@@ -6,12 +6,12 @@ return {
 			local lint = require("lint")
 			lint.linters_by_ft = {
 				python = { "ruff" },
-				javascript = { "eslint" },
-				typescript = { "eslint" },
-				javascriptreact = { "eslint" },
-				typescriptreact = { "eslint" },
-				vue = { "eslint" },
-				tex = { "chktex" },
+				javascript = { "eslint_d" },
+				typescript = { "eslint_d" },
+				javascriptreact = { "eslint_d" },
+				typescriptreact = { "eslint_d" },
+				vue = { "eslint_d" },
+				-- tex = { "chktex" },
 			}
 
 			vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost", "InsertLeave" }, {

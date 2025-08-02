@@ -5,10 +5,50 @@ vim.g.maplocalleader = " "
 local keymap = vim.keymap.set
 
 -- Better window navigation
-keymap("n", "<C-h>", "<C-w>h", { desc = "Go to left window" })
-keymap("n", "<C-j>", "<C-w>j", { desc = "Go to lower window" })
-keymap("n", "<C-k>", "<C-w>k", { desc = "Go to upper window" })
-keymap("n", "<C-l>", "<C-w>l", { desc = "Go to right window" })
+local opts = { noremap = true, silent = true }
+local modes = { "n", "x", "o" }
+
+for _, m in ipairs(modes) do
+	vim.keymap.set(m, "k", "h", opts) -- left
+	vim.keymap.set(m, "u", "j", opts) -- down
+	vim.keymap.set(m, "l", "k", opts) -- up
+	vim.keymap.set(m, "h", "l", opts) -- right
+end
+
+vim.keymap.set("n", "j", "u", { desc = "Undo", noremap = true, silent = true })
+vim.keymap.set("n", "J", "<C-r>", { desc = "Redo" })
+
+-- movement
+vim.keymap.set("n", "<C-w>k", "<C-w>h", opts) -- left
+vim.keymap.set("n", "<C-w>u", "<C-w>j", opts) -- down
+vim.keymap.set("n", "<C-w>l", "<C-w>k", opts) -- up
+vim.keymap.set("n", "<C-w>h", "<C-w>l", opts) -- right
+
+-- move window to edges (uppercase)
+vim.keymap.set("n", "<C-w>K", "<C-w>H", opts) -- far left
+vim.keymap.set("n", "<C-w>U", "<C-w>J", opts) -- bottom   (U = down)
+vim.keymap.set("n", "<C-w>L", "<C-w>K", opts) -- top      (L = up)
+vim.keymap.set("n", "<C-w>", "<C-w>L", opts) -- far right (K = right)
+
+-- vim.keymap.set("n", "<C-w>r", "<C-w>r", opts)
+-- vim.keymap.set("n", "<C-w>R", "<C-w>R", opts)
+
+-- ===== <leader>w-prefixed helpers (mirroring the scheme) =====
+vim.keymap.set("n", "<leader>wk", "<C-w>h", { desc = "Window left" })
+vim.keymap.set("n", "<leader>wu", "<C-w>j", { desc = "Window down" })
+vim.keymap.set("n", "<leader>wl", "<C-w>k", { desc = "Window up" })
+vim.keymap.set("n", "<leader>wh", "<C-w>l", { desc = "Window right" })
+
+vim.keymap.set("n", "<leader>wK", "<C-w>H", { desc = "Move window far left" })
+vim.keymap.set("n", "<leader>wU", "<C-w>J", { desc = "Move window to bottom" })
+vim.keymap.set("n", "<leader>wL", "<C-w>K", { desc = "Move window to top" })
+vim.keymap.set("n", "<leader>wH", "<C-w>L", { desc = "Move window far right" })
+
+-- keep your existing resize / split bindings or add:
+vim.keymap.set("n", "<leader>wv", "<C-w>v", { desc = "Vertical split" })
+vim.keymap.set("n", "<leader>ws", "<C-w>s", { desc = "Horizontal split" })
+vim.keymap.set("n", "<leader>w=", "<C-w>=", { desc = "Equalize" })
+vim.keymap.set("n", "<leader>wc", "<C-w>c", { desc = "Close window" })
 
 -- Resize windows
 keymap("n", "<C-Up>", ":resize -2<CR>", { desc = "Resize up" })
@@ -17,15 +57,15 @@ keymap("n", "<C-Left>", ":vertical resize -2<CR>", { desc = "Resize left" })
 keymap("n", "<C-Right>", ":vertical resize +2<CR>", { desc = "Resize right" })
 
 -- Buffer navigation
-keymap("n", "<S-l>", ":bnext<CR>", { desc = "Next buffer" })
-keymap("n", "<S-h>", ":bprevious<CR>", { desc = "Previous buffer" })
+keymap("n", "<S-h>", ":bnext<CR>", { desc = "Next buffer" })
+keymap("n", "<S-k>", ":bprevious<CR>", { desc = "Previous buffer" })
 keymap("n", "<leader>bd", ":bdelete<CR>", { desc = "Delete buffer" })
 
 -- Move text up and down
-keymap("n", "<A-j>", ":m .+1<CR>==", { desc = "Move line down" })
-keymap("n", "<A-k>", ":m .-2<CR>==", { desc = "Move line up" })
-keymap("v", "<A-j>", ":m '>+1<CR>gv=gv", { desc = "Move selection down" })
-keymap("v", "<A-k>", ":m '<-2<CR>gv=gv", { desc = "Move selection up" })
+keymap("n", "<A-l>", ":m .-2<CR>==", { desc = "Move line up" })
+keymap("n", "<A-u>", ":m .+1<CR>==", { desc = "Move line down" })
+keymap("v", "<A-l>", ":m '>+1<CR>gv=gv", { desc = "Move selection down" })
+keymap("v", "<A-u>", ":m '<-2<CR>gv=gv", { desc = "Move selection up" })
 
 -- Stay in indent mode
 keymap("v", "<", "<gv", { desc = "Indent left" })
@@ -49,3 +89,6 @@ keymap("n", "<leader>sv", "<C-w>v", { desc = "Split window vertically" })
 keymap("n", "<leader>sh", "<C-w>s", { desc = "Split window horizontally" })
 keymap("n", "<leader>se", "<C-w>=", { desc = "Make splits equal size" })
 keymap("n", "<leader>sx", "<cmd>close<CR>", { desc = "Close current split" })
+
+vim.g.copilot_no_tab_map = true
+keymap("i", "<C-l>", 'copilot#Accept("<CR>")', { expr = true, silent = true, noremap = true })

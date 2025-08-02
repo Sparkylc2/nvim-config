@@ -9,7 +9,7 @@ opt.smartindent = true
 
 -- Line numbers
 opt.number = true
-opt.relativenumber = true
+opt.relativenumber = false
 
 -- Search
 opt.ignorecase = true
@@ -43,16 +43,18 @@ opt.cursorline = true
 
 -- Diagnostics
 vim.diagnostic.config({
-    virtual_text = {
-        prefix = "●",
-        spacing = 4,
-    },
-    signs = true,
-    underline = true,
-    update_in_insert = false,
-    severity_sort = true,
-    float = {
-        border = "rounded",
-        source = "always",
-    },
+	virtual_text = {
+		prefix = "●",
+		spacing = 4,
+	},
+	signs = true,
+	underline = true,
+	update_in_insert = false,
+	severity_sort = true,
+	float = {
+		border = "rounded",
+		source = "always",
+	},
 })
+
+vim.api.nvim_set_option("clipboard", "unnamed")
