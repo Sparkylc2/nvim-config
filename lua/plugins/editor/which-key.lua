@@ -26,5 +26,15 @@ return {
 				{ "gs", group = "surround" },
 			},
 		},
+		config = function()
+			require("which-key").setup({
+				filter = function(mapping)
+					if mapping.lhs then
+						return mapping.lhs:match("^[\32-\126]*$") ~= nil
+					end
+					return true
+				end,
+			})
+		end,
 	},
 }
