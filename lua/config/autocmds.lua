@@ -36,6 +36,7 @@ autocmd("FileType", {
 
 -- Python
 autocmd("FileType", {
+
 	group = "FileTypeSettings",
 	pattern = "python",
 	callback = function()

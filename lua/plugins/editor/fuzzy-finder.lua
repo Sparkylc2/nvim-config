@@ -11,8 +11,8 @@ return {
 			{ "<leader>ff", "<cmd>Telescope find_files<cr>", desc = "Find files" },
 			{ "<leader>fg", "<cmd>Telescope live_grep<cr>", desc = "Live grep" },
 			{ "<leader>fb", "<cmd>Telescope buffers<cr>", desc = "Buffers" },
-			{ "<leader>fh", "<cmd>Telescope help_tags<cr>", desc = "Help tags" },
 			{ "<leader>fr", "<cmd>Telescope oldfiles<cr>", desc = "Recent files" },
+			{ "<leader>fh", "<cmd>Telescope help_tags<cr>", desc = "Help tags" },
 			{ "<leader>fc", "<cmd>Telescope grep_string<cr>", desc = "Grep current word" },
 			{ "<leader>fd", "<cmd>Telescope diagnostics<cr>", desc = "Diagnostics" },
 			{ "<leader>fk", "<cmd>Telescope keymaps<cr>", desc = "Keymaps" },
@@ -26,17 +26,23 @@ return {
 			telescope.setup({
 				defaults = {
 					mappings = {
+						-- Insert-mode navigation
 						i = {
-							["<C-k>"] = actions.move_selection_previous,
-							["<C-j>"] = actions.move_selection_next,
+							["<C-u>"] = actions.move_selection_next,
+							["<C-l>"] = actions.move_selection_previous,
+
+							["<C-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
+						},
+						-- Normal-mode navigation inside Telescope
+						n = {
+							["u"] = actions.move_selection_next, -- down
+							["l"] = actions.move_selection_previous, -- up
 							["<C-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
 						},
 					},
 				},
 				extensions = {
-					["ui-select"] = {
-						require("telescope.themes").get_dropdown({}),
-					},
+					["ui-select"] = require("telescope.themes").get_dropdown({}),
 				},
 			})
 

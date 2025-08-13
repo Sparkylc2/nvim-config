@@ -7,7 +7,6 @@ return {
 			require("bufferline").setup({
 				options = {
 					diagnostics = "nvim_lsp",
-					always_show_bufferline = false,
 					offsets = {
 						{
 							filetype = "neo-tree",
@@ -16,6 +15,10 @@ return {
 							separator = true,
 						},
 					},
+					numbers = "ordinal",
+					separator_style = "slant",
+					always_show_bufferline = true,
+					show_buffer_close_icons = true,
 				},
 			})
 		end,

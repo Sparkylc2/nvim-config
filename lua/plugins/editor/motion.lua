@@ -1,11 +1,23 @@
+-- return {
+-- 	{
+-- 		"phaazon/hop.nvim",
+-- 		branch = "v2",
+-- 		keys = {
+-- 			{ "s", "<cmd>HopWord<cr>", desc = "Hop to word", mode = { "n", "v" } },
+-- 			{ "S", "<cmd>HopLine<cr>", desc = "Hop to line", mode = { "n", "v" } },
+-- 		},
+-- 		config = true,
+-- 	},
+-- }
+--
 return {
 	{
-		"phaazon/hop.nvim",
-		branch = "v2",
-		keys = {
-			{ "s", "<cmd>HopWord<cr>", desc = "Hop to word", mode = { "n", "v" } },
-			{ "S", "<cmd>HopLine<cr>", desc = "Hop to line", mode = { "n", "v" } },
+		"ggandor/leap.nvim",
+		dependencies = {
+			"tpope/vim-repeat",
 		},
-		config = true,
+		config = function()
+			require("leap").set_default_mappings()
+		end,
 	},
 }

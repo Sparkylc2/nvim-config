@@ -36,5 +36,9 @@ return {
 
 			vim.cmd("autocmd! TermOpen term://* lua set_terminal_keymaps()")
 		end,
+		on_create = function(term)
+			vim.bo[term.bufnr].buflisted = false
+			vim.bo[term.bufnr].bufhidden = "wipe"
+		end,
 	},
 }

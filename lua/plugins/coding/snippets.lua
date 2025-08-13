@@ -11,7 +11,6 @@ return {
 				store_selection_keys = "<Tab>",
 			})
 
-			-- Custom keymaps for snippets (when not in completion menu)
 			vim.keymap.set({ "i", "s" }, "<C-l>", function()
 				if ls.choice_active() then
 					ls.change_choice(1)

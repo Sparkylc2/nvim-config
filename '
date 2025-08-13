@@ -2,7 +2,6 @@
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
-vim.opt.langmap = "kK:hH,uU:jJ,lL:kK,hH:lL"
 local keymap = vim.keymap.set
 
 -- Better window navigation

@@ -3,15 +3,15 @@ return {
 		"CopilotC-Nvim/CopilotChat.nvim",
 		cmd = { "CopilotChat", "CopilotChatToggle", "CopilotChatOpen" },
 		dependencies = {
-			{ "github/copilot.vim" }, -- or zbirenbaum/copilot.lua
-			{ "nvim-lua/plenary.nvim" }, -- async utils
+			{ "github/copilot.vim" },
+			{ "nvim-lua/plenary.nvim" },
 		},
 		opts = {
 			window = {
-				layout = "vertical", -- vsplit
-				width = 0.33, -- 33 % of the editor
-				title = "Copilot Chat", -- optional header
-			}, -- full list of window options in README
+				layout = "vertical",
+				width = 0.33,
+				title = "Copilot Chat",
+			},
 		},
 
 		keys = {
