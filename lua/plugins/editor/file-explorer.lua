@@ -14,31 +14,39 @@ return {
 
 		opts = {
 			filesystem = {
-				filtered_items = { visible = true },
+				filtered_items = {
+					visible = true,
+					hide_dotfiles = false,
+					hide_by_name = {
+						".DS_Store",
+					},
+				},
 				follow_current_file = { enabled = true },
-				use_libmuv_file_watcher = true,
+				use_libuv_file_watcher = true,
 			},
 			window = {
 				mappings = {
-					["j"] = "none",
-					["k"] = "none",
-					["h"] = "none",
-					["l"] = "none",
+					j = "none",
+					k = "none",
+					h = "none",
+					l = "none",
+					K = "none",
+					U = "none",
+					H = "none",
+					L = "none",
 				},
 			},
+			open_files_do_not_replace_types = { "neo-tree", "Trouble", "qf" },
+			close_if_last_window = true,
+			hijack_netrw_behavior = "open_default",
 		},
-
 		config = function(_, opts)
 			require("neo-tree").setup(opts)
 
 			vim.keymap.set("n", "<leader>E", function()
 				if vim.bo.filetype == "neo-tree" then
-					if pcall(vim.cmd, "wincmd p") then
-						return
-					else
-						vim.cmd("wincmd l")
-						return
-					end
+					vim.cmd("wincmd p")
+					return
 				end
 
 				for _, win in ipairs(vim.api.nvim_list_wins()) do
@@ -49,7 +57,6 @@ return {
 						return
 					end
 				end
-
 				vim.cmd("Neotree reveal left")
 			end, { desc = "Toggle focus on Neo-tree" })
 		end,

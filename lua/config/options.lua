@@ -58,3 +58,7 @@ vim.diagnostic.config({
 })
 
 vim.api.nvim_set_option("clipboard", "unnamed")
+
+vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
+	update_in_insert = false,
+})

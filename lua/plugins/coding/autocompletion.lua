@@ -143,6 +143,7 @@ return {
 			"hrsh7th/cmp-buffer",
 			"hrsh7th/cmp-path",
 			"rafamadriz/friendly-snippets",
+			"honza/vim-snippets",
 		},
 		config = function()
 			local cmp = require("cmp")
@@ -222,6 +223,11 @@ return {
 							luasnip.expand()
 						elseif has_words_before() then
 							cmp.complete()
+							vim.defer_fn(function()
+								if cmp.visible() then
+									cmp.confirm({ select = true })
+								end
+							end, 1)
 						else
 							fallback()
 						end

@@ -1,0 +1,68 @@
+-- -- Smart jump that goes to the next significant character
+-- local function smart_jump_forward()
+-- 	local cursor = vim.api.nvim_win_get_cursor(0)
+-- 	local row, col = cursor[1], cursor[2]
+-- 	local total_lines = vim.api.nvim_buf_line_count(0)
+--
+-- 	local jump_chars = { ")", "]", "}", '"', "'", "`", ",", ">" }
+--
+-- 	local lines = vim.api.nvim_buf_get_lines(0, row - 1, total_lines, false)
+-- 	local start_col = col + 1
+--
+-- 	for line_idx, line in ipairs(lines) do
+-- 		local actual_row = row - 1 + line_idx
+-- 		local start_pos = (line_idx == 1) and start_col or 1
+--
+-- 		for i = start_pos, #line do
+-- 			local char = line:sub(i, i)
+--
+-- 			if vim.tbl_contains(jump_chars, char) then
+-- 				vim.api.nvim_win_set_cursor(0, { actual_row, i })
+-- 				return
+-- 			end
+-- 		end
+-- 	end
+--
+-- 	vim.notify("No jump character found", vim.log.levels.INFO)
+-- end
+--
+-- local function smart_jump_backward()
+-- 	local cursor = vim.api.nvim_win_get_cursor(0)
+-- 	local row, col = cursor[1], cursor[2]
+-- 	local opening_chars = { "(", "[", "{", '"', "'", "`", "<" }
+--
+-- 	local current_line = vim.api.nvim_get_current_line()
+-- 	local skip_nearby = false
+--
+-- 	if col > 0 and col <= #current_line then
+-- 		local prev_char = current_line:sub(col, col)
+-- 		if vim.tbl_contains(opening_chars, prev_char) then
+-- 			skip_nearby = true
+-- 		end
+-- 	end
+--
+-- 	local lines = vim.api.nvim_buf_get_lines(0, 0, row, false)
+-- 	local found_first = false
+--
+-- 	for line_idx = #lines, 1, -1 do
+-- 		local line = lines[line_idx]
+-- 		local end_pos = (line_idx == #lines) and math.max(1, col) or #line
+--
+-- 		for i = end_pos, 1, -1 do
+-- 			local char = line:sub(i, i)
+-- 			if vim.tbl_contains(opening_chars, char) then
+-- 				if skip_nearby and not found_first then
+-- 					found_first = true
+-- 				else
+-- 					vim.api.nvim_win_set_cursor(0, { line_idx, i - 1 })
+-- 					return
+-- 				end
+-- 			end
+-- 		end
+-- 	end
+--
+-- 	vim.notify("No opening character found", vim.log.levels.INFO)
+-- end
+--
+-- vim.keymap.set("i", "<D-;>", smart_jump_forward, { desc = "Smart jump out forward" })
+-- vim.keymap.set("i", "<D-S-;>", smart_jump_backward, { desc = "Smart jump out backward" })

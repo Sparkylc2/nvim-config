@@ -5,9 +5,25 @@ vim.g.maplocalleader = " "
 local keymap = vim.keymap.set
 local opts = { noremap = true, silent = true }
 
-keymap("n", "j", "u", { noremap = true, silent = true, desc = "Undo" })
-keymap("n", "J", "<C-r>", { noremap = true, silent = true, desc = "Redo" })
+keymap("n", "j", "u", opts)
+keymap("n", "J", "<C-r>", opts)
 
+keymap("i", "<C-k>", "<C-o>^", opts)
+keymap("i", "<C-u>", "<Down>", opts)
+keymap("i", "<C-l>", "<Up>", opts)
+keymap("i", "<C-h>", "<C-o>$", opts)
+keymap("i", "<D-BS>", "<C-u>", opts)
+
+keymap("i", "<A-l>", "<Up>", opts)
+keymap("i", "<A-u>", "<Down>", opts)
+keymap("i", "<A-k>", "<Left>", opts)
+keymap("i", "<A-h>", "<Right>", opts)
+--
+-- keymap("t", "<C-k>", [[<C-\><C-n><Left>i]], opts)
+-- keymap("t", "<C-u>", [[<C-\><C-n><Down>i]], opts)
+-- keymap("t", "<C-l>", [[<C-\><C-n><Up>i]], opts)
+-- keymap("t", "<C-h>", [[<C-\><C-n><Right>i]], opts)
+--
 keymap("n", "<S-k>", "<C-w>h", { desc = "Move to left split" })
 keymap("n", "<S-u>", "<C-w>j", { desc = "Move to split below" })
 keymap("n", "<S-l>", "<C-w>k", { desc = "Move to split above" })
@@ -74,98 +90,19 @@ keymap("i", "<S-CR>", function()
 	end
 end, { expr = true, silent = true, noremap = true, replace_keycodes = false, desc = "Accept Copilot or newline" })
 
--- Smart jump that considers nested structures
---
---
+local sc = require("user.smart_cycles")
+keymap({ "i", "n" }, "<D-;>", sc.next, { desc = "Smart cycle forward" })
+keymap({ "i", "n" }, "<D-S-;>", sc.prev, { desc = "Smart cycle backward" }) -- Shift-;
 
-local function smart_jump_forward()
-	local cursor = vim.api.nvim_win_get_cursor(0)
-	local row, col = cursor[1], cursor[2]
-	local total_lines = vim.api.nvim_buf_line_count(0)
-	local pairs = {
-		["("] = ")",
-		["["] = "]",
-		["{"] = "}",
-		['"'] = '"',
-		["'"] = "'",
-		["`"] = "`",
-		["<"] = ">",
-	}
-	local closing_chars = { ")", "]", "}", '"', "'", "`", ">" }
-	local stack = {}
-	-- Get all text from cursor to end of buffer
-	local lines = vim.api.nvim_buf_get_lines(0, row - 1, total_lines, false)
-	local start_col = (row == cursor[1]) and col + 1 or 1
-	for line_idx, line in ipairs(lines) do
-		local actual_row = row - 1 + line_idx
-		local start_pos = (line_idx == 1) and start_col or 1
-		for i = start_pos, #line do
-			local char = line:sub(i, i)
-			-- If it's an opening character, push to stack
-			if pairs[char] then
-				table.insert(stack, pairs[char])
-			-- If it's a closing character
-			elseif vim.tbl_contains(closing_chars, char) then
-				if #stack > 0 and stack[#stack] == char then
-					-- Matching pair, pop from stack
-					table.remove(stack)
-				else
-					-- Unmatched closing char or empty stack - jump here
-					vim.api.nvim_win_set_cursor(0, { actual_row, i })
-					return
-				end
-			end
-		end
-	end
-	vim.notify("No unmatched closing character found", vim.log.levels.INFO)
-end
-
--- Enhanced backward jump that can skip nearby opening chars
-local function smart_jump_backward()
-	local cursor = vim.api.nvim_win_get_cursor(0)
-	local row, col = cursor[1], cursor[2]
-	local opening_chars = { "(", "[", "{", '"', "'", "`", "<" }
-
-	-- Check if we're immediately after an opening character
-	local current_line = vim.api.nvim_get_current_line()
-	local skip_nearby = false
-
-	-- Check if the character right before cursor is an opening char
-	if col > 0 then
-		local prev_char = current_line:sub(col, col)
-		if vim.tbl_contains(opening_chars, prev_char) then
-			skip_nearby = true
-		end
-	end
-
-	-- Search backward through all lines
-	local lines = vim.api.nvim_buf_get_lines(0, 0, row, false)
-	local found_first = false
-
-	-- Start from current position and go backward
-	for line_idx = #lines, 1, -1 do
-		local line = lines[line_idx]
-		local end_pos = (line_idx == #lines) and col or #line
-
-		for i = end_pos, 1, -1 do
-			local char = line:sub(i, i)
-			if vim.tbl_contains(opening_chars, char) then
-				if skip_nearby and not found_first then
-					-- Skip the first opening character found if it's nearby
-					found_first = true
-				else
-					-- Jump to this opening character
-					vim.api.nvim_win_set_cursor(0, { line_idx, i - 1 })
-					return
-				end
-			end
-		end
-	end
-
-	vim.notify("No opening character found", vim.log.levels.INFO)
-end
-
--- Bind the functions
-vim.keymap.set("i", "<D-;>", smart_jump_forward, { desc = "Smart jump out forward" })
-
-vim.keymap.set("i", "<D-S-;>", smart_jump_backward, { desc = "Smart jump out backward" })
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "copilot-chat",
+	callback = function()
+		local opts = { buffer = true, silent = true }
+		vim.keymap.set("n", "q", "<cmd>close<cr>", opts)
+		vim.keymap.set("n", "<C-c>", "<cmd>close<cr>", opts)
+		vim.keymap.set("n", "<S-k>", "<C-w>h", { desc = "Move to left split" })
+		vim.keymap.set("n", "<S-u>", "<C-w>j", { desc = "Move to split below" })
+		vim.keymap.set("n", "<S-l>", "<C-w>k", { desc = "Move to split above" })
+		vim.keymap.set("n", "<S-h>", "<C-w>l", { desc = "Move to right split" })
+	end,
+})

@@ -12,6 +12,12 @@ return {
 				width = 0.33,
 				title = "Copilot Chat",
 			},
+			mappings = {
+				K = false,
+				U = false,
+				H = false,
+				L = false,
+			},
 		},
 
 		keys = {

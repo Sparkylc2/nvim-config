@@ -40,6 +40,11 @@ return {
 		t("}"),
 	}),
 
+	s({ trig = "md", dscr = "Begin markdown environment" }, {
+		t({ "\\begin{markdown}", "" }),
+		i(1, "markdown"),
+		t({ "", "\\end{markdown}" }),
+	}),
 	-- Sections
 	s({ trig = "sec", dscr = "Section" }, {
 		t("\\section{"),

@@ -4,6 +4,7 @@ return {
 		build = ":TSUpdate",
 		dependencies = {
 			"nvim-treesitter/nvim-treesitter-textobjects",
+			"OXY2DEV/markview.nvim",
 		},
 		config = function()
 			require("nvim-treesitter.configs").setup({
@@ -82,41 +83,6 @@ return {
 					},
 				},
 			})
-
-			-- 	vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
-			-- 		pattern = "*.vue",
-			-- 		callback = function()
-			-- 			if vim.bo.filetype ~= "vue" then
-			-- 				vim.bo.filetype = "vue"
-			-- 			end
-			--
-			-- 			vim.schedule(function()
-			-- 				local ok = pcall(vim.treesitter.start)
-			-- 				if not ok then
-			-- 					vim.treesitter.stop()
-			-- 					vim.treesitter.start()
-			-- 				end
-			--
-			-- 				local parser = vim.treesitter.get_parser(0, "vue")
-			-- 				if parser then
-			-- 					parser:parse()
-			-- 					vim.cmd("redraw!")
-			-- 				end
-			-- 			end)
-			-- 		end,
-			-- 	})
-			--
-			-- 	vim.api.nvim_create_user_command("VueRefresh", function()
-			-- 		vim.treesitter.stop()
-			-- 		vim.bo.filetype = "vue"
-			-- 		vim.treesitter.start()
-			-- 		local parser = vim.treesitter.get_parser(0, "vue")
-			-- 		if parser then
-			-- 			parser:parse()
-			-- 		end
-			-- 		vim.cmd("redraw!")
-			-- 		print("Vue highlighting refreshed")
-			-- 	end, { desc = "Refresh Vue treesitter highlighting" })
 		end,
 	},
 }
