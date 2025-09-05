@@ -1,135 +1,132 @@
-local augroup = vim.api.nvim_create_augroup
-local autocmd = vim.api.nvim_create_autocmd
+-- ==== groups ================================================================
+local aug = vim.api.nvim_create_augroup
 
--- Highlight on yank
-augroup("YankHighlight", { clear = true })
-autocmd("TextYankPost", {
-	group = "YankHighlight",
+local fast_ui = aug("FastUI", { clear = true })
+local yank_grp = aug("YankHighlight", { clear = true })
+local ft_group = aug("FileTypeSettings", { clear = true })
+local term_group = aug("TermTweaks", { clear = true })
+local open_ext = aug("ExternalOpeners", { clear = true })
+local session_grp = aug("SessionHooks", { clear = true })
+local quit_grp = aug("QuitHooks", { clear = true })
+local perf_guard = aug("PerfGuard", { clear = true })
+local cursor_idle = aug("CursorIdle", { clear = true })
+
+-- cursor line stuff
+vim.api.nvim_create_autocmd({ "WinEnter", "BufEnter" }, {
+	group = fast_ui,
 	callback = function()
-		vim.highlight.on_yank({ higroup = "IncSearch", timeout = 200 })
+		vim.wo.cursorline = true
+	end,
+})
+vim.api.nvim_create_autocmd("WinLeave", {
+	group = fast_ui,
+	callback = function()
+		vim.wo.cursorline = false
+	end,
+})
+vim.api.nvim_create_autocmd("InsertEnter", {
+	group = fast_ui,
+	callback = function()
+		vim.wo.cursorline = false
+	end,
+})
+vim.api.nvim_create_autocmd("InsertLeave", {
+	group = fast_ui,
+	callback = function()
+		vim.wo.cursorline = true
 	end,
 })
 
--- -- Remove whitespace on save
--- augroup("RemoveWhitespace", { clear = true })
--- autocmd("BufWritePre", {
--- 	group = "RemoveWhitespace",
--- 	pattern = "*",
--- 	callback = function()
--- 		if vim.bo.buftype ~= "terminal" then
--- 			vim.cmd([[%s/\s\+$//e]])
--- 		end
--- 	end,
--- })
---
--- Language specific settings
-augroup("FileTypeSettings", { clear = true })
-
--- JavaScript/TypeScript
-autocmd("FileType", {
-	group = "FileTypeSettings",
-	pattern = { "javascript", "typescript", "javascriptreact", "typescriptreact", "vue" },
+-- highlight on yank
+vim.api.nvim_create_autocmd("TextYankPost", {
+	group = yank_grp,
 	callback = function()
+		vim.highlight.on_yank({ higroup = "IncSearch", timeout = 150 })
+	end,
+})
+
+local ft_handlers = {
+	javascript = function()
 		vim.opt_local.tabstop = 2
 		vim.opt_local.shiftwidth = 2
 		vim.opt_local.softtabstop = 2
 	end,
-})
-
--- Python
-autocmd("FileType", {
-
-	group = "FileTypeSettings",
-	pattern = "python",
-	callback = function()
+	typescript = function()
+		vim.opt_local.tabstop = 2
+		vim.opt_local.shiftwidth = 2
+		vim.opt_local.softtabstop = 2
+	end,
+	javascriptreact = function()
+		vim.opt_local.tabstop = 2
+		vim.opt_local.shiftwidth = 2
+		vim.opt_local.softtabstop = 2
+	end,
+	typescriptreact = function()
+		vim.opt_local.tabstop = 2
+		vim.opt_local.shiftwidth = 2
+		vim.opt_local.softtabstop = 2
+	end,
+	vue = function()
+		vim.opt_local.tabstop = 2
+		vim.opt_local.shiftwidth = 2
+		vim.opt_local.softtabstop = 2
+	end,
+	python = function()
 		vim.opt_local.colorcolumn = "88"
 	end,
-})
-
--- C/C++
-autocmd("FileType", {
-	group = "FileTypeSettings",
-	pattern = { "c", "cpp" },
-	callback = function()
+	c = function()
 		vim.opt_local.commentstring = "// %s"
 		vim.opt_local.tabstop = 4
 		vim.opt_local.shiftwidth = 4
 		vim.opt_local.softtabstop = 4
 	end,
-})
-
--- Markdown
-autocmd("FileType", {
-	group = "FileTypeSettings",
-	pattern = "markdown",
-	callback = function()
+	cpp = function()
+		vim.opt_local.commentstring = "// %s"
+		vim.opt_local.tabstop = 4
+		vim.opt_local.shiftwidth = 4
+		vim.opt_local.softtabstop = 4
+	end,
+	markdown = function()
 		vim.opt_local.wrap = true
 		vim.opt_local.spell = true
 	end,
+}
+
+-- close
+vim.api.nvim_create_autocmd("FileType", {
+	group = ft_group,
+	pattern = "*",
+	callback = function(args)
+		local ft = vim.bo[args.buf].filetype
+		local f = ft_handlers[ft]
+		if f then
+			pcall(f)
+		end
+	end,
 })
 
--- Close some filetypes with <q>
-autocmd("FileType", {
-	group = "FileTypeSettings",
-	pattern = {
-		"help",
-		"lspinfo",
-		"man",
-		"notify",
-		"qf",
-		"query",
-		"startuptime",
-		"checkhealth",
-	},
+-- close correctly
+vim.api.nvim_create_autocmd("FileType", {
+	group = ft_group,
+	pattern = { "help", "lspinfo", "man", "notify", "qf", "query", "startuptime", "checkhealth" },
 	callback = function(event)
 		vim.bo[event.buf].buflisted = false
 		vim.keymap.set("n", "q", "<cmd>close<cr>", { buffer = event.buf, silent = true })
 	end,
 })
 
+-- terminal buffers
 vim.api.nvim_create_autocmd("TermOpen", {
+	group = term_group,
 	callback = function()
 		vim.opt_local.buflisted = false
 		vim.opt_local.modifiable = false
 	end,
 })
 
-vim.api.nvim_create_autocmd("User", {
-	pattern = "VeryLazy",
-	callback = function()
-		vim.api.nvim_create_autocmd("User", {
-			pattern = "SessionLoadPost",
-			nested = true,
-			callback = function()
-				vim.schedule(function()
-					for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-						if vim.api.nvim_buf_is_loaded(buf) then
-							vim.api.nvim_buf_call(buf, function()
-								vim.cmd("silent! filetype detect")
-								vim.cmd("silent! doautocmd <nomodeline> FileType")
-								pcall(vim.cmd, "silent! TSEnable highlight")
-							end)
-						end
-					end
-				end)
-			end,
-		})
-	end,
-})
-
-vim.api.nvim_create_autocmd("LspAttach", {
-	callback = function(args)
-		pcall(vim.keymap.del, "n", "<S-k>", { buffer = args.buf })
-		pcall(vim.keymap.del, "n", "<C-l>", { buffer = args.buf })
-
-		vim.keymap.set("n", "<S-k>", "<C-w>h", { buffer = args.buf, desc = "Move to left split" })
-		vim.keymap.set("n", "<A-k>", ":bprevious<CR>", { buffer = args.buf, desc = "Previous buffer" })
-		vim.keymap.set("i", "<C-l>", "<Up>")
-	end,
-})
-
--- open pdfs using skim
+-- open pdfs in skim
 vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
+	group = open_ext,
 	pattern = "*.pdf",
 	callback = function()
 		local pdf_path = vim.fn.expand("%:p")
@@ -137,16 +134,15 @@ vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
 		vim.cmd("bd!")
 	end,
 })
--- prevent quitting lone pdf from quitting neovim
+
+-- close pfs
 vim.api.nvim_create_autocmd("BufEnter", {
+	group = open_ext,
 	pattern = "*.pdf",
 	callback = function()
 		vim.bo.bufhidden = "wipe"
-
 		vim.keymap.set("n", "q", function()
 			local win_count = #vim.api.nvim_list_wins()
-			local buf_count = #vim.api.nvim_list_bufs()
-
 			if win_count == 1 then
 				vim.cmd("enew")
 				vim.cmd("bd#")
@@ -157,8 +153,9 @@ vim.api.nvim_create_autocmd("BufEnter", {
 	end,
 })
 
--- view images in preview
+-- open images
 vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
+	group = open_ext,
 	pattern = { "*.png", "*.jpg", "*.jpeg", "*.gif", "*.webp" },
 	callback = function()
 		local img_path = vim.fn.expand("%:p")
@@ -167,35 +164,75 @@ vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
 	end,
 })
 
--- treesitter redetect and reapply highlighting after session load
+-- session restore
 vim.api.nvim_create_autocmd("SessionLoadPost", {
+	group = session_grp,
 	callback = function()
 		vim.schedule(function()
 			vim.cmd("silent! filetype plugin indent on")
 			vim.cmd("silent! syntax enable")
-			for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-				if vim.api.nvim_buf_is_loaded(buf) then
-					vim.api.nvim_buf_call(buf, function()
-						vim.cmd("silent! filetype detect")
-						vim.cmd("silent! doautocmd <nomodeline> FileType")
-						pcall(vim.treesitter.start, buf)
-					end)
+			local bufs = vim.api.nvim_list_bufs()
+			local i = 1
+			local function step()
+				local count = 0
+				while i <= #bufs and count < 10 do
+					local b = bufs[i]
+					i = i + 1
+					if vim.api.nvim_buf_is_loaded(b) then
+						vim.api.nvim_buf_call(b, function()
+							vim.cmd("silent! filetype detect")
+							vim.cmd("silent! doautocmd <nomodeline> FileType")
+							pcall(vim.treesitter.start, b)
+						end)
+					end
+					count = count + 1
+				end
+				if i <= #bufs then
+					vim.defer_fn(step, 10)
 				end
 			end
+			step()
 		end)
 	end,
 })
+-- reruns treesitter for highlighting
+vim.api.nvim_create_autocmd("User", {
+	group = session_grp,
+	pattern = "VeryLazy",
+	callback = function()
+		vim.api.nvim_create_autocmd("User", {
+			group = session_grp,
+			pattern = "SessionLoadPost",
+			nested = true,
+			callback = function()
+				vim.api.nvim_exec_autocmds("SessionLoadPost", {})
+			end,
+		})
+	end,
+})
 
--- stop terminal job when quitting
+-- fix keybindings
+vim.api.nvim_create_autocmd("LspAttach", {
+	callback = function(args)
+		pcall(vim.keymap.del, "n", "<S-k>", { buffer = args.buf })
+		pcall(vim.keymap.del, "n", "<C-l>", { buffer = args.buf })
+		vim.keymap.set("n", "<S-k>", "<C-w>h", { buffer = args.buf, desc = "Move to left split" })
+		vim.keymap.set("n", "<A-k>", ":bprevious<CR>", { buffer = args.buf, desc = "Previous buffer" })
+		vim.keymap.set("i", "<C-l>", "<Up>")
+	end,
+})
+
+-- quit terminal correctly
 vim.api.nvim_create_autocmd("CmdlineLeave", {
+	group = quit_grp,
 	callback = function()
 		local cmd = vim.fn.getcmdline()
 		if cmd == "wqa" or cmd == "wqa!" or cmd == "qa" then
 			for _, buf in ipairs(vim.api.nvim_list_bufs()) do
 				if vim.api.nvim_buf_is_loaded(buf) then
 					local chan = vim.bo[buf].channel
-					if chan > 0 then
-						vim.fn.jobstop(chan)
+					if chan and chan > 0 then
+						pcall(vim.fn.jobstop, chan)
 					end
 				end
 			end
@@ -203,15 +240,46 @@ vim.api.nvim_create_autocmd("CmdlineLeave", {
 	end,
 })
 
--- debounce cursor moved for plugins
-local cursor_timer = nil
-vim.api.nvim_create_autocmd("CursorMovedI", {
-	callback = function()
-		if cursor_timer then
-			vim.fn.timer_stop(cursor_timer)
+-- debounced cursor move
+do
+	local timer
+	vim.api.nvim_create_autocmd("CursorMovedI", {
+		group = cursor_idle,
+		callback = function()
+			if timer then
+				vim.fn.timer_stop(timer)
+			end
+			timer = vim.fn.timer_start(60, function()
+				timer = nil
+				vim.schedule(function()
+					vim.api.nvim_exec_autocmds("User", { pattern = "CursorMovedIIdle" })
+				end)
+			end)
+		end,
+	})
+end
+-- treesitter file guard
+vim.api.nvim_create_autocmd("BufReadPre", {
+	group = perf_guard,
+	callback = function(args)
+		local lines = vim.api.nvim_buf_line_count(args.buf)
+		if lines > 5000 then
+			vim.bo[args.buf].syntax = "off"
+			pcall(vim.treesitter.stop, args.buf)
+			vim.b[args.buf].ts_hugefile = true
 		end
-		cursor_timer = vim.fn.timer_start(50, function()
-			cursor_timer = nil
-		end)
+	end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "copilot-chat",
+	callback = function()
+		local opts = { buffer = true, silent = true }
+		vim.keymap.set("n", "q", "<cmd>close<cr>", opts)
+		vim.keymap.set("n", "<C-c>", "<cmd>close<cr>", opts)
+		vim.keymap.set("n", "<S-k>", "<C-w>h", { desc = "Move to left split" })
+		vim.keymap.set("n", "<S-u>", "<C-w>j", { desc = "Move to split below" })
+		vim.keymap.set("n", "<S-l>", "<C-w>k", { desc = "Move to split above" })
+		vim.keymap.set("n", "<S-h>", "<C-w>l", { desc = "Move to right split" })
 	end,
 })

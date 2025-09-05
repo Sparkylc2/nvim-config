@@ -1,9 +1,38 @@
 local M = {}
-local last_call = 0
-local throttle_ms = 50
+
+-- ===== Tunables =============================================================
+
+local throttle_ms = 50 -- min delay between successive next/prev
+local debounce_ms = 120 -- rebuild debounce after edits
+local viewport_margin = 50 -- extra lines around the visible window
+local bigfile_lines = 5000 -- above this, we only ever process the viewport
+local max_scan_cols = 2000 -- hard cap on per-line char scanning
+
+-- ===== Small utils ==========================================================
+
+local function hrtime_ms()
+	return vim.loop.hrtime() / 1e6
+end
+
+local function visible_range()
+	local top = vim.fn.line("w0") - 1
+	local bot = vim.fn.line("w$") - 1
+	return top, bot
+end
+
+local function clamp(n, lo, hi)
+	if n < lo then
+		return lo
+	end
+	if n > hi then
+		return hi
+	end
+	return n
+end
 
 local function goto_pos(r, c)
-	vim.api.nvim_win_set_cursor(0, { r + 1, c })
+	-- r is 0-based, API is 1-based
+	pcall(vim.api.nvim_win_set_cursor, 0, { r + 1, c })
 end
 
 local function get_cursor_pos()
@@ -11,22 +40,53 @@ local function get_cursor_pos()
 	return pos[1] - 1, pos[2]
 end
 
+-- ===== State ================================================================
+
+local state = {
+	waypoints = nil, -- cached sorted { {r,c}, ... }
+	last_tick = -1, -- buffer changedtick at which waypoints were built
+	in_jump = false, -- reentrancy guard
+	last_call = 0, -- last next/prev call time (ms)
+}
+
+-- Separate cache for the raw char scan (expensive); bound to changedtick
+local char_cache = {
+	tick = -1,
+	items = {}, -- { {r,c}, ... }
+}
+
+-- ===== Waypoint collection ==================================================
+
 local function collect_waypoints()
-	local parser = vim.treesitter.get_parser(0)
-	if not parser then
+	-- Treesitter parse (incremental) of current buffer
+	local ok, parser = pcall(vim.treesitter.get_parser, 0)
+	if not ok or not parser then
 		return {}
 	end
+
 	local trees = parser:parse()
 	if not trees or #trees == 0 then
 		return {}
 	end
 	local root = trees[1]:root()
 
+	local total_lines = vim.api.nvim_buf_line_count(0)
+	local top, bot = visible_range()
+	local margin = viewport_margin
+
+	-- For big files, restrict to viewport only (with margin).
+	if total_lines > bigfile_lines then
+		margin = math.min(margin, 200)
+	end
+
+	local range_top = clamp(top - margin, 0, total_lines - 1)
+	local range_bot = clamp(bot + margin, 0, total_lines - 1)
+
 	local waypoints = {}
 
 	local function push(out, r, c)
-		if r and c and r >= 0 and c >= 0 then
-			table.insert(out, { r, c })
+		if r and c and r >= range_top and r <= range_bot and r >= 0 and c >= 0 then
+			out[#out + 1] = { r, c }
 		end
 	end
 
@@ -72,12 +132,17 @@ local function collect_waypoints()
 			or t == "explicit_function_specifier"
 	end
 
+	-- Walk only nodes intersecting [range_top, range_bot]
 	local function walk(node)
 		if not node then
 			return
 		end
-		local t = node:type()
 		local sr, sc, er, ec = nr4(node)
+		if er < range_top or sr > range_bot then
+			return
+		end
+
+		local t = node:type()
 
 		if t:match("declaration") or t:match("definition") then
 			for child in node:iter_children() do
@@ -123,9 +188,14 @@ local function collect_waypoints()
 
 	walk(root)
 
-	local function collect_raw_jump_chars()
-		local buf = 0
-		local total_lines = vim.api.nvim_buf_line_count(buf)
+	-- Character scan (cached per changedtick); only scan viewport range
+	local function collect_raw_jump_chars_cached()
+		local tick = vim.b.changedtick or 0
+		if char_cache.tick == tick and char_cache.items then
+			return char_cache.items
+		end
+
+		local items = {}
 		local jump_chars = {
 			[")"] = true,
 			["]"] = true,
@@ -146,7 +216,6 @@ local function collect_waypoints()
 			["^"] = true,
 			["!"] = true,
 		}
-
 		local one_after_symbols = {
 			[")"] = true,
 			["]"] = true,
@@ -163,32 +232,47 @@ local function collect_waypoints()
 			["!"] = true,
 		}
 
-		for row = 0, total_lines - 1 do
-			local line = vim.api.nvim_buf_get_lines(buf, row, row + 1, false)[1]
+		-- limit to current viewport range
+		for row = range_top, range_bot do
+			local line = vim.api.nvim_buf_get_lines(0, row, row + 1, false)[1]
 			if line then
-				for col = 0, #line - 1 do
-					local ch = line:sub(col + 1, col + 1)
+				local len = math.min(#line, max_scan_cols)
+				for col = 0, len - 1 do
+					local ch = string.sub(line, col + 1, col + 1)
 					if jump_chars[ch] then
 						if one_after_symbols[ch] then
-							push(waypoints, row, col + 1)
+							items[#items + 1] = { row, col + 1 }
 						else
-							push(waypoints, row, col)
+							items[#items + 1] = { row, col }
 						end
 					end
 				end
 			end
 		end
+
+		char_cache.tick = tick
+		char_cache.items = items
+		return items
 	end
 
-	collect_raw_jump_chars()
+	-- Append cached char‑based waypoints
+	local chars = collect_raw_jump_chars_cached()
+	for i = 1, #chars do
+		local r, c = chars[i][1], chars[i][2]
+		if r >= range_top and r <= range_bot then
+			waypoints[#waypoints + 1] = { r, c }
+		end
+	end
 
+	-- Sort + dedupe
 	table.sort(waypoints, function(a, b)
-		return a[1] < b[1] or (a[1] == b[1] and a[2] < b[2])
+		return (a[1] < b[1]) or (a[1] == b[1] and a[2] < b[2])
 	end)
+
 	local deduped, lr, lc = {}, -1, -1
 	for _, wp in ipairs(waypoints) do
 		if wp[1] ~= lr or wp[2] ~= lc then
-			table.insert(deduped, wp)
+			deduped[#deduped + 1] = wp
 			lr, lc = wp[1], wp[2]
 		end
 	end
@@ -196,11 +280,7 @@ local function collect_waypoints()
 	return deduped
 end
 
-local state = {
-	waypoints = nil,
-	last_tick = -1,
-	in_jump = false,
-}
+-- ===== Cache access (no rebuild on cursor move) =============================
 
 local function get_waypoints()
 	local tick = vim.b.changedtick or 0
@@ -212,12 +292,45 @@ local function get_waypoints()
 	return state.waypoints
 end
 
+-- ===== Debounced rebuild on edits ==========================================
+
+local timer = vim.loop.new_timer()
+
+local function schedule_rebuild()
+	timer:stop()
+	timer:start(debounce_ms, 0, function()
+		vim.schedule(function()
+			if state.in_jump then
+				return
+			end
+			state.waypoints = collect_waypoints()
+			state.last_tick = vim.b.changedtick or 0
+		end)
+	end)
+end
+
+-- Define augroup before using it
+local aug = vim.api.nvim_create_augroup("SmartSemanticCycle", { clear = true })
+
+-- Only invalidate & rebuild on real text changes (not on cursor move)
+vim.api.nvim_create_autocmd({ "TextChanged", "TextChangedI", "InsertLeave" }, {
+	group = aug,
+	callback = function()
+		-- Mark dirty; let the debounced builder refresh the cache
+		state.waypoints = nil
+		state.last_tick = -1
+		schedule_rebuild()
+	end,
+})
+
+-- ===== Public API: next / prev =============================================
+
 function M.next()
-	local now = vim.loop.hrtime() / 1000000 -- Convert to ms
-	if now - last_call < throttle_ms then
+	local now = hrtime_ms()
+	if (now - state.last_call) < throttle_ms then
 		return
 	end
-	last_call = now
+	state.last_call = now
 
 	if state.in_jump then
 		return
@@ -232,17 +345,19 @@ function M.next()
 
 	local cr, cc = get_cursor_pos()
 	local target
-	for _, wp in ipairs(wps) do
-		local r, c = wp[1], wp[2]
-		if r > cr or (r == cr and c > cc) then
-			target = wp
+
+	-- pick first waypoint strictly after cursor
+	for i = 1, #wps do
+		local r, c = wps[i][1], wps[i][2]
+		if (r > cr) or (r == cr and c > cc) then
+			target = wps[i]
 			break
 		end
 	end
-
 	if not target then
 		target = wps[1]
 	end
+
 	if target then
 		goto_pos(target[1], target[2])
 	end
@@ -266,17 +381,18 @@ function M.prev()
 
 	local cr, cc = get_cursor_pos()
 	local target
+
 	for i = #wps, 1, -1 do
 		local r, c = wps[i][1], wps[i][2]
-		if r < cr or (r == cr and c < cc) then
+		if (r < cr) or (r == cr and c < cc) then
 			target = wps[i]
 			break
 		end
 	end
-
 	if not target then
 		target = wps[#wps]
 	end
+
 	if target then
 		goto_pos(target[1], target[2])
 	end
@@ -285,16 +401,5 @@ function M.prev()
 		state.in_jump = false
 	end)
 end
-
-local aug = vim.api.nvim_create_augroup("SmartSemanticCycle", { clear = true })
-vim.api.nvim_create_autocmd({ "TextChanged", "TextChangedI", "CursorMoved", "CursorMovedI" }, {
-	group = aug,
-	callback = function()
-		if not state.in_jump then
-			state.waypoints = nil
-			state.last_tick = -1
-		end
-	end,
-})
 
 return M

@@ -1,3 +1,4 @@
+-- ==== options ===============================================================
 local opt = vim.opt
 local g = vim.g
 
@@ -24,57 +25,39 @@ opt.signcolumn = "yes"
 opt.wrap = false
 opt.scrolloff = 8
 opt.sidescrolloff = 8
+vim.o.laststatus = 3
 
 -- behavior
 opt.backup = false
 opt.swapfile = false
 opt.undofile = true
-opt.undodir = os.getenv("HOME") .. "/.vim/undodir"
-opt.updatetime = 200
+opt.undodir = (os.getenv("HOME") or "") .. "/.vim/undodir"
+opt.updatetime = 150
 opt.timeout = true
 opt.timeoutlen = 300
 opt.ttimeout = true
 opt.ttimeoutlen = 10
-vim.o.completeopt = "menu,menuone,noselect"
+opt.completeopt = "menu,menuone,noselect"
 opt.splitbelow = true
 opt.splitright = true
 opt.maxmempattern = 200000
 opt.lazyredraw = true
-opt.ttyfast = true
 opt.synmaxcol = 200
-opt.termguicolors = true
 
 -- clipboard
 opt.clipboard = "unnamedplus"
 
 -- cursor
 opt.cursorline = true
+opt.cursorlineopt = "number"
 
--- diagnostics
-vim.diagnostic.config({
-	virtual_text = {
-		prefix = "●",
-		spacing = 4,
-	},
-	signs = true,
-	underline = true,
-	update_in_insert = false,
-	severity_sort = true,
-	float = {
-		border = "rounded",
-		source = "always",
-	},
-})
--- fix clipboard
-vim.api.nvim_set_option("clipboard", "unnamed")
+-- copilot pacing
+g.copilot_no_tab_map = true
+g.copilot_assume_mapped = true
+g.copilot_idle_delay = 250
 
--- remove signature help
-vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
-	update_in_insert = false,
-})
-
--- disable unused plugins
-local disabled_built_ins = {
+-- disable built-ins
+for _, plugin in pairs({
 	"netrw",
 	"netrwPlugin",
 	"netrwSettings",
@@ -93,15 +76,20 @@ local disabled_built_ins = {
 	"rrhelper",
 	"spellfile_plugin",
 	"matchit",
-}
-
-for _, plugin in pairs(disabled_built_ins) do
+}) do
 	vim.g["loaded_" .. plugin] = 1
 end
 
--- copilot behaviour
-g.copilot_idle_delay = 150
-g.copilot_no_tab_map = true
+-- diagnostics
+vim.diagnostic.config({
+	virtual_text = { prefix = "●", spacing = 4 },
+	signs = true,
+	underline = true,
+	update_in_insert = false,
+	severity_sort = true,
+	float = { border = "rounded", source = "always" },
+})
 
--- kitty behaviour
-g.kitty_fast_forwarding = 1
+-- signature help
+vim.lsp.handlers["textDocument/signatureHelp"] =
+	vim.lsp.with(vim.lsp.handlers.signature_help, { update_in_insert = false })

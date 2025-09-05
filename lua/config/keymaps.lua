@@ -75,8 +75,7 @@ keymap("n", "<leader>q", ":q<CR>", { desc = "Quit" })
 keymap("n", "<leader>Q", ":qa<CR>", { desc = "Quit all" })
 
 -- copilot config
-vim.g.copilot_no_tab_map = true
-vim.g.copilot_assume_mapped = true
+
 keymap("i", "<S-CR>", 'copilot#Accept("")', { expr = true, silent = true, noremap = true, replace_keycodes = true })
 
 vim.keymap.set("i", "<Esc>[13;2u", function()
@@ -99,48 +98,6 @@ end, { expr = true, silent = true, noremap = true, replace_keycodes = false, des
 local sc = require("user.smart_cycles")
 keymap({ "i", "n" }, "<D-;>", sc.next, { desc = "Smart cycle forward" })
 keymap({ "i", "n" }, "<D-S-;>", sc.prev, { desc = "Smart cycle backward" }) -- Shift-;
-
-vim.api.nvim_create_autocmd("FileType", {
-	pattern = "copilot-chat",
-	callback = function()
-		local opts = { buffer = true, silent = true }
-		vim.keymap.set("n", "q", "<cmd>close<cr>", opts)
-		vim.keymap.set("n", "<C-c>", "<cmd>close<cr>", opts)
-		vim.keymap.set("n", "<S-k>", "<C-w>h", { desc = "Move to left split" })
-		vim.keymap.set("n", "<S-u>", "<C-w>j", { desc = "Move to split below" })
-		vim.keymap.set("n", "<S-l>", "<C-w>k", { desc = "Move to split above" })
-		vim.keymap.set("n", "<S-h>", "<C-w>l", { desc = "Move to right split" })
-	end,
-})
-
--- profiling config
-vim.api.nvim_create_user_command("ProfileStart", function()
-	require("profile").start("*")
-	vim.notify("Profiling started - use :ProfileStop to finish")
-end, {})
-
-vim.api.nvim_create_user_command("ProfileStop", function()
-	require("profile").stop()
-	vim.ui.input({ prompt = "Save profile to (without .json):" }, function(name)
-		if name then
-			require("profile").export(name .. ".json")
-			vim.notify("Profile saved to " .. name .. ".json")
-		end
-	end)
-end, {})
---
--- vim.api.nvim_create_user_command("ProfileStart", function()
--- 	require("plenary.profile").start("nvim-plenary-profile.log", { flame = true })
--- end, {})
---
--- vim.api.nvim_create_user_command("ProfileStop", function()
--- 	require("plenary.profile").stop()
--- 	vim.notify("Saved profile to nvim-plenary-profile.log. Open in speedscope.app")
--- end, {})
---
-vim.api.nvim_create_user_command("LazyProfile", function()
-	require("lazy").profile()
-end, {})
 
 -- luasnip fixes
 local keys_to_fix = {
