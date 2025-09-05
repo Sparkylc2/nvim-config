@@ -10,18 +10,18 @@ autocmd("TextYankPost", {
 	end,
 })
 
--- Remove whitespace on save
-augroup("RemoveWhitespace", { clear = true })
-autocmd("BufWritePre", {
-	group = "RemoveWhitespace",
-	pattern = "*",
-	callback = function()
-		if vim.bo.buftype ~= "terminal" then
-			vim.cmd([[%s/\s\+$//e]])
-		end
-	end,
-})
-
+-- -- Remove whitespace on save
+-- augroup("RemoveWhitespace", { clear = true })
+-- autocmd("BufWritePre", {
+-- 	group = "RemoveWhitespace",
+-- 	pattern = "*",
+-- 	callback = function()
+-- 		if vim.bo.buftype ~= "terminal" then
+-- 			vim.cmd([[%s/\s\+$//e]])
+-- 		end
+-- 	end,
+-- })
+--
 -- Language specific settings
 augroup("FileTypeSettings", { clear = true })
 
@@ -200,5 +200,18 @@ vim.api.nvim_create_autocmd("CmdlineLeave", {
 				end
 			end
 		end
+	end,
+})
+
+-- debounce cursor moved for plugins
+local cursor_timer = nil
+vim.api.nvim_create_autocmd("CursorMovedI", {
+	callback = function()
+		if cursor_timer then
+			vim.fn.timer_stop(cursor_timer)
+		end
+		cursor_timer = vim.fn.timer_start(50, function()
+			cursor_timer = nil
+		end)
 	end,
 })

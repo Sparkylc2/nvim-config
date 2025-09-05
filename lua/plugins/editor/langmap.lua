@@ -10,12 +10,7 @@ return {
 
 		local lmap = require("langmapper")
 
-		lmap.map("n", "k", "h")
-		lmap.map("n", "h", "l")
-		lmap.map("n", "l", "k")
-		lmap.map("n", "u", "j")
-
-		for _, mode in ipairs({ "v", "x", "o" }) do
+		for _, mode in ipairs({ "n", "v", "x" }) do
 			lmap.map(mode, "k", "h")
 			lmap.map(mode, "h", "l")
 			lmap.map(mode, "l", "k")

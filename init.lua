@@ -9,6 +9,7 @@ if not vim.loop.fs_stat(lazypath) then
 		lazypath,
 	})
 end
+
 vim.opt.rtp:prepend(lazypath)
 
 require("config.options")
@@ -21,7 +22,6 @@ require("lazy").setup("plugins", {
 		notify = false,
 	},
 })
-
 local vue_language_server_path = vim.fn.expand("$MASON/packages")
 	.. "/vue-language-server"
 	.. "/node_modules/@vue/language-server"

@@ -23,5 +23,14 @@ return {
 			{ "<leader>xT", "<cmd>TodoTelescope keywords=TODO,FIX,FIXME<cr>", desc = "Todo/Fix/Fixme" },
 		},
 		opts = {},
+		-- config = function(_, opts)
+		-- 	opts.keywords = {
+		-- 		TODO = { icon = "", color = "info" },
+		-- 		FIX = { icon = "", color = "error", alt = { "FIXME", "BUG" } },
+		-- 		NOTE = { icon = "", color = "hint", alt = { "INFO" } },
+		-- 		IMPORTANT = { icon = "", color = "warning", alt = { "HIGHLIGHT" } },
+		-- 	}
+		-- 	require("todo-comments").setup(opts)
+		-- end,
 	},
 }

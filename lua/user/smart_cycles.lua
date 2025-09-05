@@ -1,4 +1,6 @@
 local M = {}
+local last_call = 0
+local throttle_ms = 50
 
 local function goto_pos(r, c)
 	vim.api.nvim_win_set_cursor(0, { r + 1, c })
@@ -211,6 +213,12 @@ local function get_waypoints()
 end
 
 function M.next()
+	local now = vim.loop.hrtime() / 1000000 -- Convert to ms
+	if now - last_call < throttle_ms then
+		return
+	end
+	last_call = now
+
 	if state.in_jump then
 		return
 	end

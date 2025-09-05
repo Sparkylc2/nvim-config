@@ -3,11 +3,12 @@ return {
 		"folke/which-key.nvim",
 		event = "VeryLazy",
 		init = function()
-			vim.o.timeout = true
-			vim.o.timeoutlen = 300
+			-- vim.o.timeout = true
+			-- vim.o.timeoutlen = 300
 		end,
 		opts = {
 			plugins = { spelling = true },
+
 			spec = {
 				{ "<leader>b", group = "buffer" },
 				{ "<leader>c", group = "code" },
@@ -28,9 +29,16 @@ return {
 		},
 		config = function()
 			require("which-key").setup({
+				delay = 200,
 				filter = function(mapping)
-					if mapping.lhs then
-						return mapping.lhs:match("^[\32-\126]*$") ~= nil
+					local lhs = mapping.lhs
+					if not lhs then
+						return true
+					end
+					for i = 1, #lhs do
+						if lhs:byte(i) > 126 or lhs:byte(i) < 32 then
+							return false
+						end
 					end
 					return true
 				end,

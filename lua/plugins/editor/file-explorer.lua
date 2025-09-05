@@ -34,6 +34,7 @@ return {
 					U = "none",
 					H = "none",
 					L = "none",
+					["<S-BS>"] = "set_root",
 				},
 			},
 			open_files_do_not_replace_types = { "neo-tree", "Trouble", "qf" },

@@ -5,6 +5,7 @@ return {
 	dependencies = {
 		"saghen/blink.cmp",
 	},
+	ft = { "markdown", "md", "rmd", "quarto" },
 	config = function()
 		local presets = require("markview.presets")
 
