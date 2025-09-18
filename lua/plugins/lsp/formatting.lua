@@ -2,6 +2,7 @@ return {
 	{
 		"stevearc/conform.nvim",
 		event = { "BufReadPost", "BufNewFile" },
+
 		cmd = { "ConformInfo" },
 		keys = {
 			{
@@ -26,12 +27,10 @@ return {
 				html = { "prettier" },
 				json = { "prettier" },
 				yaml = { "prettier" },
-				markdown = { "prettier" },
 				cpp = { "clang-format" },
 				c = { "clang-format" },
 			},
 			format_on_save = {
-				timeout_ms = 500,
 				lsp_fallback = true,
 			},
 		},

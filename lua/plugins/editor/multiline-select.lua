@@ -1,6 +1,7 @@
 return {
 	"brenton-leighton/multiple-cursors.nvim",
-	version = "*", -- Use the latest tagged version
+	version = "*",
+
 	opts = {},
 	keys = {
 		-- { "<C-u>", "<Cmd>MultipleCursorsAddDown<CR>", mode = { "n", "i" } },

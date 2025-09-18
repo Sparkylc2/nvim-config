@@ -9,11 +9,14 @@ local opts = { noremap = true, silent = true }
 keymap("n", "j", "u", opts)
 keymap("n", "J", "<C-r>", opts)
 
+-- join with line above
+keymap("n", "Y", "J", opts)
+
 -- move around with ctrl (insert) (start of line, end of line, up down)
 keymap("i", "<C-k>", "<C-o>^", opts)
 keymap("i", "<C-u>", "<Down>", opts)
-keymap("i", "<C-l>", "<Up>", opts)
 keymap("i", "<C-h>", "<C-o>$", opts)
+keymap("i", "<C-l>", "<Up>", opts)
 keymap("i", "<D-BS>", "<C-u>", opts)
 
 -- move around with alt (insert)
@@ -23,16 +26,23 @@ keymap("i", "<A-k>", "<Left>", opts)
 keymap("i", "<A-h>", "<Right>", opts)
 
 -- move around splits (normal)
-keymap("n", "<S-k>", "<C-w>h", { desc = "Move to left split" })
-keymap("n", "<S-u>", "<C-w>j", { desc = "Move to split below" })
-keymap("n", "<S-l>", "<C-w>k", { desc = "Move to split above" })
-keymap("n", "<S-h>", "<C-w>l", { desc = "Move to right split" })
+keymap("n", "<S-k>", function()
+	require("smart-splits").move_cursor_left()
+end, { desc = "Move to left split" })
+keymap("n", "<S-u>", function()
+	require("smart-splits").move_cursor_down()
+end, { desc = "Move to split below" })
+keymap("n", "<S-l>", function()
+	require("smart-splits").move_cursor_up()
+end, { desc = "Move to split above" })
+keymap("n", "<S-h>", function()
+	require("smart-splits").move_cursor_right()
+end, { desc = "Move to right split" })
 
--- resize splits (normal)
-keymap("n", "<C-A-k>", ":vertical resize -2<CR>", { desc = "Resize split left" })
-keymap("n", "<C-A-u>", ":resize +2<CR>", { desc = "Resize split down" })
-keymap("n", "<C-A-l>", ":resize -2<CR>", { desc = "Resize split up" })
-keymap("n", "<C-A-h>", ":vertical resize +2<CR>", { desc = "Resize split right" })
+keymap("n", "<C-A-S-k>", ":vertical resize -2<CR>", { desc = "Resize split left" })
+keymap("n", "<C-A-S-u>", ":resize +2<CR>", { desc = "Resize split down" })
+keymap("n", "<C-A-S-l>", ":resize -2<CR>", { desc = "Resize split up" })
+keymap("n", "<C-A-S-h>", ":vertical resize +2<CR>", { desc = "Resize split right" })
 
 -- move splits (normal)
 keymap("n", "<A-K>", "<C-w>H", { desc = "Move window left" })
@@ -45,7 +55,7 @@ keymap("n", "<C-\\>", "<C-w>p", { desc = "Go to previous window" })
 
 -- split window (normal)
 keymap("n", "<leader>sv", "<C-w>v", { desc = "Vertical split" })
-keymap("n", "<leader>sh", "<C-w>s", { desc = "Horizontal split" })
+keymap("n", "<leader>ss", "<C-w>s", { desc = "Horizontal split" })
 keymap("n", "<leader>se", "<C-w>=", { desc = "Equalize" })
 keymap("n", "<leader>sx", "<cmd>close<CR>", { desc = "Close window" })
 
@@ -74,9 +84,7 @@ keymap("n", "<Esc>", ":noh<CR>", { desc = "Clear highlights" })
 keymap("n", "<leader>q", ":q<CR>", { desc = "Quit" })
 keymap("n", "<leader>Q", ":qa<CR>", { desc = "Quit all" })
 
--- copilot config
-
-keymap("i", "<S-CR>", 'copilot#Accept("")', { expr = true, silent = true, noremap = true, replace_keycodes = true })
+keymap("i", "<D-S-CR>", 'copilot#Accept("")', { expr = true, silent = true, noremap = true, replace_keycodes = true })
 
 vim.keymap.set("i", "<Esc>[13;2u", function()
 	if vim.fn["copilot#GetDisplayedSuggestion"]().text ~= "" then
@@ -86,7 +94,7 @@ vim.keymap.set("i", "<Esc>[13;2u", function()
 	end
 end, { expr = true, silent = true, noremap = true, replace_keycodes = false, desc = "Accept Copilot with Shift+Enter" })
 
-keymap("i", "<S-CR>", function()
+keymap("i", "<D-S-CR>", function()
 	if vim.fn["copilot#GetDisplayedSuggestion"]().text ~= "" then
 		return vim.fn["copilot#Accept"]("")
 	else
@@ -94,44 +102,6 @@ keymap("i", "<S-CR>", function()
 	end
 end, { expr = true, silent = true, noremap = true, replace_keycodes = false, desc = "Accept Copilot or newline" })
 
--- smart cycles config
 local sc = require("user.smart_cycles")
 keymap({ "i", "n" }, "<D-;>", sc.next, { desc = "Smart cycle forward" })
-keymap({ "i", "n" }, "<D-S-;>", sc.prev, { desc = "Smart cycle backward" }) -- Shift-;
-
--- luasnip fixes
-local keys_to_fix = {
-	-- text-object prefixes
-	"i",
-	"a",
-	-- editing operators
-	"d",
-	"c",
-	"s",
-	-- visual mode toggles
-	"v",
-	"V",
-	"<C-v>",
-	-- paste/repeat/etc.
-	"p",
-	"P",
-	".",
-	-- motion keys that can be remapped
-	"o",
-	"O",
-	"x",
-	"X",
-	-- selection-related
-	"r",
-	"R",
-	"y",
-	"Y",
-	"u",
-	"U",
-}
-
-for _, key in ipairs(keys_to_fix) do
-	vim.keymap.set("s", key, function()
-		vim.api.nvim_feedkeys(key, "n", false)
-	end, { silent = true, remap = false, desc = "Don't fuck up in select mode" })
-end
+keymap({ "i", "n" }, "<D-S-;>", sc.prev, { desc = "Smart cycle backward" })

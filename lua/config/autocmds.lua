@@ -92,7 +92,7 @@ local ft_handlers = {
 	end,
 }
 
--- close
+-- filetype settings
 vim.api.nvim_create_autocmd("FileType", {
 	group = ft_group,
 	pattern = "*",
@@ -121,6 +121,15 @@ vim.api.nvim_create_autocmd("TermOpen", {
 	callback = function()
 		vim.opt_local.buflisted = false
 		vim.opt_local.modifiable = false
+
+		local opts = { buffer = 0 }
+		vim.keymap.set("t", "<esc>", [[<C-\><C-n>]], opts)
+		vim.keymap.set("t", "<C-e>", [[<C-\><C-n>]], opts)
+		vim.keymap.set("t", "jk", [[<C-\><C-n>]], opts)
+		vim.keymap.set("t", "<A-k>", "\x1b[D", opts) -- left
+		vim.keymap.set("t", "<A-h>", "\x1b[C", opts) -- right
+		vim.keymap.set("t", "<A-l>", "\x1b[A", opts) -- up
+		vim.keymap.set("t", "<A-u>", "\x1b[B", opts) -- down
 	end,
 })
 
@@ -130,12 +139,12 @@ vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
 	pattern = "*.pdf",
 	callback = function()
 		local pdf_path = vim.fn.expand("%:p")
-		vim.fn.jobstart({ "open", "-a", "Skim", pdf_path }, { detach = true })
+		vim.fn.jobstart({ "open", "-a", "Preview", pdf_path }, { detach = true })
 		vim.cmd("bd!")
 	end,
 })
 
--- close pfs
+-- close pdfs
 vim.api.nvim_create_autocmd("BufEnter", {
 	group = open_ext,
 	pattern = "*.pdf",
@@ -164,37 +173,38 @@ vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
 	end,
 })
 
--- session restore
-vim.api.nvim_create_autocmd("SessionLoadPost", {
-	group = session_grp,
-	callback = function()
-		vim.schedule(function()
-			vim.cmd("silent! filetype plugin indent on")
-			vim.cmd("silent! syntax enable")
-			local bufs = vim.api.nvim_list_bufs()
-			local i = 1
-			local function step()
-				local count = 0
-				while i <= #bufs and count < 10 do
-					local b = bufs[i]
-					i = i + 1
-					if vim.api.nvim_buf_is_loaded(b) then
-						vim.api.nvim_buf_call(b, function()
-							vim.cmd("silent! filetype detect")
-							vim.cmd("silent! doautocmd <nomodeline> FileType")
-							pcall(vim.treesitter.start, b)
-						end)
-					end
-					count = count + 1
-				end
-				if i <= #bufs then
-					vim.defer_fn(step, 10)
-				end
-			end
-			step()
-		end)
-	end,
-})
+-- -- session restore - updated for Snacks explorer
+-- vim.api.nvim_create_autocmd("SessionLoadPost", {
+-- 	group = session_grp,
+-- 	callback = function()
+-- 		vim.schedule(function()
+-- 			vim.cmd("silent! filetype plugin indent on")
+-- 			vim.cmd("silent! syntax enable")
+-- 			local bufs = vim.api.nvim_list_bufs()
+-- 			local i = 1
+-- 			local function step()
+-- 				local count = 0
+-- 				while i <= #bufs and count < 10 do
+-- 					local b = bufs[i]
+-- 					i = i + 1
+-- 					if vim.api.nvim_buf_is_loaded(b) then
+-- 						vim.api.nvim_buf_call(b, function()
+-- 							vim.cmd("silent! filetype detect")
+-- 							vim.cmd("silent! doautocmd <nomodeline> FileType")
+-- 							pcall(vim.treesitter.start, b)
+-- 						end)
+-- 					end
+-- 					count = count + 1
+-- 				end
+-- 				if i <= #bufs then
+-- 					vim.defer_fn(step, 10)
+-- 				end
+-- 			end
+-- 			step()
+-- 		end)
+-- 	end,
+-- })
+--
 -- reruns treesitter for highlighting
 vim.api.nvim_create_autocmd("User", {
 	group = session_grp,
@@ -210,17 +220,17 @@ vim.api.nvim_create_autocmd("User", {
 		})
 	end,
 })
-
 -- fix keybindings
-vim.api.nvim_create_autocmd("LspAttach", {
-	callback = function(args)
-		pcall(vim.keymap.del, "n", "<S-k>", { buffer = args.buf })
-		pcall(vim.keymap.del, "n", "<C-l>", { buffer = args.buf })
-		vim.keymap.set("n", "<S-k>", "<C-w>h", { buffer = args.buf, desc = "Move to left split" })
-		vim.keymap.set("n", "<A-k>", ":bprevious<CR>", { buffer = args.buf, desc = "Previous buffer" })
-		vim.keymap.set("i", "<C-l>", "<Up>")
-	end,
-})
+
+-- vim.api.nvim_create_autocmd("LspAttach", {
+-- 	callback = function(args)
+-- 		pcall(vim.keymap.del, "n", "<S-k>", { buffer = args.buf })
+-- 		pcall(vim.keymap.del, "n", "<C-l>", { buffer = args.buf })
+-- 		vim.keymap.set("n", "<S-k>", "<C-w>h", { buffer = args.buf, desc = "Move to left split" })
+-- 		vim.keymap.set("n", "<A-k>", ":bprevious<CR>", { buffer = args.buf, desc = "Previous buffer" })
+-- 	end,
+-- 		vim.keymap.set("i", "<C-l>", "<Up>")
+-- })
 
 -- quit terminal correctly
 vim.api.nvim_create_autocmd("CmdlineLeave", {
@@ -240,25 +250,7 @@ vim.api.nvim_create_autocmd("CmdlineLeave", {
 	end,
 })
 
--- debounced cursor move
-do
-	local timer
-	vim.api.nvim_create_autocmd("CursorMovedI", {
-		group = cursor_idle,
-		callback = function()
-			if timer then
-				vim.fn.timer_stop(timer)
-			end
-			timer = vim.fn.timer_start(60, function()
-				timer = nil
-				vim.schedule(function()
-					vim.api.nvim_exec_autocmds("User", { pattern = "CursorMovedIIdle" })
-				end)
-			end)
-		end,
-	})
-end
--- treesitter file guard
+-- treesitter file guard (now using Snacks bigfile)
 vim.api.nvim_create_autocmd("BufReadPre", {
 	group = perf_guard,
 	callback = function(args)
@@ -271,15 +263,12 @@ vim.api.nvim_create_autocmd("BufReadPre", {
 	end,
 })
 
-vim.api.nvim_create_autocmd("FileType", {
-	pattern = "copilot-chat",
+-- fix for neovim bugging when resizing
+vim.api.nvim_create_autocmd({ "VimResized", "FocusGained" }, {
 	callback = function()
-		local opts = { buffer = true, silent = true }
-		vim.keymap.set("n", "q", "<cmd>close<cr>", opts)
-		vim.keymap.set("n", "<C-c>", "<cmd>close<cr>", opts)
-		vim.keymap.set("n", "<S-k>", "<C-w>h", { desc = "Move to left split" })
-		vim.keymap.set("n", "<S-u>", "<C-w>j", { desc = "Move to split below" })
-		vim.keymap.set("n", "<S-l>", "<C-w>k", { desc = "Move to split above" })
-		vim.keymap.set("n", "<S-h>", "<C-w>l", { desc = "Move to right split" })
+		vim.schedule(function()
+			vim.cmd("redraw!")
+			vim.cmd("mode")
+		end)
 	end,
 })

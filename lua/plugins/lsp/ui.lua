@@ -19,10 +19,10 @@ return {
 	{
 		"ray-x/lsp_signature.nvim",
 		event = "LspAttach",
+
 		config = function()
 			local sig = require("lsp_signature")
 
-			-- Base config - less aggressive inline hints
 			local cfg = {
 				bind = true,
 				handler_opts = { border = "rounded" },
@@ -37,35 +37,30 @@ return {
 				max_width = 80,
 				doc_lines = 0,
 				zindex = 50,
-				-- Reduce aggressiveness
 				always_trigger = false,
-				auto_close_after = 3, -- Auto close after 5 seconds
+				auto_close_after = 3,
 			}
 
 			sig.setup(cfg)
 
-			-- Toggle between no hints, inline hints, and floating window
-			local hint_state = 0 -- 0: off, 1: inline, 2: floating
+			local hint_state = 0
 
 			vim.keymap.set({ "i", "n" }, "<M-s>", function()
 				hint_state = (hint_state + 1) % 3
 
 				if hint_state == 0 then
-					-- Turn off
 					sig.setup(vim.tbl_deep_extend("force", cfg, {
 						hint_enable = false,
 						floating_window = false,
 					}))
 					pcall(sig.close)
 				elseif hint_state == 1 then
-					-- Inline only
 					sig.setup(vim.tbl_deep_extend("force", cfg, {
 						hint_enable = true,
 						floating_window = false,
 						doc_lines = 0,
 					}))
 				else
-					-- Floating window
 					sig.setup(vim.tbl_deep_extend("force", cfg, {
 						hint_enable = true,
 						floating_window = true,

@@ -3,16 +3,13 @@ return {
 		"neovim/nvim-lspconfig",
 		cmd = { "LspInfo", "LspInstall", "LspStart" },
 		event = { "BufReadPre", "BufNewFile", "VeryLazy" },
-		dependencies = {
-			{ "hrsh7th/cmp-nvim-lsp" },
-		},
+
 		config = function()
 			vim.opt.signcolumn = "yes"
 
 			vim.api.nvim_create_autocmd("LspAttach", {
 				desc = "LSP actions",
-				callback = function(event)
-					local opts = { buffer = event.buf, remap = false }
+				callback = function()
 					vim.keymap.set("n", "gd", vim.lsp.buf.definition, { desc = "Go to Definition" })
 					vim.keymap.set("n", "gr", vim.lsp.buf.references, { desc = "Find References" })
 					vim.keymap.set("n", "gi", vim.lsp.buf.implementation, { desc = "Go to Implementation" })

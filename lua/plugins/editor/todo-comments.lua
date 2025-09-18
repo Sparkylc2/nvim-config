@@ -1,36 +1,31 @@
 return {
 	{
 		"folke/todo-comments.nvim",
-		dependencies = { "nvim-lua/plenary.nvim" },
-		cmd = { "TodoTelescope" },
-		event = { "BufReadPost", "BufNewFile" },
+		cmd = { "TodoTrouble", "TodoTelescope" },
+		opts = {},
 		keys = {
 			{
 				"]t",
 				function()
 					require("todo-comments").jump_next()
 				end,
-				desc = "Next todo comment",
+				desc = "Next Todo Comment",
 			},
 			{
 				"[t",
 				function()
 					require("todo-comments").jump_prev()
 				end,
-				desc = "Previous todo comment",
+				desc = "Previous Todo Comment",
 			},
-			{ "<leader>xt", "<cmd>TodoTelescope<cr>", desc = "Todo" },
-			{ "<leader>xT", "<cmd>TodoTelescope keywords=TODO,FIX,FIXME<cr>", desc = "Todo/Fix/Fixme" },
+			{ "<leader>xt", "<cmd>Trouble todo toggle<cr>", desc = "Todo (Trouble)" },
+			{
+				"<leader>xT",
+				"<cmd>Trouble todo toggle filter = {tag = {TODO,FIX,FIXME}}<cr>",
+				desc = "Todo/Fix/Fixme (Trouble)",
+			},
+			{ "<leader>st", "<cmd>TodoTelescope<cr>", desc = "Todo" },
+			{ "<leader>sT", "<cmd>TodoTelescope keywords=TODO,FIX,FIXME<cr>", desc = "Todo/Fix/Fixme" },
 		},
-		opts = {},
-		-- config = function(_, opts)
-		-- 	opts.keywords = {
-		-- 		TODO = { icon = "", color = "info" },
-		-- 		FIX = { icon = "", color = "error", alt = { "FIXME", "BUG" } },
-		-- 		NOTE = { icon = "", color = "hint", alt = { "INFO" } },
-		-- 		IMPORTANT = { icon = "", color = "warning", alt = { "HIGHLIGHT" } },
-		-- 	}
-		-- 	require("todo-comments").setup(opts)
-		-- end,
 	},
 }

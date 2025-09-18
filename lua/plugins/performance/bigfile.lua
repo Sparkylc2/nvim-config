@@ -1,6 +1,8 @@
 return {
 	{
 		"LunarVim/bigfile.nvim",
+		enabled = false,
+
 		config = function()
 			require("bigfile").setup({
 				filesize = 2,

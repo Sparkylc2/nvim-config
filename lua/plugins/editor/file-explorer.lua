@@ -2,18 +2,18 @@ return {
 	{
 		"nvim-neo-tree/neo-tree.nvim",
 		branch = "v3.x",
+		enabled = false,
 		dependencies = {
 			"nvim-lua/plenary.nvim",
 			"nvim-tree/nvim-web-devicons",
 			"MunifTanjim/nui.nvim",
 		},
-
 		keys = {
-			{ "<leader>e", "<cmd>Neotree toggle left<cr>", desc = "Toggle file explorer" },
+			{ "<leader>k", "<cmd>Neotree toggle <cr>", desc = "Toggle file explorer" },
 		},
-
 		opts = {
 			filesystem = {
+				bind_to_cwd = true,
 				filtered_items = {
 					visible = true,
 					hide_dotfiles = false,
@@ -25,6 +25,7 @@ return {
 				use_libuv_file_watcher = true,
 			},
 			window = {
+				position = "current",
 				mappings = {
 					j = "none",
 					k = "none",
@@ -43,23 +44,6 @@ return {
 		},
 		config = function(_, opts)
 			require("neo-tree").setup(opts)
-
-			vim.keymap.set("n", "<leader>E", function()
-				if vim.bo.filetype == "neo-tree" then
-					vim.cmd("wincmd p")
-					return
-				end
-
-				for _, win in ipairs(vim.api.nvim_list_wins()) do
-					local buf = vim.api.nvim_win_get_buf(win)
-					local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
-					if ft == "neo-tree" then
-						vim.api.nvim_set_current_win(win)
-						return
-					end
-				end
-				vim.cmd("Neotree reveal left")
-			end, { desc = "Toggle focus on Neo-tree" })
 		end,
 	},
 }

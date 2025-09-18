@@ -1,25 +1,25 @@
--- ==== options ===============================================================
+-- lua/config/options.lua
 local opt = vim.opt
 local g = vim.g
 
--- indentation
+-- Indentation
 opt.expandtab = true
 opt.tabstop = 4
 opt.softtabstop = 4
 opt.shiftwidth = 4
 opt.smartindent = true
 
--- line numbers
+-- Line numbers
 opt.number = true
 opt.relativenumber = false
 
--- search
+-- Search
 opt.ignorecase = true
 opt.smartcase = true
 opt.hlsearch = false
 opt.incsearch = true
 
--- appearance
+-- Appearance
 opt.termguicolors = true
 opt.signcolumn = "yes"
 opt.wrap = false
@@ -27,7 +27,7 @@ opt.scrolloff = 8
 opt.sidescrolloff = 8
 vim.o.laststatus = 3
 
--- behavior
+-- Behavior
 opt.backup = false
 opt.swapfile = false
 opt.undofile = true
@@ -43,20 +43,20 @@ opt.splitright = true
 opt.maxmempattern = 200000
 opt.lazyredraw = true
 opt.synmaxcol = 200
-
--- clipboard
+opt.winborder = "rounded"
+-- Clipboard
 opt.clipboard = "unnamedplus"
 
--- cursor
+-- Cursor
 opt.cursorline = true
 opt.cursorlineopt = "number"
 
--- copilot pacing
+-- Copilot configuration
 g.copilot_no_tab_map = true
 g.copilot_assume_mapped = true
 g.copilot_idle_delay = 250
 
--- disable built-ins
+-- Disable built-in plugins
 for _, plugin in pairs({
 	"netrw",
 	"netrwPlugin",
@@ -80,16 +80,31 @@ for _, plugin in pairs({
 	vim.g["loaded_" .. plugin] = 1
 end
 
--- diagnostics
+-- Diagnostics
+
+vim.diagnostic.enable()
 vim.diagnostic.config({
 	virtual_text = { prefix = "●", spacing = 4 },
 	signs = true,
 	underline = true,
 	update_in_insert = false,
-	severity_sort = true,
 	float = { border = "rounded", source = "always" },
+	severity_sort = true,
 })
 
--- signature help
+-- lsp
+vim.lsp.enable({
+	"vue_ls",
+	"ts_ls",
+	"lua_ls",
+	"cssls",
+	"tailwindcss",
+	"html",
+	"clangd",
+	"pyright",
+})
+
+-- Signature help
 vim.lsp.handlers["textDocument/signatureHelp"] =
 	vim.lsp.with(vim.lsp.handlers.signature_help, { update_in_insert = false })
+vim.lsp.with(vim.lsp.handlers.signature_help, { update_in_insert = false })

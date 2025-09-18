@@ -55,21 +55,95 @@ local char_cache = {
 	items = {}, -- { {r,c}, ... }
 }
 
+-- ===== Character-based waypoint collection ==================================
+
+local function collect_char_waypoints(range_top, range_bot)
+	local tick = vim.b.changedtick or 0
+	if char_cache.tick == tick and char_cache.items then
+		-- Filter cached items to current range
+		local filtered = {}
+		for i = 1, #char_cache.items do
+			local r, c = char_cache.items[i][1], char_cache.items[i][2]
+			if r >= range_top and r <= range_bot then
+				filtered[#filtered + 1] = { r, c }
+			end
+		end
+		return filtered
+	end
+
+	local items = {}
+
+	-- Define what we're looking for
+	local closing_chars = {
+		[")"] = true,
+		["]"] = true,
+		["}"] = true,
+	}
+
+	local quotes = {
+		['"'] = true,
+		["'"] = true,
+		["`"] = true,
+	}
+
+	local operators = {
+		[","] = true,
+		[">"] = true,
+		["+"] = true,
+		["-"] = true,
+		["*"] = true,
+		["/"] = true,
+		["%"] = true,
+		["&"] = true,
+		["|"] = true,
+		["="] = true,
+		["^"] = true,
+		["!"] = true,
+	}
+
+	-- Scan lines for jump targets
+	for row = range_top, range_bot do
+		local line = vim.api.nvim_buf_get_lines(0, row, row + 1, false)[1]
+		if line then
+			local len = math.min(#line, max_scan_cols)
+			local in_string = false
+			local string_char = nil
+
+			for col = 0, len - 1 do
+				local ch = string.sub(line, col + 1, col + 1)
+
+				-- Handle quotes specially - jump to inside AND after closing quotes
+				if quotes[ch] then
+					if not in_string then
+						-- Opening quote - don't add as waypoint
+						in_string = true
+						string_char = ch
+					elseif ch == string_char then
+						-- Closing quote - add position BEFORE it (inside) and AFTER it (outside)
+						items[#items + 1] = { row, col } -- Inside the quote
+						items[#items + 1] = { row, col + 1 } -- Outside the quote
+						in_string = false
+						string_char = nil
+					end
+				-- Handle closing brackets - jump after them
+				elseif closing_chars[ch] and not in_string then
+					items[#items + 1] = { row, col + 1 }
+				-- Handle operators - jump after them
+				elseif operators[ch] and not in_string then
+					items[#items + 1] = { row, col + 1 }
+				end
+			end
+		end
+	end
+
+	char_cache.tick = tick
+	char_cache.items = items
+	return items
+end
+
 -- ===== Waypoint collection ==================================================
 
 local function collect_waypoints()
-	-- Treesitter parse (incremental) of current buffer
-	local ok, parser = pcall(vim.treesitter.get_parser, 0)
-	if not ok or not parser then
-		return {}
-	end
-
-	local trees = parser:parse()
-	if not trees or #trees == 0 then
-		return {}
-	end
-	local root = trees[1]:root()
-
 	local total_lines = vim.api.nvim_buf_line_count(0)
 	local top, bot = visible_range()
 	local margin = viewport_margin
@@ -84,183 +158,122 @@ local function collect_waypoints()
 
 	local waypoints = {}
 
-	local function push(out, r, c)
-		if r and c and r >= range_top and r <= range_bot and r >= 0 and c >= 0 then
-			out[#out + 1] = { r, c }
-		end
+	-- Always collect character-based waypoints (works without treesitter)
+	local char_waypoints = collect_char_waypoints(range_top, range_bot)
+	for i = 1, #char_waypoints do
+		waypoints[#waypoints + 1] = char_waypoints[i]
 	end
 
-	local function nr4(n)
-		if not n then
-			return 0, 0, 0, 0
-		end
-		local r1, c1, r2, c2 = n:range()
-		return r1, c1, r2 or r1, c2 or c1
-	end
+	-- Try to add treesitter waypoints if available
+	local ok, parser = pcall(vim.treesitter.get_parser, 0)
+	if ok and parser then
+		local trees = parser:parse()
+		if trees and #trees > 0 then
+			local root = trees[1]:root()
 
-	local target_types = {
-		identifier = true,
-		property_identifier = true,
-		field_identifier = true,
-		number_literal = true,
-		true_literal = true,
-		false_literal = true,
-		primitive_type = true,
-		type_identifier = true,
-		sized_type_specifier = true,
-	}
-
-	local container_types = {
-		parameter_list = true,
-		argument_list = true,
-		formal_parameters = true,
-		parameters = true,
-		compound_statement = true,
-		statement_block = true,
-		block = true,
-	}
-
-	local function is_modifier_like(t)
-		return t:match("specifier")
-			or t:match("qualifier")
-			or t:match("modifier")
-			or t:match("keyword")
-			or t == "storage_class_specifier"
-			or t == "type_qualifier"
-			or t == "cv_qualifier"
-			or t == "virtual_specifier"
-			or t == "explicit_function_specifier"
-	end
-
-	-- Walk only nodes intersecting [range_top, range_bot]
-	local function walk(node)
-		if not node then
-			return
-		end
-		local sr, sc, er, ec = nr4(node)
-		if er < range_top or sr > range_bot then
-			return
-		end
-
-		local t = node:type()
-
-		if t:match("declaration") or t:match("definition") then
-			for child in node:iter_children() do
-				if child:named() then
-					local ct = child:type()
-					if target_types[ct] or is_modifier_like(ct) then
-						local cr, cc = nr4(child)
-						push(waypoints, cr, cc)
-						break
-					end
+			local function push(out, r, c)
+				if r and c and r >= range_top and r <= range_bot and r >= 0 and c >= 0 then
+					out[#out + 1] = { r, c }
 				end
 			end
-		end
 
-		if target_types[t] then
-			push(waypoints, er, ec)
-		end
-
-		if is_modifier_like(t) then
-			push(waypoints, er, ec)
-		end
-
-		if container_types[t] then
-			push(waypoints, sr, sc + 1)
-			push(waypoints, er, ec)
-		end
-
-		if t:match("parenthesized") or t:match("condition") then
-			push(waypoints, sr, sc + 1)
-			push(waypoints, er, ec)
-		end
-
-		if t:match("statement") or t:match("expression") then
-			push(waypoints, er, ec)
-		end
-
-		for child in node:iter_children() do
-			if child:named() then
-				walk(child)
+			local function nr4(n)
+				if not n then
+					return 0, 0, 0, 0
+				end
+				local r1, c1, r2, c2 = n:range()
+				return r1, c1, r2 or r1, c2 or c1
 			end
-		end
-	end
 
-	walk(root)
+			local target_types = {
+				identifier = true,
+				property_identifier = true,
+				field_identifier = true,
+				number_literal = true,
+				true_literal = true,
+				false_literal = true,
+				primitive_type = true,
+				type_identifier = true,
+				sized_type_specifier = true,
+			}
 
-	-- Character scan (cached per changedtick); only scan viewport range
-	local function collect_raw_jump_chars_cached()
-		local tick = vim.b.changedtick or 0
-		if char_cache.tick == tick and char_cache.items then
-			return char_cache.items
-		end
+			local container_types = {
+				parameter_list = true,
+				argument_list = true,
+				formal_parameters = true,
+				parameters = true,
+				compound_statement = true,
+				statement_block = true,
+				block = true,
+			}
 
-		local items = {}
-		local jump_chars = {
-			[")"] = true,
-			["]"] = true,
-			["}"] = true,
-			['"'] = true,
-			["'"] = true,
-			["`"] = true,
-			[","] = true,
-			[">"] = true,
-			["+"] = true,
-			["-"] = true,
-			["*"] = true,
-			["/"] = true,
-			["%"] = true,
-			["&"] = true,
-			["|"] = true,
-			["="] = true,
-			["^"] = true,
-			["!"] = true,
-		}
-		local one_after_symbols = {
-			[")"] = true,
-			["]"] = true,
-			["}"] = true,
-			["+"] = true,
-			["-"] = true,
-			["*"] = true,
-			["/"] = true,
-			["%"] = true,
-			["&"] = true,
-			["|"] = true,
-			["="] = true,
-			["^"] = true,
-			["!"] = true,
-		}
+			local function is_modifier_like(t)
+				return t:match("specifier")
+					or t:match("qualifier")
+					or t:match("modifier")
+					or t:match("keyword")
+					or t == "storage_class_specifier"
+					or t == "type_qualifier"
+					or t == "cv_qualifier"
+					or t == "virtual_specifier"
+					or t == "explicit_function_specifier"
+			end
 
-		-- limit to current viewport range
-		for row = range_top, range_bot do
-			local line = vim.api.nvim_buf_get_lines(0, row, row + 1, false)[1]
-			if line then
-				local len = math.min(#line, max_scan_cols)
-				for col = 0, len - 1 do
-					local ch = string.sub(line, col + 1, col + 1)
-					if jump_chars[ch] then
-						if one_after_symbols[ch] then
-							items[#items + 1] = { row, col + 1 }
-						else
-							items[#items + 1] = { row, col }
+			-- Walk only nodes intersecting [range_top, range_bot]
+			local function walk(node)
+				if not node then
+					return
+				end
+				local sr, sc, er, ec = nr4(node)
+				if er < range_top or sr > range_bot then
+					return
+				end
+
+				local t = node:type()
+
+				if t:match("declaration") or t:match("definition") then
+					for child in node:iter_children() do
+						if child:named() then
+							local ct = child:type()
+							if target_types[ct] or is_modifier_like(ct) then
+								local cr, cc = nr4(child)
+								push(waypoints, cr, cc)
+								break
+							end
 						end
 					end
 				end
+
+				if target_types[t] then
+					push(waypoints, er, ec)
+				end
+
+				if is_modifier_like(t) then
+					push(waypoints, er, ec)
+				end
+
+				if container_types[t] then
+					push(waypoints, sr, sc + 1)
+					push(waypoints, er, ec)
+				end
+
+				if t:match("parenthesized") or t:match("condition") then
+					push(waypoints, sr, sc + 1)
+					push(waypoints, er, ec)
+				end
+
+				if t:match("statement") or t:match("expression") then
+					push(waypoints, er, ec)
+				end
+
+				for child in node:iter_children() do
+					if child:named() then
+						walk(child)
+					end
+				end
 			end
-		end
 
-		char_cache.tick = tick
-		char_cache.items = items
-		return items
-	end
-
-	-- Append cached char‑based waypoints
-	local chars = collect_raw_jump_chars_cached()
-	for i = 1, #chars do
-		local r, c = chars[i][1], chars[i][2]
-		if r >= range_top and r <= range_bot then
-			waypoints[#waypoints + 1] = { r, c }
+			walk(root)
 		end
 	end
 

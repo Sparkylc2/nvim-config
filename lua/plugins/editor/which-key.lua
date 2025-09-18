@@ -2,10 +2,6 @@ return {
 	{
 		"folke/which-key.nvim",
 		event = "VeryLazy",
-		init = function()
-			-- vim.o.timeout = true
-			-- vim.o.timeoutlen = 300
-		end,
 		opts = {
 			plugins = { spelling = true },
 
@@ -26,10 +22,27 @@ return {
 				{ "g", group = "goto" },
 				{ "gs", group = "surround" },
 			},
+			keys = {
+
+				{
+					"<leader>?",
+					function()
+						require("which-key").show({ global = false })
+					end,
+					desc = "Buffer Keymaps (which-key)",
+				},
+				{
+					"<c-w><space>",
+					function()
+						require("which-key").show({ keys = "<c-w>", loop = true })
+					end,
+					desc = "Window Hydra Mode (which-key)",
+				},
+			},
 		},
 		config = function()
 			require("which-key").setup({
-				delay = 200,
+				delay = 100,
 				filter = function(mapping)
 					local lhs = mapping.lhs
 					if not lhs then

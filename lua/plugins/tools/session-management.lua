@@ -2,15 +2,30 @@ return {
 	"rmagatti/auto-session",
 	lazy = false,
 	init = function()
-		vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions"
+		-- Keep curdir OUT of sessionoptions
+		vim.o.sessionoptions = "blank,buffers,folds,help,tabpages,winsize,winpos,terminal,localoptions"
 	end,
 	opts = {
 		auto_session_suppress_dirs = { "~/", "~/Projects", "~/Downloads", "/" },
 		lazy_support = true,
 		continue_restore_on_error = true,
-		pre_save_cmds = { "tabdo Neotree close" },
+		cwd_change_handling = {
+			restore_upcoming_session = false,
+		},
+		pre_save_cmds = {
+			function()
+				-- Save Neo-tree's current position before closing
+				local manager = require("neo-tree.sources.manager")
+				local state = manager.get_state("filesystem")
+				if state and state.path then
+					vim.g.neotree_last_position = state.path
+				end
+				vim.cmd("tabdo Neotree close")
+			end,
+		},
 		post_restore_cmds = {
 			function()
+				-- Clean up neo-tree buffers
 				for _, buf in ipairs(vim.api.nvim_list_bufs()) do
 					if vim.api.nvim_buf_is_loaded(buf) then
 						local name = vim.api.nvim_buf_get_name(buf)
@@ -20,11 +35,19 @@ return {
 					end
 				end
 
-				local ok, neo = pcall(require, "neo-tree.command")
-				if ok then
-					neo.execute({ action = "show", source = "filesystem", position = "left", reveal = true })
-					neo.execute({ action = "focus", source = "filesystem" })
-				end
+				-- Restore Neo-tree to its saved position if it exists
+				vim.defer_fn(function()
+					if vim.g.neotree_last_position then
+						local path = vim.g.neotree_last_position
+						vim.g.neotree_last_position = nil
+						-- Open Neo-tree at the saved position
+						require("neo-tree.command").execute({
+							action = "show",
+							source = "filesystem",
+							dir = path,
+						})
+					end
+				end, 100)
 			end,
 		},
 		bypass_session_save_file_types = { "neo-tree", "gitcommit" },

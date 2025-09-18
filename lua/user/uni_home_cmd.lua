@@ -75,7 +75,6 @@ vim.api.nvim_create_user_command("Uni", function(opts)
 	local open_in_finder = args[2] == "open"
 
 	local uni_dir = uni_dirs[key]
-
 	if uni_dir == nil then
 		print("Please provide a valid Uni shortcut key", key)
 		return
@@ -84,16 +83,26 @@ vim.api.nvim_create_user_command("Uni", function(opts)
 	local target = base_dir .. uni_dir
 	target = vim.fn.expand(target)
 
-	vim.cmd("cd " .. target)
-
+	-- Don't change global cwd, just navigate Neo-tree
 	local old_notify = vim.notify
 	vim.notify = function() end
 	pcall(vim.cmd, "SessionRestore")
 	vim.notify = old_notify
 
+	-- Open Neo-tree at the target directory
+	vim.schedule(function()
+		require("neo-tree.command").execute({
+			action = "show",
+			source = "filesystem",
+			dir = target,
+			position = "current",
+		})
+	end)
+
 	if target:find("Computing and Numerical Methods 2", 1, true) then
 		disable_copilot_when_ready({ max_try = 60, delay = 100 })
 	end
+
 	if open_in_finder then
 		vim.fn.jobstart({ "open", target }, { detach = true })
 	end

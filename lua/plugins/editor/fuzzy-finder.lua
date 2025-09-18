@@ -18,6 +18,14 @@ return {
 			{ "<leader>fk", "<cmd>Telescope keymaps<cr>", desc = "Keymaps" },
 			{ "<leader>fs", "<cmd>Telescope lsp_document_symbols<cr>", desc = "Document symbols" },
 			{ "<leader>fS", "<cmd>Telescope lsp_workspace_symbols<cr>", desc = "Workspace symbols" },
+
+			{
+				"<leader>fn",
+				function()
+					Snacks.notifier.show_history()
+				end,
+				desc = "Notification history",
+			},
 		},
 		config = function()
 			local telescope = require("telescope")
@@ -26,17 +34,14 @@ return {
 			telescope.setup({
 				defaults = {
 					mappings = {
-						-- Insert-mode navigation
 						i = {
 							["<C-u>"] = actions.move_selection_next,
 							["<C-l>"] = actions.move_selection_previous,
-
 							["<C-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
 						},
-						-- Normal-mode navigation inside Telescope
 						n = {
-							["u"] = actions.move_selection_next, -- down
-							["l"] = actions.move_selection_previous, -- up
+							["u"] = actions.move_selection_next,
+							["l"] = actions.move_selection_previous,
 							["<C-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
 						},
 					},
