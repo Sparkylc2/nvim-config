@@ -15,16 +15,16 @@ local uni_dirs = {
 	h = "",
 }
 
+local function unescape_spaces(p)
+	return (p or ""):gsub("\\ ", " ")
+end
+
 local function disable_copilot_when_ready(opts)
 	opts = opts or {}
-	local tries = 0
-	local max_try = opts.max_try or 40
-	local delay = opts.delay or 100
-
+	local tries, max_try, delay = 0, opts.max_try or 40, opts.delay or 100
 	vim.g.copilot_enabled = false
 	vim.g.copilot_filetypes = vim.g.copilot_filetypes or {}
 	vim.g.copilot_filetypes["*"] = false
-
 	local function kill_lsp()
 		for _, client in ipairs(vim.lsp.get_active_clients()) do
 			if client.name == "copilot" then
@@ -34,70 +34,66 @@ local function disable_copilot_when_ready(opts)
 			end
 		end
 	end
-
 	local function tick()
 		tries = tries + 1
 		local has_cmd = vim.fn.exists(":Copilot") == 2
 		local ok_mod, copilot = pcall(require, "copilot")
 		local ok_cmd_mod, cop_cmd = pcall(require, "copilot.command")
-
 		if has_cmd then
 			vim.cmd("silent! Copilot disable")
 			kill_lsp()
 			return
 		end
-
 		if ok_cmd_mod and type(cop_cmd.Disable) == "function" then
 			pcall(cop_cmd.Disable)
 			kill_lsp()
 			return
 		end
-
 		if ok_mod and type(copilot.disable) == "function" then
 			pcall(copilot.disable)
 			kill_lsp()
 			return
 		end
-
 		if tries < max_try then
 			vim.defer_fn(tick, delay)
 		else
 			kill_lsp()
 		end
 	end
-
 	tick()
 end
 
 vim.api.nvim_create_user_command("Uni", function(opts)
-	local args = vim.split(opts.args, " ")
-	local key = args[1]
-	local open_in_finder = args[2] == "open"
+	local parts = vim.split(opts.args or "", " ", { trimempty = true })
+	local key = parts[1]
+	local flags = {}
+	for i = 2, #parts do
+		flags[parts[i]] = true
+	end
+	local open_in_finder = flags.open or false
+	local use_global_cwd = flags.global or false
 
-	local uni_dir = uni_dirs[key]
-	if uni_dir == nil then
-		print("Please provide a valid Uni shortcut key", key)
+	local sub = uni_dirs[key]
+	if sub == nil then
+		print("Please provide a valid Uni shortcut key (e.g. ae, fd, cs, h). Got:", key or "nil")
 		return
 	end
 
-	local target = base_dir .. uni_dir
-	target = vim.fn.expand(target)
+	local target = unescape_spaces(vim.fn.expand(base_dir .. (sub or "")))
 
-	-- Don't change global cwd, just navigate Neo-tree
-	local old_notify = vim.notify
-	vim.notify = function() end
-	pcall(vim.cmd, "SessionRestore")
-	vim.notify = old_notify
+	local cd_cmd = use_global_cwd and "cd " or "tcd "
+	vim.cmd(cd_cmd .. vim.fn.fnameescape(target))
 
-	-- Open Neo-tree at the target directory
-	vim.schedule(function()
-		require("neo-tree.command").execute({
-			action = "show",
-			source = "filesystem",
-			dir = target,
-			position = "current",
-		})
-	end)
+	if _G.LOCKED_CWD then
+		_G.LOCKED_CWD = vim.fn.getcwd()
+	end
+
+	local ok, oil = pcall(require, "oil")
+	if ok then
+		oil.open(target)
+	else
+		vim.notify("oil.nvim not found", vim.log.levels.ERROR)
+	end
 
 	if target:find("Computing and Numerical Methods 2", 1, true) then
 		disable_copilot_when_ready({ max_try = 60, delay = 100 })
@@ -111,6 +107,7 @@ end, {
 	complete = function(_, _)
 		local keys = vim.tbl_keys(uni_dirs)
 		table.insert(keys, "open")
+		table.insert(keys, "global")
 		return keys
 	end,
 })

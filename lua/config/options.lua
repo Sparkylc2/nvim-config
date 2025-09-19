@@ -25,14 +25,16 @@ opt.signcolumn = "yes"
 opt.wrap = false
 opt.scrolloff = 8
 opt.sidescrolloff = 8
+vim.wo.cursorline = true
 vim.o.laststatus = 3
 
 -- Behavior
+g.loaded_netrwPlugin = 1
 opt.backup = false
 opt.swapfile = false
 opt.undofile = true
 opt.undodir = (os.getenv("HOME") or "") .. "/.vim/undodir"
-opt.updatetime = 150
+opt.updatetime = 50
 opt.timeout = true
 opt.timeoutlen = 300
 opt.ttimeout = true
@@ -43,7 +45,7 @@ opt.splitright = true
 opt.maxmempattern = 200000
 opt.lazyredraw = true
 opt.synmaxcol = 200
-opt.winborder = "rounded"
+vim.o.winborder = "rounded"
 -- Clipboard
 opt.clipboard = "unnamedplus"
 
@@ -58,10 +60,6 @@ g.copilot_idle_delay = 250
 
 -- Disable built-in plugins
 for _, plugin in pairs({
-	"netrw",
-	"netrwPlugin",
-	"netrwSettings",
-	"netrwFileHandlers",
 	"gzip",
 	"zip",
 	"zipPlugin",

@@ -10,7 +10,20 @@ keymap("n", "j", "u", opts)
 keymap("n", "J", "<C-r>", opts)
 
 -- join with line above
-keymap("n", "Y", "J", opts)
+keymap("n", "Y", "mzJ`z", opts)
+
+-- move with middle
+keymap("n", "<C-l>", "<C-d>zz", opts)
+keymap("n", "<C-u>", "<C-u>zz", opts)
+
+-- keep in the middle of screen
+keymap("n", "n", "nzzzv", opts)
+keymap("n", "N", "Nzzzv", opts)
+
+-- useless
+keymap("n", "Q", "<nop>")
+-- quick chmod +x
+keymap("n", "<leader> ch", "<cmd>!chmod +x %<CR>", { silent = true })
 
 -- move around with ctrl (insert) (start of line, end of line, up down)
 keymap("i", "<C-k>", "<C-o>^", opts)
@@ -65,10 +78,10 @@ keymap("n", "<A-k>", ":bprevious<CR>", { desc = "Previous buffer", silent = true
 keymap("n", "<A-w>", "<Cmd>bdelete<CR>", { silent = true })
 
 -- move line (normal + visual)
-keymap("n", "<A-l>", ":m .-2<CR>==", { desc = "Move line up" })
+keymap("n", "<A-l>", ":m .-1<CR>==", { desc = "Move line up" })
 keymap("n", "<A-u>", ":m .+1<CR>==", { desc = "Move line down" })
-keymap("v", "<A-l>", ":m '>+1<CR>gv=gv", { desc = "Move selection down" })
-keymap("v", "<A-u>", ":m '<-2<CR>gv=gv", { desc = "Move selection up" })
+keymap("v", "<A-l>", ":m '<-2<CR>gv=gv", { desc = "Move selection up" })
+keymap("v", "<A-u>", ":m '>+1<CR>gv=gv", { desc = "Move selection down" })
 
 -- indent left right (visual)
 keymap("v", "<", "<gv", { desc = "Indent left" })

@@ -1,5 +1,17 @@
 return {
 	{
+		"tpope/vim-fugitive",
+
+		cmd = { "G", "Git", "Gvdiffsplit", "Gread", "Gwrite", "Ggrep", "GMove", "GDelete", "GBrowse" },
+		keys = {
+			{ "<leader>gs", "<cmd>Git<cr>", desc = "Git status" },
+			{ "<leader>gc", "<cmd>Git commit<cr>", desc = "Git commit" },
+			{ "<leader>gp", "<cmd>Git push<cr>", desc = "Git push" },
+			{ "<leader>gl", "<cmd>Git log --oneline<cr>", desc = "Git log" },
+			{ "<leader>gb", "<cmd>Git blame<cr>", desc = "Git blame" },
+		},
+	},
+	{
 		"lewis6991/gitsigns.nvim",
 		event = { "BufReadPre", "BufNewFile" },
 		opts = {
@@ -72,17 +84,17 @@ return {
 		},
 		config = function(_, opts)
 			require("gitsigns").setup(opts)
-
-			-- Snacks toggle for git signs
-			Snacks.toggle({
-				name = "Git Signs",
-				get = function()
-					return require("gitsigns.config").config.signcolumn
-				end,
-				set = function(state)
-					require("gitsigns").toggle_signs(state)
-				end,
-			}):map("<leader>uG")
 		end,
+	},
+	{
+		"kdheepak/lazygit.nvim",
+
+		enabled = true,
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+		},
+		keys = {
+			{ "<leader>gg", "<cmd>LazyGit<cr>", desc = "LazyGit" },
+		},
 	},
 }

@@ -5,5 +5,4 @@ return {
 	{ import = "plugins.coding" },
 	{ import = "plugins.lang" },
 	{ import = "plugins.tools" },
-	{ import = "plugins.performance" },
 }

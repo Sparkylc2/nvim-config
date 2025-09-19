@@ -2,6 +2,7 @@ return {
 	{
 		"nvim-telescope/telescope.nvim",
 		branch = "0.1.x",
+		enabled = true,
 		dependencies = {
 			"nvim-lua/plenary.nvim",
 			{ "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
@@ -18,14 +19,6 @@ return {
 			{ "<leader>fk", "<cmd>Telescope keymaps<cr>", desc = "Keymaps" },
 			{ "<leader>fs", "<cmd>Telescope lsp_document_symbols<cr>", desc = "Document symbols" },
 			{ "<leader>fS", "<cmd>Telescope lsp_workspace_symbols<cr>", desc = "Workspace symbols" },
-
-			{
-				"<leader>fn",
-				function()
-					Snacks.notifier.show_history()
-				end,
-				desc = "Notification history",
-			},
 		},
 		config = function()
 			local telescope = require("telescope")
