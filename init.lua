@@ -1,4 +1,18 @@
-_G.NVIM_STARTUP_CWD = vim.fn.getcwd()
+-- sets cwd to whatever the input arg was
+do
+	if vim.fn.argc() > 0 then
+		local a0 = vim.fn.fnamemodify(vim.fn.argv(0), ":p") -- absolute path
+		if vim.fn.isdirectory(a0) == 1 then
+			pcall(vim.loop.chdir, a0)
+			vim.cmd("cd " .. vim.fn.fnameescape(a0))
+		elseif vim.fn.filereadable(a0) == 1 then
+			local dir = vim.fn.fnamemodify(a0, ":h")
+			pcall(vim.loop.chdir, dir)
+			vim.cmd("cd " .. vim.fn.fnameescape(dir))
+		end
+	end
+end
+
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 
 if not vim.loop.fs_stat(lazypath) then

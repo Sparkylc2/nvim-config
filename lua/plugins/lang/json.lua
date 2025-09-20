@@ -2,7 +2,7 @@ return {
 	{
 		"b0o/schemastore.nvim",
 
-event = "VeryLazy",
+		event = "VeryLazy",
 		ft = { "json", "jsonc" },
 	},
 }

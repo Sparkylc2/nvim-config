@@ -5,12 +5,6 @@ vim.g.maplocalleader = " "
 local keymap = vim.keymap.set
 local opts = { noremap = true, silent = true }
 
-keymap("n", "<Plug>(ColemakNext)", "n", opts)
-keymap("n", "<Plug>(ColemakEnd)", "e", opts)
-keymap("n", "<Plug>(ColemakInsert)", "i", opts)
-
-keymap("n", "<Plug>(ColemakOpen)", "o", opts)
-
 keymap({ "n", "x", "v" }, "n", "h", opts) -- left
 keymap({ "n", "x", "v" }, "e", "j", opts) -- down
 keymap({ "n", "x", "v" }, "i", "k", opts) -- up
@@ -22,7 +16,7 @@ keymap("v", "k", "e", { noremap = true, silent = true }) -- end of word in visua
 keymap("v", "K", "E", { noremap = true, silent = true }) -- end of WORD in visual
 keymap("v", "h", "n", { noremap = true, silent = true }) -- for consistency
 
--- make l work like i for motions
+-- make u work like i for motions
 vim.keymap.set("x", "u", "<Nop>", { silent = true })
 vim.keymap.set("o", "u", "<Nop>", { silent = true })
 
@@ -31,19 +25,14 @@ for _, o in ipairs(objs) do
 	vim.keymap.set({ "x", "o" }, "u" .. o, "i" .. o, { noremap = true, silent = true })
 end
 
-keymap("n", "m", "<Plug>(ColemakNext)", opts) -- next search result
-keymap("n", "M", "N", opts) -- previous search result
+keymap("n", "t", "i", opts) -- insert mode
+keymap("n", "T", "I", opts) -- insert at beginning of line
 
-keymap("n", "u", "<Plug>(ColemakInsert)", opts) -- insert mode
-keymap("n", "U", "I", opts) -- insert at beginning of line
+keymap({ "n", "x", "o", "v" }, "k", "e", opts) -- end of word
+keymap({ "n", "x", "o", "v" }, "K", "E", opts) -- end of WORD
 
-keymap({ "n", "x", "o" }, "k", "<Plug>(ColemakEnd)", opts) -- end of word
-keymap({ "n", "x", "o" }, "K", "E", opts) -- end of WORD
-
-keymap("n", "l", "<Plug>(ColemakOpen)", opts) -- open line below
-keymap("n", "L", "O", opts) -- open line above
-
-keymap("n", "h", "n", opts) -- h becomes next search
+keymap("n", "u", "o", opts) -- open line below
+keymap("n", "U", "O", opts) -- open line above
 
 -- undo/redo (normal)
 keymap("n", "j", "u", opts)
@@ -52,7 +41,7 @@ keymap("n", "J", "<C-r>", opts)
 -- join with line above
 keymap("n", "Y", "mzJ`z", opts)
 -- move with middle
-keymap("n", "<C-l>", "<C-d>zz", opts)
+keymap("n", "<C-d>", "<C-d>zz", opts)
 keymap("n", "<C-u>", "<C-u>zz", opts)
 
 keymap("n", "m", "nzzzv", opts)
@@ -72,20 +61,7 @@ keymap("i", "<A-e>", "<Down>", opts)
 keymap("i", "<A-n>", "<Left>", opts)
 keymap("i", "<A-o>", "<Right>", opts)
 
--- move around splits (normal)
--- keymap("n", "<S-n>", function()
--- 	require("smart-splits").move_cursor_left()
--- end, { desc = "Move to left split" })
--- keymap("n", "<S-e>", function()
--- 	require("smart-splits").move_cursor_down()
--- end, { desc = "Move to split below" })
--- keymap("n", "<S-i>", function()
--- 	require("smart-splits").move_cursor_up()
--- end, { desc = "Move to split above" })
--- keymap("n", "<S-o>", function()
--- 	require("smart-splits").move_cursor_right()
--- end, { desc = "Move to right split" })
-
+-- win resize commands
 keymap("n", "<C-A-S-n>", ":vertical resize -2<CR>", { desc = "Resize split left" })
 keymap("n", "<C-A-S-e>", ":resize +2<CR>", { desc = "Resize split down" })
 keymap("n", "<C-A-S-i>", ":resize -2<CR>", { desc = "Resize split up" })

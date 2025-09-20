@@ -63,6 +63,15 @@ local function disable_copilot_when_ready(opts)
 	tick()
 end
 
+local function has_real_buffers()
+	for _, b in ipairs(vim.api.nvim_list_bufs()) do
+		if vim.bo[b].buflisted and vim.api.nvim_buf_get_name(b) ~= "" then
+			return true
+		end
+	end
+	return false
+end
+
 vim.api.nvim_create_user_command("Uni", function(opts)
 	local parts = vim.split(opts.args or "", " ", { trimempty = true })
 	local key = parts[1]
@@ -71,7 +80,6 @@ vim.api.nvim_create_user_command("Uni", function(opts)
 		flags[parts[i]] = true
 	end
 	local open_in_finder = flags.open or false
-	local use_global_cwd = flags.global or false
 
 	local sub = uni_dirs[key]
 	if sub == nil then
@@ -80,25 +88,18 @@ vim.api.nvim_create_user_command("Uni", function(opts)
 	end
 
 	local target = unescape_spaces(vim.fn.expand(base_dir .. (sub or "")))
+	target = vim.fn.fnamemodify(target, ":p") -- absolute path
 
-	local cd_cmd = use_global_cwd and "cd " or "tcd "
-	vim.cmd(cd_cmd .. vim.fn.fnameescape(target))
+	pcall(vim.cmd, "silent! AutoSession save")
 
-	if _G.LOCKED_CWD then
-		_G.LOCKED_CWD = vim.fn.getcwd()
-	end
+	pcall(vim.api.nvim_set_current_dir, target)
+	pcall(vim.loop.chdir, vim.fn.getcwd())
+	vim.cmd("cd " .. vim.fn.fnameescape(target))
 
-	local ok, oil = pcall(require, "oil")
-	if ok then
-		oil.open(target)
-	else
-		vim.notify("oil.nvim not found", vim.log.levels.ERROR)
-	end
-
+	pcall(vim.cmd, "silent! AutoSession restore")
 	if target:find("Computing and Numerical Methods 2", 1, true) then
 		disable_copilot_when_ready({ max_try = 60, delay = 100 })
 	end
-
 	if open_in_finder then
 		vim.fn.jobstart({ "open", target }, { detach = true })
 	end
@@ -107,7 +108,6 @@ end, {
 	complete = function(_, _)
 		local keys = vim.tbl_keys(uni_dirs)
 		table.insert(keys, "open")
-		table.insert(keys, "global")
 		return keys
 	end,
 })

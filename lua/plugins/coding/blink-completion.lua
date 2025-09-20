@@ -194,8 +194,6 @@ return {
 								end
 								return vim.tbl_keys(bufs)
 							end,
-							max_indexed_line_length = 200,
-							indexing_interval = 100,
 						},
 					},
 				},
