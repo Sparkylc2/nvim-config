@@ -51,7 +51,6 @@ keymap("n", "J", "<C-r>", opts)
 
 -- join with line above
 keymap("n", "Y", "mzJ`z", opts)
-
 -- move with middle
 keymap("n", "<C-l>", "<C-d>zz", opts)
 keymap("n", "<C-u>", "<C-u>zz", opts)

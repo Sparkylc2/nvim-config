@@ -1,5 +1,4 @@
 return {
-
 	{
 		"benomahony/oil-git.nvim",
 		dependencies = { "stevearc/oil.nvim" },
@@ -17,51 +16,25 @@ return {
 				"<leader>e",
 				function()
 					local oil = require("oil")
-					--
-					-- local function statefile_for_session()
-					-- 	local cwd = vim.fn.getcwd()
-					-- 	local branch = (function()
-					-- 		local gitdir = vim.fs.find(".git", { upward = true, path = cwd, type = "directory" })[1]
-					-- 		if not gitdir then
-					-- 			return ""
-					-- 		end
-					-- 		local out = vim.fn.systemlist({ "git", "-C", cwd, "rev-parse", "--abbrev-ref", "HEAD" })
-					-- 		local b = (out and out[1]) or ""
-					-- 		return (b ~= "HEAD" and b ~= "") and b or ""
-					-- 	end)()
-					-- 	local key = cwd .. (branch ~= "" and ("|" .. branch) or "")
-					--
-					-- 	local slug = key:gsub("[^%w_.-]", "_")
-					-- 	local dir = vim.fn.stdpath("state") .. "/oil"
-					-- 	vim.fn.mkdir(dir, "p")
-					-- 	return dir .. "/last_dir-" .. slug .. ".json"
-					-- end
-					--
-					-- local statefile = statefile_for_session()
-					--
-					-- local function load_last_dir()
-					-- 	local f = io.open(statefile, "r")
-					-- 	if not f then
-					-- 		return nil
-					-- 	end
-					-- 	local ok, data = pcall(vim.json.decode, f:read("*a"))
-					-- 	f:close()
-					-- 	return (ok and data and data.path ~= "" and data.path) or nil
-					-- end
-					--
-					-- local cur = vim.api.nvim_buf_get_name(0)
-					-- if cur ~= "" and vim.bo.buftype == "" then
-					-- 	local dir = vim.fn.fnamemodify(cur, ":p:h")
-					-- 	local file = vim.fn.fnamemodify(cur, ":t")
-					-- 	oil.open(dir)
-					-- 	return
-					-- end
-					--
-					-- local target = load_last_dir() or vim.fn.getcwd()
-					-- oil.open(target)
-					oil.open()
+					-- Open oil in current file's directory or cwd
+					local current_file = vim.api.nvim_buf_get_name(0)
+					if current_file ~= "" and vim.bo.buftype == "" then
+						-- If we're in a real file, open its directory
+						oil.open(vim.fn.fnamemodify(current_file, ":h"))
+					else
+						-- Otherwise just open oil in cwd
+						oil.open()
+					end
 				end,
-				desc = "Oil: open current file's dir (highlight file) or last session dir",
+				desc = "Open Oil file explorer",
+			},
+			{
+				"<leader>E",
+				function()
+					-- Open oil in project root (cwd)
+					require("oil").open(vim.fn.getcwd())
+				end,
+				desc = "Open Oil at project root",
 			},
 		},
 
@@ -69,88 +42,89 @@ return {
 			default_file_explorer = false,
 			skip_confirm_for_simple_edits = true,
 			view_options = { show_hidden = true },
+
+			-- THIS IS IMPORTANT: Don't let oil change cwd
+			-- Oil should never mess with your working directory
+			buf_options = {
+				buflisted = false,
+				bufhidden = "hide",
+			},
+
 			keymaps = {
 				["<leader>e"] = "actions.close",
 				["s"] = "actions.select",
 				["<leader>rr"] = "actions.refresh",
 				["<leader>p"] = "actions.preview",
 				[";"] = "actions.parent",
+				["<C-s>"] = false, -- Disable any cwd changing keymaps
+				["<C-h>"] = false,
+				["-"] = false,
 			},
+
+			-- Don't change directory when entering oil buffers
+			prompt_save_on_select_new_entry = false,
+
+			-- Keep focus on the current window
+			restore_win_options = true,
 		},
 
 		config = function(_, opts)
 			require("oil").setup(opts)
+
+			-- CRITICAL: Disable autochdir completely
 			vim.opt.autochdir = false
 
-			-- vim.defer_fn(function()
-			-- 	_G.LOCKED_CWD = vim.fn.getcwd()
-			--
-			-- 	vim.api.nvim_create_autocmd("DirChanged", {
-			-- 		group = vim.api.nvim_create_augroup("OilLockCwd", { clear = true }),
-			-- 		callback = function()
-			-- 			if _G.LOCKED_CWD and vim.fn.getcwd() ~= _G.LOCKED_CWD then
-			-- 				vim.schedule(function()
-			-- 					vim.api.nvim_set_current_dir(_G.LOCKED_CWD)
-			-- 				end)
-			-- 			end
-			-- 		end,
-			-- 	})
-			--
-			-- 	vim.api.nvim_create_autocmd({ "BufEnter", "BufLeave" }, {
-			-- 		group = vim.api.nvim_create_augroup("OilBufferCwd", { clear = true }),
-			-- 		pattern = "oil://*",
-			-- 		callback = function()
-			-- 			if _G.LOCKED_CWD and vim.fn.getcwd() ~= _G.LOCKED_CWD then
-			-- 				vim.api.nvim_set_current_dir(_G.LOCKED_CWD)
-			-- 			end
-			-- 		end,
-			-- 	})
-			-- end, 100)
-
-			local function statefile_for_session()
-				local cwd = vim.fn.getcwd()
-				local branch = (function()
-					local gitdir = vim.fs.find(".git", { upward = true, path = cwd, type = "directory" })[1]
-					if not gitdir then
-						return ""
-					end
-					local out = vim.fn.systemlist({ "git", "-C", cwd, "rev-parse", "--abbrev-ref", "HEAD" })
-					local b = (out and out[1]) or ""
-					return (b ~= "HEAD" and b ~= "") and b or ""
-				end)()
-				local key = cwd .. (branch ~= "" and ("|" .. branch) or "")
-				local slug = key:gsub("[^%w_.-]", "_")
-				local dir = vim.fn.stdpath("state") .. "/oil"
-				vim.fn.mkdir(dir, "p")
-				return dir .. "/last_dir-" .. slug .. ".json"
+			-- Lock the CWD to what we started with
+			if not _G.LOCKED_CWD then
+				_G.LOCKED_CWD = vim.fn.getcwd()
 			end
 
-			local function save_last_dir()
-				local ok, oil = pcall(require, "oil")
-				if not ok then
-					return
-				end
-				local dir = oil.get_current_dir()
-				if not dir or dir == "" then
-					return
-				end
-				local f = io.open(statefile_for_session(), "w")
-				if f then
-					f:write(vim.json.encode({ path = dir }))
-					f:close()
-				end
-			end
+			-- Prevent any directory changes when using Oil
+			local oil_group = vim.api.nvim_create_augroup("OilNoCwdChange", { clear = true })
 
-			vim.api.nvim_create_autocmd("BufLeave", {
+			-- When entering Oil, save current cwd
+			vim.api.nvim_create_autocmd("BufEnter", {
+				group = oil_group,
+				pattern = "oil://*",
 				callback = function()
-					if vim.bo.filetype == "oil" then
-						pcall(save_last_dir)
+					-- Remember where we are
+					if not _G.OIL_SAVED_CWD then
+						_G.OIL_SAVED_CWD = vim.fn.getcwd()
 					end
 				end,
 			})
-			vim.api.nvim_create_autocmd("VimLeavePre", {
+
+			-- When leaving Oil, restore cwd if it changed
+			vim.api.nvim_create_autocmd("BufLeave", {
+				group = oil_group,
+				pattern = "oil://*",
 				callback = function()
-					pcall(save_last_dir)
+					-- Skip if we're in the middle of session operations
+					if vim.g.oil_disable_autocmds then
+						return
+					end
+					vim.defer_fn(function()
+						if _G.OIL_SAVED_CWD and vim.fn.getcwd() ~= _G.OIL_SAVED_CWD then
+							vim.cmd("cd " .. vim.fn.fnameescape(_G.OIL_SAVED_CWD))
+						end
+						_G.OIL_SAVED_CWD = nil
+					end, 10)
+				end,
+			})
+
+			-- Catch any DirChanged events and revert them if they're from Oil
+			vim.api.nvim_create_autocmd("DirChanged", {
+				group = oil_group,
+				callback = function(args)
+					-- If we're in an oil buffer and the dir changed, revert it
+					local bufname = vim.api.nvim_buf_get_name(0)
+					if bufname:match("^oil://") and _G.LOCKED_CWD then
+						if vim.fn.getcwd() ~= _G.LOCKED_CWD then
+							vim.schedule(function()
+								vim.cmd("cd " .. vim.fn.fnameescape(_G.LOCKED_CWD))
+							end)
+						end
+					end
 				end,
 			})
 		end,
