@@ -53,7 +53,6 @@ return {
 			end, { desc = "Harpoon: next" })
 
 			vim.keymap.set("n", "<leader>hx", function()
-				local harpoon = require("harpoon")
 				harpoon:list():remove()
 			end, { desc = "Harpoon: remove current buffer from list" })
 		end,

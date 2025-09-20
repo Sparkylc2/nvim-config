@@ -54,11 +54,11 @@ return {
 						lookahead = true,
 						keymaps = {
 							["aa"] = "@parameter.outer",
-							["ia"] = "@parameter.inner",
+							["la"] = "@parameter.inner",
 							["af"] = "@function.outer",
-							["if"] = "@function.inner",
+							["lf"] = "@function.inner",
 							["ac"] = "@class.outer",
-							["ic"] = "@class.inner",
+							["lc"] = "@class.inner",
 						},
 					},
 					move = {

@@ -61,11 +61,9 @@ return {
 
 			fuzzy = {
 				implementation = "prefer_rust_with_warning",
-				-- Prefer exact and prefix matches over fuzzy matches
 				prebuilt_binaries = {
 					download = true,
 				},
-				-- CRITICAL: Add 'exact' first to always prioritize exact matches
 				sorts = { "exact", "score", "sort_text" },
 			},
 
@@ -74,20 +72,14 @@ return {
 				["<CR>"] = { "fallback" },
 				["<S-CR>"] = { "accept" },
 				["<C-space>"] = { "show", "show_documentation", "hide_documentation" },
-				["<C-e>"] = { "hide" },
-
+				["<C-h>"] = { "hide" },
 				["<C-b>"] = { "scroll_documentation_up", "fallback" },
 				["<C-f>"] = { "scroll_documentation_down", "fallback" },
-
 				["<C-y>"] = { "select_and_accept" },
-
-				["<A-S-n>"] = { "select_prev", "fallback" },
-
-				["<A-N>"] = { "select_prev", "fallback" },
-				["<A-n>"] = { "select_next", "fallback" },
-
-				["<C-p>"] = { "select_prev", "fallback" },
-				["<C-n>"] = { "select_next", "fallback" },
+				["<A-l>"] = { "select_prev", "fallback" },
+				["<A-H>"] = { "select_prev", "fallback" },
+				["<A-h>"] = { "select_next", "fallback" },
+				["<A-u>"] = { "select_next", "fallback" },
 				["<Tab>"] = { "snippet_forward", "fallback" },
 				["<S-Tab>"] = { "snippet_backward", "fallback" },
 			},
@@ -163,7 +155,7 @@ return {
 					snippets = {
 						name = "Snippets",
 						module = "blink.cmp.sources.snippets",
-						score_offset = 90, -- Increased for exact snippet matches
+						score_offset = 20, -- Increased for exact snippet matches
 						opts = {
 							friendly_snippets = true,
 							search_paths = { vim.fn.stdpath("config") .. "/snippets" },
@@ -175,12 +167,12 @@ return {
 					lsp = {
 						name = "LSP",
 						module = "blink.cmp.sources.lsp",
-						score_offset = 100, -- Highest for LSP (built-ins, imports, etc)
+						score_offset = 19, -- Highest for LSP (built-ins, imports, etc)
 					},
 					path = {
 						name = "Path",
 						module = "blink.cmp.sources.path",
-						score_offset = 30, -- Lower priority for paths
+						-- score_offset = 30, -- Lower priority for paths
 						opts = {
 							trailing_slash = false,
 							label_trailing_slash = true,
@@ -193,7 +185,7 @@ return {
 					buffer = {
 						name = "Buffer",
 						module = "blink.cmp.sources.buffer",
-						score_offset = 75, -- Reduced to let exact snippet matches win
+						score_offset = 20, -- Reduced to let exact snippet matches win
 						opts = {
 							get_bufnrs = function()
 								local bufs = {}

@@ -38,7 +38,7 @@ return {
 		end
 
 		-- Keymaps: save/load/delete session for THIS cwd under the cwd-based name
-		vim.keymap.set("n", "<leader>ss", function()
+		vim.keymap.set("n", "<leader>sr", function()
 			save_current({ notify = true })
 		end, { desc = "Resession: Save (cwd-named)" })
 		vim.keymap.set("n", "<leader>sl", function()

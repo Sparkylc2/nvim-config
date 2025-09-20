@@ -21,10 +21,10 @@ return {
 				title = "Copilot Chat",
 			},
 			mappings = {
-				K = false,
-				U = false,
-				H = false,
-				L = false,
+				N = false,
+				E = false,
+				I = false,
+				O = false,
 			},
 		},
 

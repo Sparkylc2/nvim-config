@@ -4,28 +4,56 @@ return {
 		lazy = false,
 		keys = {
 			{
-				"<S-k>",
+				"<S-n>",
 				function()
 					require("smart-splits").move_cursor_left()
 				end,
 				desc = "Move to left split",
 			},
 			{
-				"<S-u>",
+				"<S-e>",
 				function()
 					require("smart-splits").move_cursor_down()
 				end,
 				desc = "Move to split below",
 			},
 			{
-				"<S-l>",
+				"<S-i>",
 				function()
 					require("smart-splits").move_cursor_up()
 				end,
 				desc = "Move to split above",
 			},
 			{
-				"<S-h>",
+				"<S-o>",
+				function()
+					require("smart-splits").move_cursor_right()
+				end,
+				desc = "Move to right split",
+			},
+			{
+				"<C-h>",
+				function()
+					require("smart-splits").move_cursor_left()
+				end,
+				desc = "Move to left split",
+			},
+			{
+				"<C-j>",
+				function()
+					require("smart-splits").move_cursor_down()
+				end,
+				desc = "Move to split below",
+			},
+			{
+				"<C-k>",
+				function()
+					require("smart-splits").move_cursor_up()
+				end,
+				desc = "Move to split above",
+			},
+			{
+				"<C-l>",
 				function()
 					require("smart-splits").move_cursor_right()
 				end,
@@ -42,7 +70,7 @@ return {
 			multiplexer_integration = "zellij",
 			resize_mode = {
 				quit_key = "<ESC>",
-				resize_keys = { "k", "u", "l", "h" },
+				resize_keys = { "n", "e", "i", "o" },
 				silent = false,
 			},
 		},

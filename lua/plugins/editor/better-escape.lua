@@ -1,7 +1,6 @@
 return {
 	{
 		"max397574/better-escape.nvim",
-
 		config = function()
 			require("better_escape").setup({
 				timeout = 50,
@@ -29,25 +28,6 @@ return {
 							i = "<Esc>",
 						},
 						i = {
-							e = "<Esc>",
-						},
-					},
-
-					v = {
-						e = {
-							i = "<Esc>",
-						},
-						i = {
-							e = "<Esc>",
-						},
-					},
-
-					s = {
-						e = {
-							i = "<Esc>",
-						},
-						i = {
-
 							e = "<Esc>",
 						},
 					},

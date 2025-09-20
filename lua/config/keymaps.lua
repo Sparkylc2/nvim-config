@@ -5,6 +5,46 @@ vim.g.maplocalleader = " "
 local keymap = vim.keymap.set
 local opts = { noremap = true, silent = true }
 
+keymap("n", "<Plug>(ColemakNext)", "n", opts)
+keymap("n", "<Plug>(ColemakEnd)", "e", opts)
+keymap("n", "<Plug>(ColemakInsert)", "i", opts)
+
+keymap("n", "<Plug>(ColemakOpen)", "o", opts)
+
+keymap({ "n", "x", "v" }, "n", "h", opts) -- left
+keymap({ "n", "x", "v" }, "e", "j", opts) -- down
+keymap({ "n", "x", "v" }, "i", "k", opts) -- up
+keymap({ "n", "x", "v" }, "o", "l", opts) -- right
+
+keymap("v", "m", "n", { noremap = true, silent = true }) -- next search in visual
+keymap("v", "M", "N", { noremap = true, silent = true }) -- prev search in visual
+keymap("v", "k", "e", { noremap = true, silent = true }) -- end of word in visual
+keymap("v", "K", "E", { noremap = true, silent = true }) -- end of WORD in visual
+keymap("v", "h", "n", { noremap = true, silent = true }) -- for consistency
+
+-- make l work like i for motions
+vim.keymap.set("x", "u", "<Nop>", { silent = true })
+vim.keymap.set("o", "u", "<Nop>", { silent = true })
+
+local objs = { "w", "W", "s", "p", "b", "B", '"', "'", "`", ")", "]", "}", ">", "(", "[", "{", "<", "t" }
+for _, o in ipairs(objs) do
+	vim.keymap.set({ "x", "o" }, "u" .. o, "i" .. o, { noremap = true, silent = true })
+end
+
+keymap("n", "m", "<Plug>(ColemakNext)", opts) -- next search result
+keymap("n", "M", "N", opts) -- previous search result
+
+keymap("n", "u", "<Plug>(ColemakInsert)", opts) -- insert mode
+keymap("n", "U", "I", opts) -- insert at beginning of line
+
+keymap({ "n", "x", "o" }, "k", "<Plug>(ColemakEnd)", opts) -- end of word
+keymap({ "n", "x", "o" }, "K", "E", opts) -- end of WORD
+
+keymap("n", "l", "<Plug>(ColemakOpen)", opts) -- open line below
+keymap("n", "L", "O", opts) -- open line above
+
+keymap("n", "h", "n", opts) -- h becomes next search
+
 -- undo/redo (normal)
 keymap("n", "j", "u", opts)
 keymap("n", "J", "<C-r>", opts)
@@ -16,52 +56,47 @@ keymap("n", "Y", "mzJ`z", opts)
 keymap("n", "<C-l>", "<C-d>zz", opts)
 keymap("n", "<C-u>", "<C-u>zz", opts)
 
--- keep in the middle of screen
-keymap("n", "n", "nzzzv", opts)
-keymap("n", "N", "Nzzzv", opts)
+keymap("n", "m", "nzzzv", opts)
+keymap("n", "M", "Nzzzv", opts)
 
 -- useless
 keymap("n", "Q", "<nop>")
 -- quick chmod +x
 keymap("n", "<leader> ch", "<cmd>!chmod +x %<CR>", { silent = true })
 
--- move around with ctrl (insert) (start of line, end of line, up down)
-keymap("i", "<C-k>", "<C-o>^", opts)
-keymap("i", "<C-u>", "<Down>", opts)
-keymap("i", "<C-h>", "<C-o>$", opts)
-keymap("i", "<C-l>", "<Up>", opts)
+keymap("i", "<C-n>", "<C-o>^", opts)
+keymap("i", "<C-o>", "<C-o>$", opts)
 keymap("i", "<D-BS>", "<C-u>", opts)
 
--- move around with alt (insert)
-keymap("i", "<A-l>", "<Up>", opts)
-keymap("i", "<A-u>", "<Down>", opts)
-keymap("i", "<A-k>", "<Left>", opts)
-keymap("i", "<A-h>", "<Right>", opts)
+keymap("i", "<A-i>", "<Up>", opts)
+keymap("i", "<A-e>", "<Down>", opts)
+keymap("i", "<A-n>", "<Left>", opts)
+keymap("i", "<A-o>", "<Right>", opts)
 
 -- move around splits (normal)
-keymap("n", "<S-k>", function()
-	require("smart-splits").move_cursor_left()
-end, { desc = "Move to left split" })
-keymap("n", "<S-u>", function()
-	require("smart-splits").move_cursor_down()
-end, { desc = "Move to split below" })
-keymap("n", "<S-l>", function()
-	require("smart-splits").move_cursor_up()
-end, { desc = "Move to split above" })
-keymap("n", "<S-h>", function()
-	require("smart-splits").move_cursor_right()
-end, { desc = "Move to right split" })
+-- keymap("n", "<S-n>", function()
+-- 	require("smart-splits").move_cursor_left()
+-- end, { desc = "Move to left split" })
+-- keymap("n", "<S-e>", function()
+-- 	require("smart-splits").move_cursor_down()
+-- end, { desc = "Move to split below" })
+-- keymap("n", "<S-i>", function()
+-- 	require("smart-splits").move_cursor_up()
+-- end, { desc = "Move to split above" })
+-- keymap("n", "<S-o>", function()
+-- 	require("smart-splits").move_cursor_right()
+-- end, { desc = "Move to right split" })
 
-keymap("n", "<C-A-S-k>", ":vertical resize -2<CR>", { desc = "Resize split left" })
-keymap("n", "<C-A-S-u>", ":resize +2<CR>", { desc = "Resize split down" })
-keymap("n", "<C-A-S-l>", ":resize -2<CR>", { desc = "Resize split up" })
-keymap("n", "<C-A-S-h>", ":vertical resize +2<CR>", { desc = "Resize split right" })
+keymap("n", "<C-A-S-n>", ":vertical resize -2<CR>", { desc = "Resize split left" })
+keymap("n", "<C-A-S-e>", ":resize +2<CR>", { desc = "Resize split down" })
+keymap("n", "<C-A-S-i>", ":resize -2<CR>", { desc = "Resize split up" })
+keymap("n", "<C-A-S-o>", ":vertical resize +2<CR>", { desc = "Resize split right" })
 
 -- move splits (normal)
-keymap("n", "<A-K>", "<C-w>H", { desc = "Move window left" })
-keymap("n", "<A-U>", "<C-w>J", { desc = "Move window down" })
-keymap("n", "<A-L>", "<C-w>K", { desc = "Move window up" })
-keymap("n", "<A-H>", "<C-w>L", { desc = "Move window right" })
+keymap("n", "<A-N>", "<C-w>H", { desc = "Move window left" })
+keymap("n", "<A-E>", "<C-w>J", { desc = "Move window down" })
+keymap("n", "<A-I>", "<C-w>K", { desc = "Move window up" })
+keymap("n", "<A-O>", "<C-w>L", { desc = "Move window right" })
 
 -- go to previous window (normal)
 keymap("n", "<C-\\>", "<C-w>p", { desc = "Go to previous window" })
@@ -73,17 +108,17 @@ keymap("n", "<leader>se", "<C-w>=", { desc = "Equalize" })
 keymap("n", "<leader>sx", "<cmd>close<CR>", { desc = "Close window" })
 
 -- tab management (normal)
-keymap("n", "<A-h>", ":bnext<CR>", { desc = "Next buffer", silent = true })
-keymap("n", "<A-k>", ":bprevious<CR>", { desc = "Previous buffer", silent = true })
 keymap("n", "<A-w>", "<Cmd>bdelete<CR>", { silent = true })
 
 -- move line (normal + visual)
-keymap("n", "<A-l>", ":m .-1<CR>==", { desc = "Move line up" })
-keymap("n", "<A-u>", ":m .+1<CR>==", { desc = "Move line down" })
-keymap("v", "<A-l>", ":m '<-2<CR>gv=gv", { desc = "Move selection up" })
-keymap("v", "<A-u>", ":m '>+1<CR>gv=gv", { desc = "Move selection down" })
+keymap("n", "<A-i>", ":m .-2<CR>==", { desc = "Move line up" })
+keymap("n", "<A-e>", ":m .+1<CR>==", { desc = "Move line down" })
+keymap("v", "<A-i>", ":m '<-2<CR>gv=gv", { desc = "Move selection up" })
+keymap("v", "<A-e>", ":m '>+1<CR>gv=gv", { desc = "Move selection down" })
 
 -- indent left right (visual)
+keymap("n", "<A-o>", ">>", { desc = "Indent right" })
+keymap("n", "<A-n>", "<<", { desc = "Indent left" })
 keymap("v", "<", "<gv", { desc = "Indent left" })
 keymap("v", ">", ">gv", { desc = "Indent right" })
 

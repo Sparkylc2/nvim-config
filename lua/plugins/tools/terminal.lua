@@ -73,10 +73,10 @@ return {
 
 			function _G.set_terminal_keymaps()
 				local opts = { buffer = 0 }
-				vim.keymap.set("t", "<A-k>", "\x1b[D", opts) -- left
-				vim.keymap.set("t", "<A-h>", "\x1b[C", opts) -- right
-				vim.keymap.set("t", "<A-l>", "\x1b[A", opts) -- up
-				vim.keymap.set("t", "<A-u>", "\x1b[B", opts) -- down
+				vim.keymap.set("t", "<A-n>", "\x1b[D", opts) -- left
+				vim.keymap.set("t", "<A-o>", "\x1b[C", opts) -- right
+				vim.keymap.set("t", "<A-i>", "\x1b[A", opts) -- up
+				vim.keymap.set("t", "<A-e>", "\x1b[B", opts) -- down
 			end
 
 			vim.cmd("autocmd! TermOpen term://* lua _G.set_terminal_keymaps()")

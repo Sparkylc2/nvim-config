@@ -114,10 +114,10 @@ vim.api.nvim_create_autocmd("TermOpen", {
 		vim.keymap.set("t", "<esc>", [[<C-\><C-n>]], opts)
 		vim.keymap.set("t", "<C-e>", [[<C-\><C-n>]], opts)
 		vim.keymap.set("t", "jk", [[<C-\><C-n>]], opts)
-		vim.keymap.set("t", "<A-k>", "\x1b[D", opts) -- left
-		vim.keymap.set("t", "<A-h>", "\x1b[C", opts) -- right
-		vim.keymap.set("t", "<A-l>", "\x1b[A", opts) -- up
-		vim.keymap.set("t", "<A-u>", "\x1b[B", opts) -- down
+		vim.keymap.set("t", "<A-n>", "\x1b[D", opts) -- left
+		vim.keymap.set("t", "<A-o>", "\x1b[C", opts) -- right
+		vim.keymap.set("t", "<A-i>", "\x1b[A", opts) -- up
+		vim.keymap.set("t", "<A-e>", "\x1b[B", opts) -- down
 	end,
 })
 

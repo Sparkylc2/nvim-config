@@ -1,3 +1,4 @@
+_G.NVIM_STARTUP_CWD = vim.fn.getcwd()
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 
 if not vim.loop.fs_stat(lazypath) then
