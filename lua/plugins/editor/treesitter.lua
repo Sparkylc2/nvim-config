@@ -146,12 +146,12 @@ return {
 						swap_next = {
 							["<leader>sa"] = "@parameter.inner",
 							["<leader>sf"] = "@function.outer",
-							["<leader>ss"] = "@statement.outer",
+							["<leader>sL"] = "@statement.outer",
 						},
 						swap_previous = {
 							["<leader>sA"] = "@parameter.inner",
 							["<leader>sF"] = "@function.outer",
-							["<leader>sS"] = "@statement.outer",
+							["<leader>sL"] = "@statement.outer",
 						},
 					},
 					lsp_interop = {

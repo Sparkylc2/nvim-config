@@ -5,45 +5,46 @@ vim.g.maplocalleader = " "
 local keymap = vim.keymap.set
 local opts = { noremap = true, silent = true }
 
-keymap({ "n", "x" }, "n", "h", opts) -- left
-keymap({ "n", "x" }, "e", "j", opts) -- down
-keymap({ "n", "x" }, "i", "k", opts) -- up
-keymap({ "n", "x" }, "o", "l", opts) -- right
-
-keymap("x", "m", "n", { noremap = true, silent = true }) -- next search in visual
-keymap("x", "M", "N", { noremap = true, silent = true }) -- prev search in visual
-keymap("v", "k", "e", { noremap = true, silent = true }) -- end of word in visual
-keymap("v", "K", "E", { noremap = true, silent = true }) -- end of WORD in visual
-keymap("v", "h", "n", { noremap = true, silent = true }) -- for consistency
-
+-- keymap({ "n", "x" }, "n", "h", opts) -- left
+-- keymap({ "n", "x" }, "e", "j", opts) -- down
+-- keymap({ "n", "x" }, "i", "k", opts) -- up
+-- keymap({ "n", "x" }, "o", "l", opts) -- right
+--
+-- keymap("x", "m", "n", { noremap = true, silent = true }) -- next search in visual
+-- keymap("x", "M", "N", { noremap = true, silent = true }) -- prev search in visual
+-- keymap("v", "k", "e", { noremap = true, silent = true }) -- end of word in visual
+-- keymap("v", "K", "E", { noremap = true, silent = true }) -- end of WORD in visual
+-- keymap("v", "h", "n", { noremap = true, silent = true }) -- for consistency
+--
 -- make u work like i for motions
-keymap("x", "u", "<Nop>", { silent = true })
-keymap("o", "u", "<Nop>", { silent = true })
+-- keymap("x", "u", "<Nop>", { silent = true })
+-- keymap("o", "u", "<Nop>", { silent = true })
+--
+-- local objs = { "w", "W", "s", "p", "b", "B", '"', "'", "`", ")", "]", "}", ">", "(", "[", "{", "<", "t" }
+-- for _, o in ipairs(objs) do
+-- 	vim.keymap.set({ "x", "o" }, "u" .. o, "i" .. o, { noremap = true, silent = true })
+-- end
 
-local objs = { "w", "W", "s", "p", "b", "B", '"', "'", "`", ")", "]", "}", ">", "(", "[", "{", "<", "t" }
-for _, o in ipairs(objs) do
-	vim.keymap.set({ "x", "o" }, "u" .. o, "i" .. o, { noremap = true, silent = true })
-end
-
-keymap("o", "k", "e", opts) -- end of word (was e)
-keymap("o", "K", "E", opts) -- end of WORD (was E)
-
-keymap("n", "t", "i", opts) -- insert mode
-keymap("n", "T", "I", opts) -- insert at beginning of line
-
-keymap({ "n", "x", "o", "v" }, "k", "e", opts) -- end of word
-keymap({ "n", "x", "o", "v" }, "K", "E", opts) -- end of WORD
-
-keymap("n", "u", "o", opts) -- open line below
-keymap("n", "U", "O", opts) -- open line above
+-- keymap("o", "k", "e", opts) -- end of word (was e)
+-- keymap("o", "K", "E", opts) -- end of WORD (was E)
+--
+-- keymap("n", "t", "i", opts) -- insert mode
+-- keymap("n", "T", "I", opts) -- insert at beginning of line
+--
+-- keymap({ "n", "x", "o", "v" }, "k", "e", opts) -- end of word
+-- keymap({ "n", "x", "o", "v" }, "K", "E", opts) -- end of WORD
+--
+-- keymap("n", "u", "o", opts) -- open line below
+-- keymap("n", "U", "O", opts) -- open line above
 
 -- undo/redo (normal)
-keymap({ "n", "x", "v" }, "j", "u", opts)
-keymap({ "n", "x", "v" }, "J", "<C-r>", opts)
-
+-- keymap({ "n", "x", "v" }, "j", "u", opts)
+-- keymap({ "n", "x", "v" }, "J", "<C-r>", opts)
 -- join with line above
-keymap({ "n", "x", "v" }, "H", "mzJ`z", opts)
+--
+-- keymap({ "n", "x", "v" }, "H", "mzJ`z", opts)
 
+keymap({ "n", "x", "v" }, "J", "mzJ`z", opts)
 -- copy until end of line
 keymap({ "n", "x", "v" }, "Y", "y$", opts)
 

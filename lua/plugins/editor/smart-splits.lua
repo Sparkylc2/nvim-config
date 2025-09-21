@@ -4,28 +4,28 @@ return {
 		lazy = false,
 		keys = {
 			{
-				"<S-n>",
+				"<S-h>",
 				function()
 					require("smart-splits").move_cursor_left()
 				end,
 				desc = "Move to left split",
 			},
 			{
-				"<S-e>",
+				"<S-j>",
 				function()
 					require("smart-splits").move_cursor_down()
 				end,
 				desc = "Move to split below",
 			},
 			{
-				"<S-i>",
+				"<S-k>",
 				function()
 					require("smart-splits").move_cursor_up()
 				end,
 				desc = "Move to split above",
 			},
 			{
-				"<S-o>",
+				"<S-l>",
 				function()
 					require("smart-splits").move_cursor_right()
 				end,
