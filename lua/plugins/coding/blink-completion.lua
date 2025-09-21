@@ -1,15 +1,27 @@
 return {
+	{
+		"L3MON4D3/LuaSnip",
+		lazy = true,
+		config = function()
+			require("luasnip.loaders.from_lua").lazy_load({
+				paths = vim.fn.stdpath("config") .. "/lua/snippets",
+			})
+			require("luasnip.loaders.from_snipmate").lazy_load()
+			require("luasnip.loaders.from_vscode").lazy_load()
+		end,
+	},
 
 	{
 		"saghen/blink.cmp",
 		lazy = false,
-		version = "v1.*",
 		dependencies = {
 			"rafamadriz/friendly-snippets",
 			"honza/vim-snippets",
+			"L3MON4D3/LuaSnip",
 		},
 
 		filetype_exclude = { "neo-tree", "harpoon", "copilot-chat", "TelescopePrompt", "lazy", "NvimTree" },
+
 		opts = {
 			enabled = function()
 				local allowed_filetypes = {
@@ -43,27 +55,25 @@ return {
 					"vue",
 					"svelte",
 				}
-
 				if vim.bo.buftype == "prompt" then
 					return false
 				end
-
 				if not vim.tbl_contains(allowed_filetypes, vim.bo.filetype) then
 					return false
 				end
-
 				if vim.b.completion == false then
 					return false
 				end
-
 				return true
 			end,
 
+			snippets = {
+				preset = "luasnip",
+			},
+
 			fuzzy = {
 				implementation = "prefer_rust_with_warning",
-				prebuilt_binaries = {
-					download = true,
-				},
+				prebuilt_binaries = { download = true },
 				sorts = { "exact", "score", "sort_text" },
 			},
 
@@ -71,6 +81,7 @@ return {
 				preset = "enter",
 				["<CR>"] = { "fallback" },
 				["<S-CR>"] = { "accept" },
+				["<S-space>"] = { "accept", "fallback" },
 				["<C-space>"] = { "show", "show_documentation", "hide_documentation" },
 				["<C-h>"] = { "hide" },
 				["<C-b>"] = { "scroll_documentation_up", "fallback" },
@@ -80,7 +91,6 @@ return {
 				["<A-H>"] = { "select_prev", "fallback" },
 				["<A-h>"] = { "select_next", "fallback" },
 				["<A-u>"] = { "select_next", "fallback" },
-				-- ["<Tab>"] = { "snippet_forward",  "fallback" },
 				["<Tab>"] = { "snippet_forward", "accept", "fallback" },
 				["<S-Tab>"] = { "snippet_backward", "fallback" },
 			},
@@ -118,87 +128,45 @@ return {
 			},
 
 			sources = {
-
-				per_filetype = {
-					lua = { "lsp", "buffer", "snippets", "path" },
-					python = { "lsp", "buffer", "snippets", "path" },
-					javascript = { "lsp", "buffer", "snippets", "path" },
-					typescript = { "lsp", "buffer", "snippets", "path" },
-					rust = { "lsp", "buffer", "snippets", "path" },
-					go = { "lsp", "buffer", "snippets", "path" },
-					c = { "lsp", "buffer", "snippets", "path" },
-					cpp = { "lsp", "buffer", "snippets", "path" },
-					java = { "lsp", "buffer", "snippets", "path" },
-					php = { "lsp", "buffer", "snippets", "path" },
-					ruby = { "lsp", "buffer", "snippets", "path" },
-					html = { "lsp", "buffer", "snippets", "path" },
-					css = { "lsp", "buffer", "snippets", "path" },
-					scss = { "lsp", "buffer", "snippets", "path" },
-					json = { "lsp", "buffer", "snippets", "path" },
-					yaml = { "lsp", "buffer", "snippets", "path" },
-					toml = { "lsp", "buffer", "snippets", "path" },
-					sh = { "lsp", "buffer", "snippets", "path" },
-					bash = { "lsp", "buffer", "snippets", "path" },
-					zsh = { "lsp", "buffer", "snippets", "path" },
-					vim = { "lsp", "buffer", "snippets", "path" },
-					markdown = { "lsp", "buffer", "snippets", "path" },
-					tex = { "lsp", "buffer", "snippets", "path" },
-					sql = { "lsp", "buffer", "snippets", "path" },
-					dockerfile = { "lsp", "buffer", "snippets", "path" },
-					javascriptreact = { "lsp", "buffer", "snippets", "path" },
-					typescriptreact = { "lsp", "buffer", "snippets", "path" },
-					vue = { "lsp", "buffer", "snippets", "path" },
-					svelte = { "lsp", "buffer", "snippets", "path" },
-				},
-
-				default = {},
+				default = { "lsp", "path", "snippets", "buffer" },
 				providers = {
 					snippets = {
-						name = "Snippets",
-						module = "blink.cmp.sources.snippets",
-						score_offset = 20, -- Increased for exact snippet matches
-						opts = {
-							friendly_snippets = true,
-							search_paths = { vim.fn.stdpath("config") .. "/snippets" },
-							global_snippets = { "all" },
-							extended_filetypes = {},
-							ignored_filetypes = {},
-						},
+						score_offset = 100, -- High priority for snippets
 					},
 					lsp = {
-						name = "LSP",
-						module = "blink.cmp.sources.lsp",
-						score_offset = 19, -- Highest for LSP (built-ins, imports, etc)
-					},
-					path = {
-						name = "Path",
-						module = "blink.cmp.sources.path",
-						-- score_offset = 30, -- Lower priority for paths
-						opts = {
-							trailing_slash = false,
-							label_trailing_slash = true,
-							get_cwd = function()
-								return vim.fn.getcwd()
-							end,
-							show_hidden_files_by_default = false,
-						},
+						score_offset = 50,
 					},
 					buffer = {
-						name = "Buffer",
-						module = "blink.cmp.sources.buffer",
-						score_offset = 20, -- Reduced to let exact snippet matches win
-						opts = {
-							get_bufnrs = function()
-								local bufs = {}
-								for _, win in ipairs(vim.api.nvim_list_wins()) do
-									bufs[vim.api.nvim_win_get_buf(win)] = true
-								end
-								return vim.tbl_keys(bufs)
-							end,
-						},
+						score_offset = 10, -- Lower priority for buffer matches
+					},
+					path = {
+						score_offset = 20,
 					},
 				},
+				-- Boost snippet scores for exact matches
+				transform_items = function(_, items)
+					local input = vim.v.completed_item and vim.v.completed_item.word or ""
+					if input == "" then
+						-- Get current line and cursor position to extract the current input
+						local line = vim.api.nvim_get_current_line()
+						local col = vim.api.nvim_win_get_cursor(0)[2]
+						-- Extract word before cursor
+						local before_cursor = line:sub(1, col)
+						input = before_cursor:match("%w+$") or ""
+					end
+
+					for _, item in ipairs(items) do
+						-- Boost snippet scores significantly for exact prefix matches
+						if item.source_name == "snippets" then
+							if item.label and input ~= "" and item.label:lower():find("^" .. input:lower()) then
+								item.score_offset = (item.score_offset or 0) + 1000
+							end
+						end
+					end
+					return items
+				end,
 			},
+
 			completion = {
 				accept = { auto_brackets = { enabled = true } },
 				trigger = {
@@ -239,6 +207,7 @@ return {
 		},
 
 		opts_extend = { "sources.default" },
+
 		config = function(_, opts)
 			require("blink.cmp").setup(opts)
 

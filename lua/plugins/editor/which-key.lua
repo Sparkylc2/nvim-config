@@ -30,10 +30,14 @@ return {
 						return false
 					end
 				end
+				if (mapping.mode == "o" or mapping.mode == "x") and (mapping.keys == "i" or mapping.keys == "a") then
+					return false
+				end
 				return true
 			end,
 			plugins = { spelling = true },
 			spec = {
+
 				-- Leader groups
 				{ "<leader>b", group = "buffer" },
 				{ "<leader>c", group = "code" },

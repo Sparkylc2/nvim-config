@@ -14,6 +14,5 @@ return {
 		{ "<Leader>A", "<Cmd>MultipleCursorsAddMatchesV<CR>", mode = { "n", "v" } },
 		{ "<Leader>d", "<Cmd>MultipleCursorsAddJumpNextMatch<CR>", mode = { "n", "v" } },
 		{ "<Leader>D", "<Cmd>MultipleCursorsJumpNextMatch<CR>" },
-		{ "<Leader>l", "<Cmd>MultipleCursorsLock<CR>" },
 	},
 }

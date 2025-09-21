@@ -46,6 +46,11 @@ return {
 
 			telescope.load_extension("fzf")
 			telescope.load_extension("ui-select")
+			telescope.load_extension("yank_history")
+
+			vim.keymap.set("n", "<leader>y", function()
+				require("telescope").extensions.yank_history.yank_history()
+			end, { desc = "Show yank history" })
 		end,
 	},
 }

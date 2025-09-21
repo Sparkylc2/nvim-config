@@ -5,13 +5,13 @@ vim.g.maplocalleader = " "
 local keymap = vim.keymap.set
 local opts = { noremap = true, silent = true }
 
-keymap({ "n", "x", "v" }, "n", "h", opts) -- left
-keymap({ "n", "x", "v" }, "e", "j", opts) -- down
-keymap({ "n", "x", "v" }, "i", "k", opts) -- up
-keymap({ "n", "x", "v" }, "o", "l", opts) -- right
+keymap({ "n", "x" }, "n", "h", opts) -- left
+keymap({ "n", "x" }, "e", "j", opts) -- down
+keymap({ "n", "x" }, "i", "k", opts) -- up
+keymap({ "n", "x" }, "o", "l", opts) -- right
 
-keymap("v", "m", "n", { noremap = true, silent = true }) -- next search in visual
-keymap("v", "M", "N", { noremap = true, silent = true }) -- prev search in visual
+keymap("x", "m", "n", { noremap = true, silent = true }) -- next search in visual
+keymap("x", "M", "N", { noremap = true, silent = true }) -- prev search in visual
 keymap("v", "k", "e", { noremap = true, silent = true }) -- end of word in visual
 keymap("v", "K", "E", { noremap = true, silent = true }) -- end of WORD in visual
 keymap("v", "h", "n", { noremap = true, silent = true }) -- for consistency
@@ -48,8 +48,12 @@ keymap({ "n", "x", "v" }, "H", "mzJ`z", opts)
 keymap({ "n", "x", "v" }, "Y", "y$", opts)
 
 -- paste while removing end of line
-keymap({ "n", "x", "v" }, "P", [["_d$"+P]], opts)
--- move with middle
+keymap(
+	{ "n", "x", "v" },
+	"P",
+	[[mz"_d$"+P`z]],
+	{ noremap = true, silent = true, desc = "Delete to EOL (black hole) → paste from clipboard, keep cursor" }
+)
 keymap("n", "<C-d>", "<C-d>zz", opts)
 keymap("n", "<C-u>", "<C-u>zz", opts)
 

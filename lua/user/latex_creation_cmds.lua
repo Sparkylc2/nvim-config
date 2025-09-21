@@ -149,27 +149,6 @@ local function setup_latex_keymaps()
 			end, { buffer = true, desc = "Install LaTeX cls/sty files" })
 		end,
 	})
-
-	vim.api.nvim_create_autocmd("FileType", {
-		pattern = { "tex", "latex" },
-		callback = function()
-			vim.keymap.set(
-				"n",
-				"<leader>lr",
-				copy_report_template,
-				{ buffer = true, desc = "Create LaTeX report template here" }
-			)
-			vim.keymap.set(
-				"n",
-				"<leader>ln",
-				copy_notes_template,
-				{ buffer = true, desc = "Create LaTeX notes template here" }
-			)
-			vim.keymap.set("n", "<leader>li", function()
-				vim.cmd("LatexSetupInstall")
-			end, { buffer = true, desc = "Install LaTeX cls/sty files" })
-		end,
-	})
 end
 
 setup_latex_keymaps()
