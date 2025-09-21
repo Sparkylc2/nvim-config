@@ -54,35 +54,125 @@ return {
 						lookahead = true,
 						keymaps = {
 							["aa"] = "@parameter.outer",
-							["la"] = "@parameter.inner",
+							["ua"] = "@parameter.inner",
+
 							["af"] = "@function.outer",
-							["lf"] = "@function.inner",
+							["uf"] = "@function.inner",
+
 							["ac"] = "@class.outer",
-							["lc"] = "@class.inner",
+							["uc"] = "@class.inner",
+
+							["ai"] = "@conditional.outer",
+							["ui"] = "@conditional.inner",
+
+							["al"] = "@loop.outer",
+							["ul"] = "@loop.inner",
+
+							["aC"] = "@comment.outer",
+							["uC"] = "@comment.inner",
+
+							["ab"] = "@block.outer",
+							["ub"] = "@block.inner",
+
+							["as"] = "@statement.outer",
+
+							["am"] = "@call.outer",
+							["um"] = "@call.inner",
+
+							["ar"] = "@return.outer",
+							["ur"] = "@return.inner",
+
+							["a="] = "@assignment.outer",
+							["u="] = "@assignment.inner",
+							["av"] = "@assignment.lhs",
+							["uv"] = "@assignment.rhs",
 						},
 					},
 					move = {
 						enable = true,
 						set_jumps = true,
 						goto_next_start = {
-							["]m"] = "@function.outer",
-							["]]"] = "@class.outer",
+							["]f"] = "@function.outer",
+							["]c"] = "@class.outer",
+							["]a"] = "@parameter.inner",
+							["]i"] = "@conditional.outer",
+							["]l"] = "@loop.outer",
+							["]C"] = "@comment.outer",
+							["]b"] = "@block.outer",
+							["]m"] = "@call.outer",
+							["]r"] = "@return.outer",
+							["]="] = "@assignment.outer",
 						},
 						goto_next_end = {
-							["]M"] = "@function.outer",
-							["]["] = "@class.outer",
+							["]F"] = "@function.outer",
+							["]A"] = "@parameter.inner",
+							["]I"] = "@conditional.outer",
+							["]L"] = "@loop.outer",
+							["]B"] = "@block.outer",
+							["]M"] = "@call.outer",
+							["]R"] = "@return.outer",
 						},
 						goto_previous_start = {
-							["[m"] = "@function.outer",
-							["[["] = "@class.outer",
+							["[f"] = "@function.outer",
+							["[c"] = "@class.outer",
+							["[a"] = "@parameter.inner",
+							["[i"] = "@conditional.outer",
+							["[l"] = "@loop.outer",
+							["[C"] = "@comment.outer",
+							["[b"] = "@block.outer",
+							["[m"] = "@call.outer",
+							["[r"] = "@return.outer",
+							["[="] = "@assignment.outer",
 						},
 						goto_previous_end = {
-							["[M"] = "@function.outer",
-							["[]"] = "@class.outer",
+							["[F"] = "@function.outer",
+							["[A"] = "@parameter.inner",
+							["[I"] = "@conditional.outer",
+							["[L"] = "@loop.outer",
+							["[B"] = "@block.outer",
+							["[M"] = "@call.outer",
+							["[R"] = "@return.outer",
+						},
+
+						goto_next = {
+							["]s"] = "@statement.outer",
+						},
+						goto_previous = {
+							["[s"] = "@statement.outer",
+						},
+					},
+					swap = {
+						enable = true,
+						swap_next = {
+							["<leader>sa"] = "@parameter.inner",
+							["<leader>sf"] = "@function.outer",
+							["<leader>ss"] = "@statement.outer",
+						},
+						swap_previous = {
+							["<leader>sA"] = "@parameter.inner",
+							["<leader>sF"] = "@function.outer",
+							["<leader>sS"] = "@statement.outer",
+						},
+					},
+					lsp_interop = {
+						enable = true,
+						border = "none",
+						floating_preview_opts = {},
+						peek_definition_code = {
+							["<leader>df"] = "@function.outer",
+							["<leader>dc"] = "@class.outer",
 						},
 					},
 				},
 			})
+
+			local ts_repeat_move = require("nvim-treesitter.textobjects.repeatable_move")
+
+			vim.keymap.set({ "n", "x", "o" }, ";", ts_repeat_move.repeat_last_move_next)
+			vim.keymap.set({ "n", "x", "o" }, ",", ts_repeat_move.repeat_last_move_previous)
+
+			vim.keymap.set({ "n", "x", "o" }, "f", ts_repeat_move.builtin_f_expr, { expr = true })
+			vim.keymap.set({ "n", "x", "o" }, "F", ts_repeat_move.builtin_F_expr, { expr = true })
 		end,
 	},
 }

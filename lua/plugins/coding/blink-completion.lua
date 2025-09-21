@@ -80,7 +80,8 @@ return {
 				["<A-H>"] = { "select_prev", "fallback" },
 				["<A-h>"] = { "select_next", "fallback" },
 				["<A-u>"] = { "select_next", "fallback" },
-				["<Tab>"] = { "snippet_forward", "fallback" },
+				-- ["<Tab>"] = { "snippet_forward",  "fallback" },
+				["<Tab>"] = { "snippet_forward", "accept", "fallback" },
 				["<S-Tab>"] = { "snippet_backward", "fallback" },
 			},
 

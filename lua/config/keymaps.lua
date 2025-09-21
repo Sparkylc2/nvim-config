@@ -17,13 +17,16 @@ keymap("v", "K", "E", { noremap = true, silent = true }) -- end of WORD in visua
 keymap("v", "h", "n", { noremap = true, silent = true }) -- for consistency
 
 -- make u work like i for motions
-vim.keymap.set("x", "u", "<Nop>", { silent = true })
-vim.keymap.set("o", "u", "<Nop>", { silent = true })
+keymap("x", "u", "<Nop>", { silent = true })
+keymap("o", "u", "<Nop>", { silent = true })
 
 local objs = { "w", "W", "s", "p", "b", "B", '"', "'", "`", ")", "]", "}", ">", "(", "[", "{", "<", "t" }
 for _, o in ipairs(objs) do
 	vim.keymap.set({ "x", "o" }, "u" .. o, "i" .. o, { noremap = true, silent = true })
 end
+
+keymap("o", "k", "e", opts) -- end of word (was e)
+keymap("o", "K", "E", opts) -- end of WORD (was E)
 
 keymap("n", "t", "i", opts) -- insert mode
 keymap("n", "T", "I", opts) -- insert at beginning of line
@@ -35,11 +38,17 @@ keymap("n", "u", "o", opts) -- open line below
 keymap("n", "U", "O", opts) -- open line above
 
 -- undo/redo (normal)
-keymap("n", "j", "u", opts)
-keymap("n", "J", "<C-r>", opts)
+keymap({ "n", "x", "v" }, "j", "u", opts)
+keymap({ "n", "x", "v" }, "J", "<C-r>", opts)
 
 -- join with line above
-keymap("n", "Y", "mzJ`z", opts)
+keymap({ "n", "x", "v" }, "H", "mzJ`z", opts)
+
+-- copy until end of line
+keymap({ "n", "x", "v" }, "Y", "y$", opts)
+
+-- paste while removing end of line
+keymap({ "n", "x", "v" }, "P", [["_d$"+P]], opts)
 -- move with middle
 keymap("n", "<C-d>", "<C-d>zz", opts)
 keymap("n", "<C-u>", "<C-u>zz", opts)

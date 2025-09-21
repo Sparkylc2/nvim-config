@@ -1,14 +1,10 @@
 local M = {}
 
--- ===== Tunables =============================================================
-
 local throttle_ms = 50 -- min delay between successive next/prev
 local debounce_ms = 120 -- rebuild debounce after edits
 local viewport_margin = 50 -- extra lines around the visible window
 local bigfile_lines = 5000 -- above this, we only ever process the viewport
 local max_scan_cols = 2000 -- hard cap on per-line char scanning
-
--- ===== Small utils ==========================================================
 
 local function hrtime_ms()
 	return vim.loop.hrtime() / 1e6
@@ -60,7 +56,6 @@ local char_cache = {
 local function collect_char_waypoints(range_top, range_bot)
 	local tick = vim.b.changedtick or 0
 	if char_cache.tick == tick and char_cache.items then
-		-- Filter cached items to current range
 		local filtered = {}
 		for i = 1, #char_cache.items do
 			local r, c = char_cache.items[i][1], char_cache.items[i][2]
@@ -73,7 +68,6 @@ local function collect_char_waypoints(range_top, range_bot)
 
 	local items = {}
 
-	-- Define what we're looking for
 	local closing_chars = {
 		[")"] = true,
 		["]"] = true,
@@ -115,11 +109,9 @@ local function collect_char_waypoints(range_top, range_bot)
 				-- Handle quotes specially - jump to inside AND after closing quotes
 				if quotes[ch] then
 					if not in_string then
-						-- Opening quote - don't add as waypoint
 						in_string = true
 						string_char = ch
 					elseif ch == string_char then
-						-- Closing quote - add position BEFORE it (inside) and AFTER it (outside)
 						items[#items + 1] = { row, col } -- Inside the quote
 						items[#items + 1] = { row, col + 1 } -- Outside the quote
 						in_string = false
