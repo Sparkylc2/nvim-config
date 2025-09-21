@@ -63,15 +63,6 @@ local function disable_copilot_when_ready(opts)
 	tick()
 end
 
-local function has_real_buffers()
-	for _, b in ipairs(vim.api.nvim_list_bufs()) do
-		if vim.bo[b].buflisted and vim.api.nvim_buf_get_name(b) ~= "" then
-			return true
-		end
-	end
-	return false
-end
-
 vim.api.nvim_create_user_command("Uni", function(opts)
 	local parts = vim.split(opts.args or "", " ", { trimempty = true })
 	local key = parts[1]

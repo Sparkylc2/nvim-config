@@ -27,13 +27,13 @@ return {
 				defaults = {
 					mappings = {
 						i = {
-							["<C-e>"] = actions.move_selection_next,
-							["<C-i>"] = actions.move_selection_previous,
+							["<C-j>"] = actions.move_selection_next,
+							["<C-k>"] = actions.move_selection_previous,
 							["<C-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
 						},
 						n = {
-							["e"] = actions.move_selection_next,
-							["i"] = actions.move_selection_previous,
+							["j"] = actions.move_selection_next,
+							["k"] = actions.move_selection_previous,
 							["<C-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
 						},
 					},

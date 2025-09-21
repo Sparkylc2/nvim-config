@@ -1,4 +1,3 @@
--- lua/config/options.lua
 local opt = vim.opt
 local g = vim.g
 

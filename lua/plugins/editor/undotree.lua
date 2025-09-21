@@ -3,11 +3,11 @@ return {
 	dependencies = { "nvim-lua/plenary.nvim" },
 	opts = {
 		keymaps = {
-			e = "move_next",
-			i = "move_prev",
-			gi = "move2parent",
-			E = "move_change_next",
-			I = "move_change_prev",
+			j = "move_next",
+			k = "move_prev",
+			gk = "move2parent",
+			J = "move_change_next",
+			K = "move_change_prev",
 			["<cr>"] = "action_enter",
 			p = "enter_diffbuf",
 			q = "quit",

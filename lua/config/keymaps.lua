@@ -5,81 +5,49 @@ vim.g.maplocalleader = " "
 local keymap = vim.keymap.set
 local opts = { noremap = true, silent = true }
 
--- keymap({ "n", "x" }, "n", "h", opts) -- left
--- keymap({ "n", "x" }, "e", "j", opts) -- down
--- keymap({ "n", "x" }, "i", "k", opts) -- up
--- keymap({ "n", "x" }, "o", "l", opts) -- right
---
--- keymap("x", "m", "n", { noremap = true, silent = true }) -- next search in visual
--- keymap("x", "M", "N", { noremap = true, silent = true }) -- prev search in visual
--- keymap("v", "k", "e", { noremap = true, silent = true }) -- end of word in visual
--- keymap("v", "K", "E", { noremap = true, silent = true }) -- end of WORD in visual
--- keymap("v", "h", "n", { noremap = true, silent = true }) -- for consistency
---
--- make u work like i for motions
--- keymap("x", "u", "<Nop>", { silent = true })
--- keymap("o", "u", "<Nop>", { silent = true })
---
--- local objs = { "w", "W", "s", "p", "b", "B", '"', "'", "`", ")", "]", "}", ">", "(", "[", "{", "<", "t" }
--- for _, o in ipairs(objs) do
--- 	vim.keymap.set({ "x", "o" }, "u" .. o, "i" .. o, { noremap = true, silent = true })
--- end
-
--- keymap("o", "k", "e", opts) -- end of word (was e)
--- keymap("o", "K", "E", opts) -- end of WORD (was E)
---
--- keymap("n", "t", "i", opts) -- insert mode
--- keymap("n", "T", "I", opts) -- insert at beginning of line
---
--- keymap({ "n", "x", "o", "v" }, "k", "e", opts) -- end of word
--- keymap({ "n", "x", "o", "v" }, "K", "E", opts) -- end of WORD
---
--- keymap("n", "u", "o", opts) -- open line below
--- keymap("n", "U", "O", opts) -- open line above
-
--- undo/redo (normal)
--- keymap({ "n", "x", "v" }, "j", "u", opts)
--- keymap({ "n", "x", "v" }, "J", "<C-r>", opts)
--- join with line above
---
--- keymap({ "n", "x", "v" }, "H", "mzJ`z", opts)
-
+-- join line below without moving cursor
 keymap({ "n", "x", "v" }, "J", "mzJ`z", opts)
+
 -- copy until end of line
 keymap({ "n", "x", "v" }, "Y", "y$", opts)
 
 -- paste while removing end of line
-keymap(
-	{ "n", "x", "v" },
-	"P",
-	[[mz"_d$"+P`z]],
-	{ noremap = true, silent = true, desc = "Delete to EOL (black hole) → paste from clipboard, keep cursor" }
-)
+keymap({ "n", "x", "v" }, "P", [[mz"_d$"+P`z]], opts)
+
+-- move half page down/up and center
 keymap("n", "<C-d>", "<C-d>zz", opts)
 keymap("n", "<C-u>", "<C-u>zz", opts)
 
-keymap("n", "m", "nzzzv", opts)
-keymap("n", "M", "Nzzzv", opts)
+-- search next/prev and center
+keymap("n", "n", "nzzzv", opts)
+keymap("n", "n", "Nzzzv", opts)
+
+-- switch ^ and 0 for ease of use
+keymap("n", "0", "^", opts)
+keymap("n", "^", "0", opts)
 
 -- useless
 keymap("n", "Q", "<nop>")
+
 -- quick chmod +x
 keymap("n", "<leader> ch", "<cmd>!chmod +x %<CR>", { silent = true })
 
+-- insert mode enhancements
 keymap("i", "<C-n>", "<C-o>^", opts)
 keymap("i", "<C-o>", "<C-o>$", opts)
 keymap("i", "<D-BS>", "<C-u>", opts)
 
+-- move cursor with alt + neio
 keymap("i", "<A-i>", "<Up>", opts)
 keymap("i", "<A-e>", "<Down>", opts)
 keymap("i", "<A-n>", "<Left>", opts)
 keymap("i", "<A-o>", "<Right>", opts)
 
 -- win resize commands
-keymap("n", "<C-A-S-n>", ":vertical resize -2<CR>", { desc = "Resize split left" })
-keymap("n", "<C-A-S-e>", ":resize +2<CR>", { desc = "Resize split down" })
-keymap("n", "<C-A-S-i>", ":resize -2<CR>", { desc = "Resize split up" })
-keymap("n", "<C-A-S-o>", ":vertical resize +2<CR>", { desc = "Resize split right" })
+keymap("n", "<C-A-n>", ":vertical resize -2<CR>", { desc = "Resize split left" })
+keymap("n", "<C-A-e>", ":resize +2<CR>", { desc = "Resize split down" })
+keymap("n", "<C-A-i>", ":resize -2<CR>", { desc = "Resize split up" })
+keymap("n", "<C-A-o>", ":vertical resize +2<CR>", { desc = "Resize split right" })
 
 -- move splits (normal)
 keymap("n", "<A-N>", "<C-w>H", { desc = "Move window left" })
@@ -92,7 +60,7 @@ keymap("n", "<C-\\>", "<C-w>p", { desc = "Go to previous window" })
 
 -- split window (normal)
 keymap("n", "<leader>sv", "<C-w>v", { desc = "Vertical split" })
-keymap("n", "<leader>ss", "<C-w>s", { desc = "Horizontal split" })
+keymap("n", "<leader>sh", "<C-w>s", { desc = "Horizontal split" })
 keymap("n", "<leader>se", "<C-w>=", { desc = "Equalize" })
 keymap("n", "<leader>sx", "<cmd>close<CR>", { desc = "Close window" })
 
@@ -121,6 +89,7 @@ keymap("n", "<Esc>", ":noh<CR>", { desc = "Clear highlights" })
 keymap("n", "<leader>q", ":q<CR>", { desc = "Quit" })
 keymap("n", "<leader>Q", ":qa<CR>", { desc = "Quit all" })
 
+-- copilot stuff
 keymap("i", "<D-S-CR>", 'copilot#Accept("")', { expr = true, silent = true, noremap = true, replace_keycodes = true })
 
 vim.keymap.set("i", "<Esc>[13;2u", function()
@@ -139,6 +108,7 @@ keymap("i", "<D-S-CR>", function()
 	end
 end, { expr = true, silent = true, noremap = true, replace_keycodes = false, desc = "Accept Copilot or newline" })
 
-local sc = require("user.smart_cycles")
+-- smart jumps out of closing stuff and to important things
+local sc = require("user.smart_jump")
 keymap({ "i", "n" }, "<D-;>", sc.next, { desc = "Smart cycle forward" })
 keymap({ "i", "n" }, "<D-S-;>", sc.prev, { desc = "Smart cycle backward" })
