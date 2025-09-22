@@ -1,12 +1,15 @@
 return {
 	{
 		"lervag/vimtex",
+
 		ft = "tex",
 		event = "VeryLazy",
 		init = function()
 			vim.g.vimtex_view_method = "skim"
 			vim.g.vimtex_view_skim_sync = 1
 			vim.g.vimtex_view_skim_activate = 1
+			vim.g.vimtex_complete_enabled = 1
+			vim.g.vimtex_complete_close_braces = 1
 			vim.g.vimtex_compiler_method = "latexmk"
 			vim.g.vimtex_compiler_latexmk_engines = { _ = "-xelatex" }
 			vim.g.vimtex_compiler_latexmk = {
@@ -82,10 +85,14 @@ return {
 				callback = function()
 					vim.opt_local.spell = true
 					vim.opt_local.spelllang = "en_us"
-					vim.cmd("highlight SpellBad cterm=underline ctermfg=red gui=underline guifg=red")
-					vim.cmd("highlight SpellCap cterm=underline ctermfg=blue gui=underline guifg=blue")
-					vim.cmd("highlight SpellLocal cterm=underline ctermfg=cyan gui=underline guifg=cyan")
-					vim.cmd("highlight SpellRare cterm=underline ctermfg=magenta gui=underline guifg=magenta")
+				end,
+			})
+			vim.api.nvim_create_autocmd("ColorScheme", {
+				callback = function()
+					vim.cmd("highlight SpellBad cterm=underline ctermfg=red gui=underline guifg=#E82424")
+					vim.cmd("highlight SpellCap cterm=underline ctermfg=blue gui=underline guifg=#7FB4CA")
+					vim.cmd("highlight SpellLocal cterm=underline ctermfg=cyan gui=underline guifg=#7AA89F")
+					vim.cmd("highlight SpellRare cterm=underline ctermfg=magenta gui=underline guifg=#938AA9")
 				end,
 			})
 		end,

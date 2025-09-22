@@ -13,9 +13,14 @@ return {
 
 	-- Math mode
 	s({ trig = "mm", dscr = "Math mode" }, {
-		t("\\["),
+		t("\\[ "),
 		i(1),
-		t("\\]"),
+		t(" \\]"),
+	}),
+	s({ trig = "im", dscr = "Inline Math mode" }, {
+		t("\\( "),
+		i(1),
+		t(" \\)"),
 	}),
 
 	s({ trig = "eq", dscr = "Equation environment" }, {
@@ -43,6 +48,42 @@ return {
 		t({ "\\begin{align}", "\t" }),
 		i(1),
 		t({ "", "\\end{align}" }),
+	}),
+
+	-- Autosized delimiters mode
+	s({ trig = "op", dscr = "Sized parenthesis" }, {
+		t("\\left("),
+		i(1),
+		t("\\right)"),
+	}),
+	s({ trig = "ob", dscr = "Sized parenthesis" }, {
+		t("\\left["),
+		i(1),
+		t("\\right]"),
+	}),
+	s({ trig = "ocb", dscr = "Sized parenthesis" }, {
+		t("\\left{"),
+		i(1),
+		t("\\right}"),
+	}),
+
+	-- Autosized delimiter pair
+	s({ trig = "lr", dscr = "Sized delimiter pair" }, {
+		t("\\left"),
+		i(1, "("),
+		t(" "),
+		i(2),
+		t(" "),
+		t("\\right"),
+		f(function(args)
+			local delimiter = args[1][1]
+			-- if delimiter starts with '\l', replace with '\r'
+			if delimiter:sub(1, 2) == "\\l" then
+				return "\\r" .. delimiter:sub(3)
+			end
+
+			return delimiter
+		end, { 1 }),
 	}),
 
 	-- Greek letters

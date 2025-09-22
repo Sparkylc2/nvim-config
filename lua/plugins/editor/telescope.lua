@@ -6,6 +6,7 @@ return {
 			"nvim-lua/plenary.nvim",
 			{ "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
 			"nvim-telescope/telescope-ui-select.nvim",
+			"nvim-telescope/telescope-symbols.nvim",
 		},
 		keys = {
 			{ "<leader>ff", "<cmd>Telescope find_files<cr>", desc = "Find files" },
@@ -50,6 +51,10 @@ return {
 			vim.keymap.set("n", "<leader>y", function()
 				require("telescope").extensions.yank_history.yank_history()
 			end, { desc = "Show yank history" })
+
+			vim.keymap.set("n", "<leader>fm", function()
+				require("telescope.builtin").symbols({ sources = { "latex" } })
+			end, { desc = "Find LaTeX symbols" })
 		end,
 	},
 }

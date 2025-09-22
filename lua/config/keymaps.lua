@@ -5,14 +5,16 @@ vim.g.maplocalleader = " "
 local keymap = vim.keymap.set
 local opts = { noremap = true, silent = true }
 
+-- redo with shift u
+keymap("n", "U", "<C-r>", opts)
 -- join line below without moving cursor
-keymap({ "n", "x", "v" }, "J", "mzJ`z", opts)
+keymap({ "n", "x" }, "J", "mzJ`z", opts)
 
 -- copy until end of line
-keymap({ "n", "x", "v" }, "Y", "y$", opts)
+keymap({ "n", "x" }, "Y", "y$", opts)
 
 -- paste while removing end of line
-keymap({ "n", "x", "v" }, "P", [[mz"_d$"+P`z]], opts)
+keymap({ "n", "x" }, "P", [[mz"_d$"+P`z]], opts)
 
 -- move half page down/up and center
 keymap("n", "<C-d>", "<C-d>zz", opts)
