@@ -16,13 +16,19 @@ keymap({ "n", "x" }, "Y", "y$", opts)
 -- paste while removing end of line
 keymap({ "n", "x" }, "P", [[mz"_d$"+P`z]], opts)
 
+-- move to bottom of page and end of line
+keymap("n", "G", "G$", opts)
+
+-- move to start of page and start of line
+keymap("n", "gg", "gg^", opts)
+
 -- move half page down/up and center
 keymap("n", "<C-d>", "<C-d>zz", opts)
 keymap("n", "<C-u>", "<C-u>zz", opts)
 
 -- search next/prev and center
 keymap("n", "n", "nzzzv", opts)
-keymap("n", "n", "Nzzzv", opts)
+keymap("n", "N", "Nzzzv", opts)
 
 -- switch ^ and 0 for ease of use
 keymap("n", "0", "^", opts)

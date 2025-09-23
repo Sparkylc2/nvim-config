@@ -31,6 +31,55 @@ return {
 						fg = "#c5c9c5",
 						border = "#54546D",
 					}
+					vim.api.nvim_set_hl(0, "SignColumn", { bg = "#181616" })
+					vim.api.nvim_set_hl(0, "LineNr", { bg = "#181616", fg = "#625E5A" })
+					vim.api.nvim_set_hl(0, "DiagnosticSignError", { bg = "#181616", fg = "#FF5D62" })
+					vim.api.nvim_set_hl(0, "DiagnosticSignWarn", { bg = "#181616", fg = "#E6C384" })
+					vim.api.nvim_set_hl(0, "DiagnosticSignInfo", { bg = "#181616", fg = "#7FB4CA" })
+					vim.api.nvim_set_hl(0, "DiagnosticSignHint", { bg = "#181616", fg = "#98BB6C" })
+
+					local function set_git_sign_bgs()
+						local bg = "#181616"
+
+						vim.api.nvim_set_hl(0, "SignColumn", { bg = bg })
+
+						local groups = {
+							"GitSignsAdd",
+							"GitSignsChange",
+							"GitSignsDelete",
+							"GitSignsTopdelete",
+							"GitSignsChangedelete",
+							"GitSignsUntracked",
+						}
+
+						for _, grp in ipairs(groups) do
+							local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = grp, link = false })
+							if ok and hl then
+								local new = {
+									bg = bg,
+									fg = hl.fg,
+									bold = hl.bold or false,
+									italic = hl.italic or false,
+									underline = hl.underline or false,
+									undercurl = hl.undercurl or false,
+									strikethrough = hl.strikethrough or false,
+									reverse = hl.reverse or false,
+									nocombine = hl.nocombine or false,
+								}
+								vim.api.nvim_set_hl(0, grp, new)
+							else
+								vim.api.nvim_set_hl(0, grp, { bg = bg })
+							end
+						end
+					end
+
+					set_git_sign_bgs()
+
+					vim.api.nvim_create_autocmd({ "ColorScheme", "User" }, {
+						pattern = { "*", "GitsignsAttach", "GitsignsDetach" },
+						callback = set_git_sign_bgs,
+					})
+					-- vim.api.nvim_set_hl(0, "CursorLineNr", { bg = "#181820", fg = "#C8C093", bold = true })
 
 					vim.api.nvim_set_hl(0, "NormalFloat", { bg = colors.bg, fg = colors.fg })
 					vim.api.nvim_set_hl(0, "FloatBorder", { bg = colors.bg, fg = colors.border })

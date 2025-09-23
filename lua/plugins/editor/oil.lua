@@ -40,7 +40,12 @@ return {
 			delete_to_trash = true,
 			default_file_explorer = false,
 			skip_confirm_for_simple_edits = true,
-			view_options = { show_hidden = true },
+			view_options = {
+				show_hidden = true,
+				custom_filter = function(name, _entry)
+					return name ~= ".DS_Store"
+				end,
+			},
 
 			watch_for_changes = true,
 
