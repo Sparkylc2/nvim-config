@@ -35,9 +35,9 @@ opt.undofile = true
 opt.undodir = (os.getenv("HOME") or "") .. "/.vim/undodir"
 opt.updatetime = 50
 opt.timeout = true
-opt.timeoutlen = 300
-opt.ttimeout = true
-opt.ttimeoutlen = 10
+opt.timeoutlen = 75
+opt.ttimeout = false
+opt.ttimeoutlen = 0
 opt.completeopt = "menu,menuone,noselect"
 opt.splitbelow = true
 opt.splitright = true
@@ -76,32 +76,3 @@ for _, plugin in pairs({
 }) do
 	vim.g["loaded_" .. plugin] = 1
 end
-
--- Diagnostics
-
-vim.diagnostic.enable()
-vim.diagnostic.config({
-	virtual_text = { prefix = "●", spacing = 4 },
-	signs = true,
-	underline = true,
-	update_in_insert = false,
-	float = { border = "rounded", source = "always" },
-	severity_sort = true,
-})
-
--- lsp
-vim.lsp.enable({
-	"vue_ls",
-	"ts_ls",
-	"lua_ls",
-	"cssls",
-	"tailwindcss",
-	"html",
-	"clangd",
-	"pyright",
-})
-
--- Signature help
-vim.lsp.handlers["textDocument/signatureHelp"] =
-	vim.lsp.with(vim.lsp.handlers.signature_help, { update_in_insert = false })
-vim.lsp.with(vim.lsp.handlers.signature_help, { update_in_insert = false })

@@ -29,6 +29,9 @@ return {
 				yaml = { "prettier" },
 				cpp = { "clang-format" },
 				c = { "clang-format" },
+				tex = { "latexindent" },
+				plaintex = { "latexindent" },
+				bib = { "bibtex-tidy" },
 			},
 			format_on_save = {
 				lsp_fallback = true,

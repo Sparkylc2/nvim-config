@@ -173,8 +173,8 @@ return {
 					["<C-h>"] = cmp.mapping.close(),
 					["<C-b>"] = cmp.mapping.scroll_docs(-4),
 					["<C-f>"] = cmp.mapping.scroll_docs(4),
-					["<A-u>"] = cmp.mapping.select_next_item(),
-					["<A-S-u>"] = cmp.mapping.select_prev_item(),
+					["<D-u>"] = cmp.mapping.select_next_item(),
+					["<D-S-u>"] = cmp.mapping.select_prev_item(),
 
 					["<Tab>"] = cmp.mapping(function(fallback)
 						if luasnip.expand_or_jumpable() then

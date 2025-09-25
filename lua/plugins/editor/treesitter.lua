@@ -17,6 +17,7 @@ return {
 					"javascript",
 					"json",
 					"lua",
+					"latex",
 					"markdown",
 					"markdown_inline",
 					"python",
@@ -57,35 +58,35 @@ return {
 							["ua"] = "@parameter.inner",
 
 							["af"] = "@function.outer",
-							["uf"] = "@function.inner",
+							["if"] = "@function.inner",
 
 							["ac"] = "@class.outer",
-							["uc"] = "@class.inner",
+							["ic"] = "@class.inner",
 
 							["ai"] = "@conditional.outer",
-							["ui"] = "@conditional.inner",
+							["ii"] = "@conditional.inner",
 
 							["al"] = "@loop.outer",
-							["ul"] = "@loop.inner",
+							["il"] = "@loop.inner",
 
 							["aC"] = "@comment.outer",
-							["uC"] = "@comment.inner",
+							["iC"] = "@comment.inner",
 
 							["ab"] = "@block.outer",
-							["ub"] = "@block.inner",
+							["ib"] = "@block.inner",
 
 							["as"] = "@statement.outer",
 
 							["am"] = "@call.outer",
-							["um"] = "@call.inner",
+							["im"] = "@call.inner",
 
 							["ar"] = "@return.outer",
-							["ur"] = "@return.inner",
+							["ir"] = "@return.inner",
 
 							["a="] = "@assignment.outer",
-							["u="] = "@assignment.inner",
+							["i="] = "@assignment.inner",
 							["av"] = "@assignment.lhs",
-							["uv"] = "@assignment.rhs",
+							["iv"] = "@assignment.rhs",
 						},
 					},
 					move = {

@@ -1,4 +1,5 @@
 return {
+
 	{
 		"lervag/vimtex",
 		ft = "tex",
@@ -6,13 +7,11 @@ return {
 		init = function()
 			vim.g.vimtex_view_method = "general"
 			vim.g.vimtex_view_general_viewer = "pdfview"
-
 			vim.g.vimtex_view_general_options = "@pdf"
-
 			vim.g.vimtex_view_use_temp_files = 0
-
+			vim.g.vimtex_quickfix_enabled = 1
+			vim.g.vimtex_quickfix_mode = 0
 			vim.g.vimtex_view_automatic = 1
-
 			vim.g.vimtex_compiler_latexmk = {
 				backend = "biber",
 				executable = "latexmk",
@@ -25,14 +24,11 @@ return {
 					"-view=none",
 				},
 			}
-
 			vim.g.vimtex_complete_enabled = 1
 			vim.g.vimtex_complete_close_braces = 1
 			vim.g.vimtex_compiler_method = "latexmk"
 			vim.g.vimtex_compiler_latexmk_engines = { _ = "-xelatex" }
 			vim.g.vimtex_bibliography_autoload = { filenames = { "**/bibliography/*.bib" } }
-
-			-- Auto-detect project root (main.tex) unless a %! TEX root directive is present
 			local function has_tex_root_directive(buf)
 				local line_count = vim.api.nvim_buf_line_count(buf)
 				local last = math.min(5, line_count)
@@ -44,7 +40,6 @@ return {
 				end
 				return false
 			end
-
 			local function find_closest_main_tex(start_path)
 				local dir = vim.fs.dirname(start_path)
 				local found = vim.fs.find({ "main.tex", "Main.tex" }, { upward = true, path = dir })
@@ -57,7 +52,6 @@ return {
 				end
 				return nil
 			end
-
 			vim.api.nvim_create_autocmd({ "BufReadPre", "BufNewFile" }, {
 				pattern = "*.tex",
 				callback = function(args)
@@ -79,6 +73,60 @@ return {
 		config = function()
 			vim.api.nvim_create_autocmd("BufWritePost", {
 				pattern = "*.tex",
+				callback = function() end,
+			})
+
+			function ToggleVimtexQuickfixMode()
+				if vim.g.vimtex_quickfix_mode == 1 then
+					vim.g.vimtex_quickfix_mode = 0
+					print("vimtex_quickfix_mode: 0 (default menu shown)")
+				else
+					vim.g.vimtex_quickfix_mode = 1
+					print("vimtex_quickfix_mode: 1 (default menu hidden)")
+				end
+			end
+
+			function ShowSpellSuggestions()
+				local word = vim.fn.expand("<cword>")
+				local suggestions = vim.fn.spellsuggest(word, 10)
+				if #suggestions == 0 then
+					suggestions = { "No suggestions" }
+				end
+				local buf = vim.api.nvim_create_buf(false, true)
+				vim.api.nvim_buf_set_lines(buf, 0, -1, false, suggestions)
+				local width = 1
+				for _, s in ipairs(suggestions) do
+					if #s > width then
+						width = #s
+					end
+				end
+				local opts = {
+					relative = "cursor",
+					row = 1,
+					col = 0,
+					width = width + 2,
+					height = #suggestions,
+					style = "minimal",
+					border = "rounded",
+				}
+				local win = vim.api.nvim_open_win(buf, true, opts)
+				vim.keymap.set("n", "<Esc>", function()
+					vim.api.nvim_win_close(win, true)
+				end, { buffer = buf, nowait = true })
+			end
+
+			vim.keymap.set("n", "<leader>ss", ShowSpellSuggestions, { desc = "Show spell suggestions in float" })
+			vim.keymap.set("n", "<leader>vq", ToggleVimtexQuickfixMode, { desc = "Toggle vimtex_quickfix_mode" })
+
+			vim.api.nvim_create_autocmd("FileType", {
+				pattern = "tex",
+				callback = function()
+					vim.keymap.set("x", "p", "p", { buffer = true, desc = "Paste without yanking (TeX)" })
+				end,
+			})
+
+			vim.api.nvim_create_autocmd("BufWritePost", {
+				pattern = "*.tex",
 				callback = function()
 					if vim.fn.exists(":VimtexCompile") == 2 then
 						vim.cmd("silent VimtexCompile")
@@ -90,7 +138,7 @@ return {
 				pattern = "tex",
 				callback = function()
 					vim.opt_local.spell = true
-					vim.opt_local.spelllang = "en_us"
+					vim.opt_local.spelllang = "en_gb"
 				end,
 			})
 

@@ -1,20 +1,20 @@
 return {
 	{
 		"gbprod/yanky.nvim",
+		dependencies = { "kkharji/sqlite.lua" },
 		opts = {},
 		config = function()
 			require("yanky").setup({
 				ring = {
 					history_length = 100,
-					storage = "shada",
+					storage = "sqlite",
 					sync_with_numbered_registers = true,
 					cancel_event = "update",
 					ignore_registers = { "_" },
 					update_register_on_cycle = false,
-					permanent_wrapper = nil,
 				},
 				system_clipboard = {
-					sync_with_ring = true,
+					sync_with_ring = false,
 				},
 			})
 		end,

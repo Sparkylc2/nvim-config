@@ -7,24 +7,24 @@ local opts = { noremap = true, silent = true }
 
 -- redo with shift u
 keymap("n", "U", "<C-r>", opts)
+
 -- join line below without moving cursor
 keymap({ "n", "x" }, "J", "mzJ`z", opts)
 
 -- copy until end of line
 keymap({ "n", "x" }, "Y", "y$", opts)
 
--- paste while removing end of line
-keymap({ "n", "x" }, "P", [[mz"_d$"+P`z]], opts)
+-- paste until end of line
+keymap({ "n", "x" }, "P", [[mz"_D"+p`z]], opts)
 
 -- move to bottom of page and end of line
-keymap("n", "G", "G$", opts)
-
+keymap("x", "G", "G$", opts)
 -- move to start of page and start of line
-keymap("n", "gg", "gg^", opts)
+keymap("x", "gg", "gg^", opts)
 
--- move half page down/up and center
-keymap("n", "<C-d>", "<C-d>zz", opts)
-keymap("n", "<C-u>", "<C-u>zz", opts)
+-- move half page up/down while keeping cursor centered
+keymap("n", "<D-d>", "<C-d>zz", opts)
+keymap("n", "<D-u>", "<C-u>zz", opts)
 
 -- search next/prev and center
 keymap("n", "n", "nzzzv", opts)
@@ -90,9 +90,6 @@ keymap("v", ">", ">gv", { desc = "Indent right" })
 -- paste with no yank (visual)
 keymap("x", "p", '"_dP', { desc = "Paste without yanking" })
 
--- clear highlights (normal)
-keymap("n", "<Esc>", ":noh<CR>", { desc = "Clear highlights" })
-
 -- quit (normal)
 keymap("n", "<leader>q", ":q<CR>", { desc = "Quit" })
 keymap("n", "<leader>Q", ":qa<CR>", { desc = "Quit all" })
@@ -115,8 +112,3 @@ keymap("i", "<D-S-CR>", function()
 		return "<CR>"
 	end
 end, { expr = true, silent = true, noremap = true, replace_keycodes = false, desc = "Accept Copilot or newline" })
-
--- smart jumps out of closing stuff and to important things
-local sc = require("user.smart_jump")
-keymap({ "i", "n" }, "<D-;>", sc.next, { desc = "Smart cycle forward" })
-keymap({ "i", "n" }, "<D-S-;>", sc.prev, { desc = "Smart cycle backward" })

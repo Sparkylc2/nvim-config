@@ -42,8 +42,8 @@ return {
 			skip_confirm_for_simple_edits = true,
 			view_options = {
 				show_hidden = true,
-				custom_filter = function(name, _entry)
-					return name ~= ".DS_Store"
+				is_always_hidden = function(name, _)
+					return name == ".DS_Store"
 				end,
 			},
 
@@ -73,6 +73,61 @@ return {
 
 		config = function(_, opts)
 			require("oil").setup(opts)
+
+			local function save_session_in_oil_dir()
+				local oil = require("oil")
+				local dir = oil.get_current_dir()
+				if not dir then
+					vim.notify("Oil: no directory?", vim.log.levels.WARN)
+					return
+				end
+				local old = vim.fn.getcwd()
+				vim.cmd("lcd " .. vim.fn.fnameescape(dir))
+				local ok, autosession = pcall(require, "auto-session")
+				if ok and autosession.SaveSession then
+					autosession.SaveSession()
+				else
+					vim.cmd("SessionSave")
+				end
+				vim.cmd("lcd " .. vim.fn.fnameescape(old))
+				vim.notify("Session saved for " .. dir)
+			end
+
+			local function load_session_in_oil_dir()
+				local oil = require("oil")
+				local dir = oil.get_current_dir()
+				if not dir then
+					vim.notify("Oil: no directory?", vim.log.levels.WARN)
+					return
+				end
+				local old = vim.fn.getcwd()
+				vim.cmd("lcd " .. vim.fn.fnameescape(dir))
+				local ok, autosession = pcall(require, "auto-session")
+				if ok and autosession.RestoreSession then
+					autosession.RestoreSession()
+				else
+					vim.cmd("SessionRestore")
+				end
+				vim.cmd("lcd " .. vim.fn.fnameescape(old))
+				vim.notify("Session loaded for " .. dir)
+			end
+
+			-- save session in current oil dir
+			vim.api.nvim_create_autocmd("FileType", {
+				pattern = "oil",
+				callback = function(ev)
+					vim.keymap.set("n", "<leader>ss", save_session_in_oil_dir, {
+						buffer = ev.buf,
+						desc = "Save AutoSession for this Oil directory",
+						silent = true,
+					})
+					vim.keymap.set("n", "<leader>sl", load_session_in_oil_dir, {
+						buffer = ev.buf,
+						desc = "Load AutoSession for this Oil directory",
+						silent = true,
+					})
+				end,
+			})
 		end,
 	},
 }
