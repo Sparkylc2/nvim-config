@@ -7,7 +7,7 @@ return {
 		init = function()
 			vim.g.vimtex_view_method = "general"
 			vim.g.vimtex_view_general_viewer = "pdfview"
-			vim.g.vimtex_view_general_options = "@pdf"
+			vim.g.vimtex_view_general_options = ("--ppid %d @pdf"):format(vim.fn.getpid())
 			vim.g.vimtex_view_use_temp_files = 0
 			vim.g.vimtex_quickfix_enabled = 1
 			vim.g.vimtex_quickfix_mode = 0

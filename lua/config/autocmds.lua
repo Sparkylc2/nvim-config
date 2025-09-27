@@ -180,14 +180,14 @@ vim.api.nvim_create_autocmd("CmdlineLeave", {
 })
 
 -- fix for neovim bugging when resizing
-vim.api.nvim_create_autocmd({ "VimResized", "FocusGained" }, {
-	callback = function()
-		vim.schedule(function()
-			vim.cmd("redraw!")
-			vim.cmd("mode")
-		end)
-	end,
-})
+-- vim.api.nvim_create_autocmd({ "VimResized", "FocusGained" }, {
+-- 	callback = function()
+-- 		vim.schedule(function()
+-- 			vim.cmd("redraw!")
+-- 			vim.cmd("mode")
+-- 		end)
+-- 	end,
+-- })
 -- launches neovim cd'd into the working directory it was launched as an arg with
 vim.api.nvim_create_autocmd("VimEnter", {
 	desc = "cd to passed $PWD when vim starts.",
@@ -195,5 +195,13 @@ vim.api.nvim_create_autocmd("VimEnter", {
 	callback = function()
 		local pwd = vim.fn.getcwd()
 		vim.api.nvim_set_current_dir(pwd)
+	end,
+})
+
+vim.api.nvim_create_autocmd("WinResized", {
+	callback = function()
+		vim.cmd("redrawstatus")
+		vim.cmd("redrawtabline")
+		vim.cmd("redraw")
 	end,
 })

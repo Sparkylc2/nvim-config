@@ -5,20 +5,6 @@ return {
 		config = function()
 			require("kanagawa").setup({
 				theme = "dragon",
-				overrides = function(c)
-					local t = c.theme
-					return {
-						-- menu window
-						BlinkCmpMenu = { bg = t.ui.bg_p1, fg = t.ui.fg },
-						BlinkCmpMenuBorder = { bg = t.ui.bg_p1, fg = t.ui.bg_p1 },
-
-						-- docs/signature window
-						BlinkCmpDoc = { bg = t.ui.bg_m2, fg = t.ui.fg },
-						BlinkCmpDocBorder = { bg = t.ui.bg_m2, fg = t.ui.bg_m2 },
-						BlinkCmpSignatureHelp = { bg = t.ui.bg_m2, fg = t.ui.fg },
-						BlinkCmpSignatureHelpBorder = { bg = t.ui.bg_m2, fg = t.ui.bg_m2 },
-					}
-				end,
 			})
 
 			vim.cmd("colorscheme kanagawa-dragon")
@@ -79,7 +65,6 @@ return {
 						pattern = { "*", "GitsignsAttach", "GitsignsDetach" },
 						callback = set_git_sign_bgs,
 					})
-					-- vim.api.nvim_set_hl(0, "CursorLineNr", { bg = "#181820", fg = "#C8C093", bold = true })
 
 					vim.api.nvim_set_hl(0, "NormalFloat", { bg = colors.bg, fg = colors.fg })
 					vim.api.nvim_set_hl(0, "FloatBorder", { bg = colors.bg, fg = colors.border })
@@ -103,6 +88,9 @@ return {
 					vim.api.nvim_set_hl(0, "Pmenu", { bg = colors.bg_light, fg = colors.fg })
 					vim.api.nvim_set_hl(0, "PmenuSel", { bg = colors.border, fg = colors.bg, bold = true })
 					vim.api.nvim_set_hl(0, "PmenuBorder", { bg = colors.bg_light, fg = colors.border })
+					local c = require("kanagawa.colors").setup()
+					local sep = c.theme.ui.whitespace
+					vim.api.nvim_set_hl(0, "WinSeparator", { fg = sep, bg = "NONE" })
 				end,
 			})
 

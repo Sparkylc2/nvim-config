@@ -169,6 +169,9 @@ return {
 					end,
 				},
 				mapping = cmp.mapping.preset.insert({
+					["<C-n>"] = cmp.mapping(function(fallback)
+						fallback()
+					end, { "i", "s" }),
 					["<S-CR>"] = cmp.mapping.confirm({ select = true }),
 					["<C-h>"] = cmp.mapping.close(),
 					["<C-b>"] = cmp.mapping.scroll_docs(-4),

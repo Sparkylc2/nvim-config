@@ -25,7 +25,8 @@ opt.wrap = false
 opt.scrolloff = 8
 opt.sidescrolloff = 8
 vim.wo.cursorline = true
-vim.o.laststatus = 3
+opt.laststatus = 2
+opt.cmdheight = 1
 
 -- Behavior
 g.loaded_netrwPlugin = 1
@@ -42,11 +43,9 @@ opt.completeopt = "menu,menuone,noselect"
 opt.splitbelow = true
 opt.splitright = true
 opt.maxmempattern = 200000
-opt.lazyredraw = true
+opt.lazyredraw = false
 opt.synmaxcol = 200
-vim.o.winborder = "rounded"
--- Clipboard
-opt.clipboard = "unnamedplus"
+opt.winborder = "rounded"
 
 -- Cursor
 opt.cursorline = true

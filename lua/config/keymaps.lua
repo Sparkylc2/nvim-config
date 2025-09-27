@@ -5,6 +5,8 @@ vim.g.maplocalleader = " "
 local keymap = vim.keymap.set
 local opts = { noremap = true, silent = true }
 
+-- enter visual block mode with alt-v
+keymap("n", "<A-v>", "<C-v>", opts)
 -- redo with shift u
 keymap("n", "U", "<C-r>", opts)
 
@@ -18,9 +20,9 @@ keymap({ "n", "x" }, "Y", "y$", opts)
 keymap({ "n", "x" }, "P", [[mz"_D"+p`z]], opts)
 
 -- move to bottom of page and end of line
-keymap("x", "G", "G$", opts)
+keymap({ "x", "n" }, "G", "G$", opts)
 -- move to start of page and start of line
-keymap("x", "gg", "gg^", opts)
+keymap({ "x", "n" }, "gg", "gg^", opts)
 
 -- move half page up/down while keeping cursor centered
 keymap("n", "<D-d>", "<C-d>zz", opts)
@@ -38,7 +40,7 @@ keymap("n", "^", "0", opts)
 keymap("n", "Q", "<nop>")
 
 -- quick chmod +x
-keymap("n", "<leader> ch", "<cmd>!chmod +x %<CR>", { silent = true })
+keymap("n", "<leader>ch", "<cmd>!chmod +x %<CR>", { silent = true })
 
 -- insert mode enhancements
 keymap("i", "<C-n>", "<C-o>^", opts)

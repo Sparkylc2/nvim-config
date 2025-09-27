@@ -3,58 +3,35 @@ return {
 		"nvim-lualine/lualine.nvim",
 		dependencies = { "nvim-tree/nvim-web-devicons" },
 		config = function()
+			local base = require("lualine.themes.kanagawa")
+
+			local theme = vim.deepcopy(base)
+			local function set_center_bg(t, hex)
+				for _, mode in ipairs({ "normal", "insert", "visual", "replace", "command", "inactive" }) do
+					if t[mode] and t[mode].c then
+						t[mode].c.bg = hex
+					end
+				end
+				return t
+			end
+			set_center_bg(theme, "#181616")
+
 			require("lualine").setup({
 				options = {
-					theme = "kanagawa",
 					component_separators = "|",
 					section_separators = "",
 					globalstatus = true,
-					refresh = {
-						statusline = 100,
-						tabline = 100,
-						winbar = 100,
-					},
+					theme = theme,
 				},
 			})
 
-			local function refresh_lualine()
-				vim.schedule(function()
-					pcall(function()
-						require("lualine").refresh({
-							place = { "statusline", "tabline", "winbar" },
-						})
-					end)
-					vim.cmd("redraw!")
-					vim.cmd("mode")
-				end)
-			end
-
-			local resize_group = vim.api.nvim_create_augroup("LualineResizeFix", { clear = true })
-
-			vim.api.nvim_create_autocmd({ "VimResized", "WinResized", "WinNew", "WinClosed" }, {
-				group = resize_group,
+			vim.api.nvim_create_autocmd("WinResized", {
 				callback = function()
-					refresh_lualine()
+					vim.defer_fn(function()
+						require("lualine").refresh({ place = { "statusline" }, force = true })
+					end, 50)
 				end,
 			})
-
-			vim.api.nvim_create_autocmd({ "FocusGained", "FocusLost" }, {
-				group = resize_group,
-				callback = function()
-					vim.defer_fn(refresh_lualine, 50)
-				end,
-			})
-
-			vim.api.nvim_create_autocmd("TermResponse", {
-				group = resize_group,
-				callback = function()
-					vim.defer_fn(refresh_lualine, 100)
-				end,
-			})
-
-			vim.api.nvim_create_user_command("LualineRefresh", function()
-				refresh_lualine()
-			end, { desc = "Manually refresh lualine" })
 		end,
 	},
 }

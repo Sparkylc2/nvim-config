@@ -1,11 +1,8 @@
 return {
 	"OXY2DEV/markview.nvim",
 
-        event = "VeryLazy",
+	event = "VeryLazy",
 
-	dependencies = {
-		"saghen/blink.cmp",
-	},
 	ft = { "markdown", "md", "rmd", "quarto" },
 	config = function()
 		local presets = require("markview.presets")
