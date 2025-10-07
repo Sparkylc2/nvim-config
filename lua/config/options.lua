@@ -46,6 +46,7 @@ opt.maxmempattern = 200000
 opt.lazyredraw = false
 opt.synmaxcol = 200
 opt.winborder = "rounded"
+opt.clipboard = "unnamedplus"
 
 -- Cursor
 opt.cursorline = true

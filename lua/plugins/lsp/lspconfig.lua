@@ -7,9 +7,24 @@ return {
 		config = function()
 			vim.opt.signcolumn = "yes"
 
+			-- local lspconfig = require("lspconfig")
+			-- lspconfig.ltex.setup({
+			-- 	filetypes = { "tex", "plaintex", "bib", "markdown" },
+			-- 	settings = {
+			-- 		ltex = {
+			-- 			enabled = { "latex", "tex", "bibtex", "markdown" },
+			-- 			language = "en-GB",
+			-- 			checkFrequency = "edit",
+			-- 			diagnosticSeverity = "warning",
+			-- 		},
+			-- 	},
+			-- 	on_attach = function(client, bufnr)
+			-- 		vim.notify("LTeX attached and enabled for buffer " .. bufnr)
+			-- 	end,
+			-- })
 			vim.api.nvim_create_autocmd("LspAttach", {
 				desc = "LSP actions",
-				callback = function()
+				callback = function(event)
 					vim.keymap.set("n", "gd", vim.lsp.buf.definition, { desc = "Go to Definition" })
 					vim.keymap.set("n", "gr", vim.lsp.buf.references, { desc = "Find References" })
 					vim.keymap.set("n", "gi", vim.lsp.buf.implementation, { desc = "Go to Implementation" })

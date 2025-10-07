@@ -101,14 +101,14 @@ return {
 					return
 				end
 				local old = vim.fn.getcwd()
-				vim.cmd("lcd " .. vim.fn.fnameescape(dir))
+				vim.cmd("cd" .. vim.fn.fnameescape(dir))
 				local ok, autosession = pcall(require, "auto-session")
 				if ok and autosession.RestoreSession then
 					autosession.RestoreSession()
 				else
 					vim.cmd("SessionRestore")
 				end
-				vim.cmd("lcd " .. vim.fn.fnameescape(old))
+				-- vim.cmd("lcd " .. vim.fn.fnameescape(old))
 				vim.notify("Session loaded for " .. dir)
 			end
 

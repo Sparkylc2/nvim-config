@@ -43,8 +43,8 @@ keymap("n", "Q", "<nop>")
 keymap("n", "<leader>ch", "<cmd>!chmod +x %<CR>", { silent = true })
 
 -- insert mode enhancements
-keymap("i", "<C-n>", "<C-o>^", opts)
-keymap("i", "<C-o>", "<C-o>$", opts)
+-- keymap("i", "<C-n>", "<C-o>^", opts)
+-- keymap("i", "<C-o>", "<C-o>$", opts)
 keymap("i", "<D-BS>", "<C-u>", opts)
 
 -- move cursor with alt + neio
@@ -54,10 +54,10 @@ keymap("i", "<A-n>", "<Left>", opts)
 keymap("i", "<A-o>", "<Right>", opts)
 
 -- win resize commands
-keymap("n", "<C-A-n>", ":vertical resize -2<CR>", { desc = "Resize split left" })
-keymap("n", "<C-A-e>", ":resize +2<CR>", { desc = "Resize split down" })
-keymap("n", "<C-A-i>", ":resize -2<CR>", { desc = "Resize split up" })
-keymap("n", "<C-A-o>", ":vertical resize +2<CR>", { desc = "Resize split right" })
+keymap("n", "<C-n>", ":vertical resize -2<CR>", { desc = "Resize split left" }) -- n
+keymap("n", "<C-e>", ":resize +2<CR>", { desc = "Resize split down" }) -- e
+keymap("n", "<C-i>", ":resize -2<CR>", { desc = "Resize split up" }) -- i
+keymap("n", "<C-o>", ":vertical resize +2<CR>", { desc = "Resize split right" }) -- o
 
 -- move splits (normal)
 keymap("n", "<A-N>", "<C-w>H", { desc = "Move window left" })
@@ -70,8 +70,8 @@ keymap("n", "<C-\\>", "<C-w>p", { desc = "Go to previous window" })
 
 -- split window (normal)
 keymap("n", "<leader>sv", "<C-w>v", { desc = "Vertical split" })
-keymap("n", "<leader>sh", "<C-w>s", { desc = "Horizontal split" })
 keymap("n", "<leader>se", "<C-w>=", { desc = "Equalize" })
+keymap("n", "<leader>sh", "<C-w>s", { desc = "Horizontal split" })
 keymap("n", "<leader>sx", "<cmd>close<CR>", { desc = "Close window" })
 
 -- tab management (normal)

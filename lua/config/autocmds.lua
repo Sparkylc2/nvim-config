@@ -9,33 +9,6 @@ local open_ext = aug("ExternalOpeners", { clear = true })
 local quit_grp = aug("QuitHooks", { clear = true })
 local perf_guard = aug("PerfGuard", { clear = true })
 
--- cursor line stuff
--- vim.api.nvim_create_autocmd({ "WinEnter", "BufEnter" }, {
--- 	group = fast_ui,
--- 	callback = function()
--- 		vim.wo.cursorline = true
--- 	end,
--- })
--- vim.api.nvim_create_autocmd("WinLeave", {
--- 	group = fast_ui,
--- 	callback = function()
--- 		vim.wo.cursorline = false
--- 	end,
--- })
--- vim.api.nvim_create_autocmd("InsertEnter", {
--- 	group = fast_ui,
--- 	callback = function()
--- 		vim.wo.cursorline = false
--- 	end,
--- })
--- vim.api.nvim_create_autocmd("InsertLeave", {
--- 	group = fast_ui,
--- 	callback = function()
--- 		vim.wo.cursorline = true
--- 	end,
--- })
-
--- highlight on yank
 vim.api.nvim_create_autocmd("TextYankPost", {
 	group = yank_grp,
 	callback = function()
@@ -203,5 +176,60 @@ vim.api.nvim_create_autocmd("WinResized", {
 		vim.cmd("redrawstatus")
 		vim.cmd("redrawtabline")
 		vim.cmd("redraw")
+	end,
+})
+
+vim.api.nvim_create_autocmd("VimEnter", {
+	callback = function()
+		local cols = tonumber(vim.env.COLUMNS)
+		local lines = tonumber(vim.env.LINES)
+		if cols and cols > 0 then
+			vim.o.columns = cols
+		end
+		if lines and lines > 0 then
+			vim.o.lines = lines
+		end
+		vim.cmd("doautocmd VimResized")
+		vim.schedule(function()
+			pcall(function()
+				require("lualine").refresh({ place = { "statusline" }, force = true })
+			end)
+			vim.cmd("redrawstatus!")
+		end)
+	end,
+})
+-- run npm tasks easily
+vim.api.nvim_create_autocmd("FileType", {
+	group = ft_group,
+	pattern = {
+		"json",
+		"markdown",
+		"js",
+		"css",
+		"html",
+	},
+	callback = function()
+		vim.keymap.set("n", "<leader>npm", ":!npm run dev<CR>", { buffer = true, desc = "Run npm dev" })
+	end,
+})
+
+-- open markdown preview in arview
+vim.api.nvim_create_autocmd("FileType", {
+	group = ft_group,
+	pattern = { "markdown", "md", "rmd", "quarto" },
+	callback = function()
+		vim.keymap.set("n", "<leader>mv", function()
+			os.execute("arview " .. vim.api.nvim_buf_get_name(0))
+		end, { desc = "Open markdown preview in arview", buffer = true })
+	end,
+})
+
+-- run make and the output easily
+vim.api.nvim_create_autocmd("FileType", {
+	group = ft_group,
+	pattern = { "c", "cpp" },
+	callback = function()
+		vim.keymap.set("n", "<leader>mm", ":!make<CR>", { buffer = true, desc = "Run make run" })
+		vim.keymap.set("n", "<leader>mr", ":!./a.out<CR>", { buffer = true, desc = "Run make output" })
 	end,
 })

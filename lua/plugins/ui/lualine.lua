@@ -12,6 +12,7 @@ return {
 						t[mode].c.bg = hex
 					end
 				end
+
 				return t
 			end
 			set_center_bg(theme, "#181616")
@@ -22,6 +23,16 @@ return {
 					section_separators = "",
 					globalstatus = true,
 					theme = theme,
+				},
+				sections = {
+					lualine_a = {
+						{
+							"mode",
+							fmt = function(s)
+								return s:sub(1, 1)
+							end,
+						},
+					},
 				},
 			})
 

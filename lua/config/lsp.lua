@@ -25,11 +25,20 @@ vim.lsp.config("texlab", {
 		},
 	},
 })
+vim.lsp.config("ltex", {
+	filetypes = { "markdown", "tex", "latex", "text" },
+	settings = {
+		ltex = {
+			language = "en-GB",
+		},
+	},
+})
 
 vim.lsp.enable({
 	"vue_ls",
 	"ts_ls",
 	"lua_ls",
+	"ltex",
 	"cssls",
 	"tailwindcss",
 	"html",

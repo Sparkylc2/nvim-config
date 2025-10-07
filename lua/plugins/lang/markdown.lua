@@ -1,8 +1,7 @@
 return {
 	"OXY2DEV/markview.nvim",
-
+	enabled = false,
 	event = "VeryLazy",
-
 	ft = { "markdown", "md", "rmd", "quarto" },
 	config = function()
 		local presets = require("markview.presets")

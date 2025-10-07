@@ -125,8 +125,12 @@ return {
 					path = "~/.config/nvim",
 					use_autosession = true,
 				},
-				GitHome = {
+				Github = {
 					path = "~/Documents/GitHub/",
+					use_autosession = true,
+				},
+				Personal = {
+					path = "~/Library/CloudStorage/OneDrive-ImperialCollegeLondon/Personal/",
 					use_autosession = true,
 				},
 			},

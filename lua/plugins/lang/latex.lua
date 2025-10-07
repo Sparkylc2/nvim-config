@@ -1,12 +1,12 @@
 return {
-
+	-- { "neoclide/coc.nvim", branch = "release" },
 	{
 		"lervag/vimtex",
 		ft = "tex",
 		event = "VeryLazy",
 		init = function()
 			vim.g.vimtex_view_method = "general"
-			vim.g.vimtex_view_general_viewer = "pdfview"
+			vim.g.vimtex_view_general_viewer = "arview"
 			vim.g.vimtex_view_general_options = ("--ppid %d @pdf"):format(vim.fn.getpid())
 			vim.g.vimtex_view_use_temp_files = 0
 			vim.g.vimtex_quickfix_enabled = 1
