@@ -99,8 +99,8 @@ vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
 	group = open_ext,
 	pattern = "*.pdf",
 	callback = function()
-		local pdf_path = vim.fn.expand("%:p")
-		vim.jobstart({ "arview", ("--ppid %d "):format(vim.fn.getpid()) .. pdf_path }, { detach = true })
+		local cmd = "arview " .. ("--ppid %d "):format(vim.fn.getpid()) .. '"' .. vim.api.nvim_buf_get_name(0) .. '"'
+		vim.fn.jobstart(cmd, { detach = true })
 		vim.cmd("bd!")
 	end,
 })
@@ -218,8 +218,12 @@ vim.api.nvim_create_autocmd("FileType", {
 	group = ft_group,
 	pattern = { "markdown", "md", "rmd", "quarto" },
 	callback = function()
-		vim.keymap.set("n", "<leader>mv", function()
-			local cmd = 'arview "' .. vim.api.nvim_buf_get_name(0) .. '"'
+		vim.keymap.set("n", "<leader>lv", function()
+			local cmd = "arview "
+				.. ("--ppid %d "):format(vim.fn.getpid())
+				.. '"'
+				.. vim.api.nvim_buf_get_name(0)
+				.. '"'
 			vim.fn.jobstart(cmd, { detach = true })
 		end, { desc = "Open markdown preview in arview", buffer = true })
 	end,

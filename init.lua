@@ -1,13 +1,3 @@
--- fixes weird OSC-52 clipboard issue
-if vim.env.TERM == "xterm-kitty" then
-	vim.g.clipboard = {
-		name = "pbcopy-pbpaste",
-		copy = { ["+"] = "pbcopy", ["*"] = "pbcopy" },
-		paste = { ["+"] = "pbpaste", ["*"] = "pbpaste" },
-		cache_enabled = 0,
-	}
-end
-package.loaded["vim.ui.clipboard.osc52"] = false
 -- sets cwd to whatever the input arg was
 do
 	if vim.fn.argc() > 0 then

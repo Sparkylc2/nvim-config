@@ -5,9 +5,6 @@ vim.g.maplocalleader = " "
 local keymap = vim.keymap.set
 local opts = { noremap = true, silent = true }
 
--- generalize file viewing keybinding for both md and tex
-keymap("n", "<leader>vf", "<plug>(vimtex-view)", { desc = "View Latex PDF" })
-
 -- enter visual block mode with alt-v
 keymap("n", "<A-v>", "<C-v>", opts)
 -- redo with shift u
