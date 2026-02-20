@@ -36,7 +36,7 @@ opt.undofile = true
 opt.undodir = (os.getenv("HOME") or "") .. "/.vim/undodir"
 opt.updatetime = 50
 opt.timeout = true
-opt.timeoutlen = 75
+opt.timeoutlen = 250
 opt.ttimeout = false
 opt.ttimeoutlen = 0
 opt.completeopt = "menu,menuone,noselect"
@@ -76,3 +76,6 @@ for _, plugin in pairs({
 }) do
 	vim.g["loaded_" .. plugin] = 1
 end
+
+-- Python provider and environment
+vim.g.python3_host_prog = vim.fn.expand("~/.virtualenvs/neovim/bin/python")

@@ -19,7 +19,7 @@ return {
 				desc = "Toggle breakpoint",
 			},
 			{
-				"<leader>dc",
+				"<leader>dd",
 				function()
 					require("dap").continue()
 				end,
@@ -89,7 +89,7 @@ return {
 			-- C/C++
 			dap.adapters.lldb = {
 				type = "executable",
-				command = "/usr/bin/lldb-vscode",
+				command = "/opt/homebrew/opt/llvm/bin/lldb-dap",
 				name = "lldb",
 			}
 

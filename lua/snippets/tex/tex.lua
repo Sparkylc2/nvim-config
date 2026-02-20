@@ -9,6 +9,10 @@ local fmt = require("luasnip.extras.fmt").fmt
 local fmta = require("luasnip.extras.fmt").fmta
 local rep = require("luasnip.extras").rep
 
+local function in_mathzone()
+	return vim.fn["vimtex#syntax#in_mathzone"]() == 1
+end
+
 return {
 
 	s({ trig = "tt", dscr = "Expands 'tt' into '\\texttt{}'" }, {
@@ -17,29 +21,70 @@ return {
 		t("}"),
 	}),
 
-	s({ trig = "tit", dscr = "Expands 'tit' into '\\textit{}'" }, {
-		t("\\textit{"),
-		i(1),
-		t("}"),
+	s({ trig = "it", dscr = "Expands 'tit' into '\\textit{}' or '\\mathit{}'" }, {
+		d(1, function()
+			if in_mathzone() then
+				return sn(nil, { t("\\mathit{"), i(1), t("}") })
+			else
+				return sn(nil, { t("\\textit{"), i(1), t("}") })
+			end
+		end),
 	}),
-
-	s({ trig = "tbf", dscr = "Expands 'tbf' into '\\textbf{}'" }, {
-		t("\\textbf{"),
-		i(1),
-		t("}"),
+	s({ trig = "bf", dscr = "Expands 'bf' into '\\textbf{}' or '\\mathbf{}'" }, {
+		d(1, function()
+			if in_mathzone() then
+				return sn(nil, { t("\\mathbf{"), i(1), t("}") })
+			else
+				return sn(nil, { t("\\textbf{"), i(1), t("}") })
+			end
+		end),
 	}),
 
 	-- Environments
+	s({ trig = "begin", dscr = "Begin environment" }, {
+		t("\\begin{"),
+		i(1, "environment"),
+		t({ "}", "\t" }),
+		i(0),
+		t({ "", "\\end{" }),
+		f(function(args)
+			return args[1][1]
+		end, { 1 }),
+		t("}"),
+	}),
+	s({ trig = "\\begin", dscr = "Begin environment" }, {
+		t("\\begin{"),
+		i(1, "environment"),
+		t({ "}", "\t" }),
+		i(0),
+		t({ "", "\\end{" }),
+		f(function(args)
+			return args[1][1]
+		end, { 1 }),
+		t("}"),
+	}),
 	s({ trig = "beg", dscr = "Begin environment" }, {
 		t("\\begin{"),
 		i(1, "environment"),
 		t({ "}", "\t" }),
 		i(0),
 		t({ "", "\\end{" }),
-		rep(1),
+		f(function(args)
+			return args[1][1]
+		end, { 1 }),
 		t("}"),
 	}),
-
+	s({ trig = "\\beg", dscr = "Begin environment" }, {
+		t("\\begin{"),
+		i(1, "environment"),
+		t({ "}", "\t" }),
+		i(0),
+		t({ "", "\\end{" }),
+		f(function(args)
+			return args[1][1]
+		end, { 1 }),
+		t("}"),
+	}),
 	s({ trig = "md", dscr = "Begin markdown environment" }, {
 		t({ "\\begin{markdown}", "" }),
 		i(1, "markdown"),

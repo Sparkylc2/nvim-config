@@ -1,19 +1,29 @@
+-- return {
+-- 	"jiaoshijie/undotree",
+-- 	dependencies = { "nvim-lua/plenary.nvim" },
+-- 	opts = {
+-- 		keymaps = {
+-- 			j = "move_next",
+-- 			k = "move_prev",
+-- 			gk = "move2parent",
+-- 			J = "move_change_next",
+-- 			K = "move_change_prev",
+-- 			["<cr>"] = "action_enter",
+-- 			p = "enter_diffbuf",
+-- 			q = "quit",
+-- 		},
+-- 	},
+-- 	keys = {
+-- 		{ "<leader>u", "<cmd>lua require('undotree').toggle()<cr>" },
+-- 	},
+-- }
 return {
-	"jiaoshijie/undotree",
-	dependencies = { "nvim-lua/plenary.nvim" },
-	opts = {
-		keymaps = {
-			j = "move_next",
-			k = "move_prev",
-			gk = "move2parent",
-			J = "move_change_next",
-			K = "move_change_prev",
-			["<cr>"] = "action_enter",
-			p = "enter_diffbuf",
-			q = "quit",
+	{
+		"XXiaoA/atone.nvim",
+		cmd = "Atone",
+		opts = {},
+		keys = {
+			{ "<leader>u", "<cmd>Atone toggle<cr>" },
 		},
-	},
-	keys = {
-		{ "<leader>u", "<cmd>lua require('undotree').toggle()<cr>" },
 	},
 }

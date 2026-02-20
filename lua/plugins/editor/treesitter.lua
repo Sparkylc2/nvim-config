@@ -4,7 +4,6 @@ return {
 		build = ":TSUpdate",
 		dependencies = {
 			"nvim-treesitter/nvim-treesitter-textobjects",
-			"OXY2DEV/markview.nvim",
 		},
 		config = function()
 			require("nvim-treesitter.configs").setup({
@@ -19,7 +18,7 @@ return {
 					"lua",
 					"latex",
 					"markdown",
-					"markdown_inline",
+					-- "markdown_inline",
 					"python",
 					"regex",
 					"scss",

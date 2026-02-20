@@ -31,10 +31,11 @@ require("config.options")
 require("config.keymaps")
 require("config.autocmds")
 require("config.lsp")
-require("user")
 
 require("lazy").setup("plugins", {
 	change_detection = {
 		notify = false,
 	},
 })
+
+require("user")

@@ -97,17 +97,8 @@ keymap("n", "<leader>q", ":q<CR>", { desc = "Quit" })
 keymap("n", "<leader>Q", ":qa<CR>", { desc = "Quit all" })
 
 -- copilot stuff
-keymap("i", "<D-S-CR>", 'copilot#Accept("")', { expr = true, silent = true, noremap = true, replace_keycodes = true })
-
-vim.keymap.set("i", "<Esc>[13;2u", function()
-	if vim.fn["copilot#GetDisplayedSuggestion"]().text ~= "" then
-		return vim.fn["copilot#Accept"]("")
-	else
-		return "<CR>"
-	end
-end, { expr = true, silent = true, noremap = true, replace_keycodes = false, desc = "Accept Copilot with Shift+Enter" })
-
-keymap("i", "<D-S-CR>", function()
+keymap("i", "<C-k>", 'copilot#Accept("")', { expr = true, silent = true, noremap = true, replace_keycodes = true })
+keymap("i", "<C-k>", function()
 	if vim.fn["copilot#GetDisplayedSuggestion"]().text ~= "" then
 		return vim.fn["copilot#Accept"]("")
 	else

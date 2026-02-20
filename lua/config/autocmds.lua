@@ -84,13 +84,13 @@ vim.api.nvim_create_autocmd("TermOpen", {
 		vim.opt_local.modifiable = false
 
 		local opts = { buffer = 0 }
+
 		vim.keymap.set("t", "<esc>", [[<C-\><C-n>]], opts)
 		vim.keymap.set("t", "<C-e>", [[<C-\><C-n>]], opts)
-		vim.keymap.set("t", "jk", [[<C-\><C-n>]], opts)
-		vim.keymap.set("t", "<A-n>", "\x1b[D", opts) -- left
-		vim.keymap.set("t", "<A-o>", "\x1b[C", opts) -- right
-		vim.keymap.set("t", "<A-i>", "\x1b[A", opts) -- up
-		vim.keymap.set("t", "<A-e>", "\x1b[B", opts) -- down
+		vim.keymap.set("t", "<A-n>", "<Left>", opts) -- left
+		vim.keymap.set("t", "<A-o>", "<Right>", opts) -- right
+		vim.keymap.set("t", "<A-i>", "<Up>", opts) -- up
+		vim.keymap.set("t", "<A-e>", "<Down>", opts) -- down
 	end,
 })
 
@@ -229,12 +229,12 @@ vim.api.nvim_create_autocmd("FileType", {
 	end,
 })
 
--- run make and the output easily
+-- run make and the output of that
 vim.api.nvim_create_autocmd("FileType", {
 	group = ft_group,
 	pattern = { "c", "cpp" },
 	callback = function()
-		vim.keymap.set("n", "<leader>mm", ":!make<CR>", { buffer = true, desc = "Run make run" })
-		vim.keymap.set("n", "<leader>mr", ":!./a.out<CR>", { buffer = true, desc = "Run make output" })
+		vim.keymap.set("n", "<leader>rm", ":!make<CR>", { buffer = true, desc = "Run make run" })
+		vim.keymap.set("n", "<leader>rf", ":!./a.out<CR>", { buffer = true, desc = "Run make output" })
 	end,
 })

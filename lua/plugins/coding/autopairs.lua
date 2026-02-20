@@ -25,9 +25,19 @@ return {
 				Rule("\\lceil", "\\rceil", "tex"),
 				Rule("\\lvert", "\\rvert", "tex"),
 				Rule("\\lVert", "\\rVert", "tex"),
+				Rule("_", "{}", "tex"):set_end_pair_length(1):with_pair(function(opts)
+					local col = vim.api.nvim_win_get_cursor(0)[2]
+					local line = vim.api.nvim_get_current_line()
+					return line:sub(col + 1, col + 1) ~= "{"
+				end),
+				Rule("^", "{}", "tex"):set_end_pair_length(1):with_pair(function(opts)
+					local col = vim.api.nvim_win_get_cursor(0)[2]
+					local line = vim.api.nvim_get_current_line()
+					return line:sub(col + 1, col + 1) ~= "{"
+				end),
+
+				Rule("$", "$", "tex"):with_pair(cond.not_before_regex("\\", 1)), -- $ pair (not when escaped)
 			})
-			-- $ pair (not when escaped)
-			npairs.add_rule(Rule("$", "$", "tex"):with_pair(cond.not_before_regex("\\", 1)))
 		end,
 	},
 }

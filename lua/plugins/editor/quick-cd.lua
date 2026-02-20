@@ -8,7 +8,7 @@ return {
 			},
 			primary_dirs = {
 				Uni = {
-					base_dir = "~/Library/CloudStorage/OneDrive-ImperialCollegeLondon/Year\\ 2/",
+					base_dir = "~/Library/CloudStorage/OneDrive2-ImperialCollegeLondon/Year\\ 2/",
 					use_autosession = true,
 					subdirs = {
 						ae = {
@@ -110,7 +110,7 @@ return {
 						misc = {
 							path = "Misc",
 						},
-						struc = {
+						struct = {
 							path = "Structures\\ 2",
 						},
 						h = {
@@ -125,12 +125,16 @@ return {
 					path = "~/.config/nvim",
 					use_autosession = true,
 				},
+				Snippets = {
+					path = "~/.config/nvim/lua/snippets",
+					use_autosession = true,
+				},
 				Github = {
 					path = "~/Documents/GitHub/",
 					use_autosession = true,
 				},
 				Personal = {
-					path = "~/Library/CloudStorage/OneDrive-ImperialCollegeLondon/Personal/",
+					path = "~/Library/CloudStorage/OneDrive2-ImperialCollegeLondon/Personal/",
 					use_autosession = true,
 				},
 			},

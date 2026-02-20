@@ -1,5 +1,67 @@
+local function start_neovim_server()
+	local socket = "/tmp/nvim-arview.sock"
+
+	if vim.fn.filereadable(socket) == 1 then
+		vim.fn.delete(socket)
+	end
+
+	vim.fn.serverstart(socket)
+end
+
+vim.api.nvim_create_autocmd("VimEnter", {
+	callback = start_neovim_server,
+	once = true,
+})
+
+if vim.v.vim_did_enter == 1 then
+	start_neovim_server()
+end
+
+local function sync_to_pdf()
+	local line = vim.fn.line(".")
+	local file = vim.fn.expand("%:p")
+
+	if not file:match("%.tex$") then
+		vim.notify("Not a TeX file", vim.log.levels.WARN)
+		return
+	end
+
+	local socket_path = "/tmp/nvim-arview-forward.sock"
+
+	if vim.fn.filereadable(socket_path) == 0 then
+		vim.notify("arview forward search server not running", vim.log.levels.ERROR)
+		return
+	end
+
+	local message = vim.fn.json_encode({
+		type = "forward-search",
+		sourcePath = file,
+		line = line,
+	})
+
+	local cmd = string.format("echo %s | nc -U %s", vim.fn.shellescape(message), vim.fn.shellescape(socket_path))
+
+	vim.fn.system(cmd)
+
+	vim.notify(string.format("Synced line %d to PDF", line), vim.log.levels.INFO)
+end
+
+vim.api.nvim_create_user_command("SyncPDF", sync_to_pdf, {
+	desc = "Sync current line to PDF (forward search)",
+})
+
+vim.keymap.set("n", "<leader>sp", sync_to_pdf, {
+	desc = "Sync to PDF",
+	silent = true,
+})
+
+vim.api.nvim_create_autocmd("BufWritePost", {
+	pattern = "*.tex",
+	callback = function()
+		-- sync_to_pdf()
+	end,
+})
 return {
-	-- { "neoclide/coc.nvim", branch = "release" },
 	{
 		"lervag/vimtex",
 		ft = "tex",
@@ -9,6 +71,7 @@ return {
 			vim.g.vimtex_view_general_viewer = "arview"
 			vim.g.vimtex_view_general_options = ("--ppid %d @pdf"):format(vim.fn.getpid())
 			vim.g.vimtex_view_use_temp_files = 0
+			vim.g.vimtex_quickfix_open_on_warning = 0
 			vim.g.vimtex_quickfix_enabled = 1
 			vim.g.vimtex_quickfix_mode = 0
 			vim.g.vimtex_view_automatic = 1
@@ -115,13 +178,29 @@ return {
 				end, { buffer = buf, nowait = true })
 			end
 
-			vim.keymap.set("n", "<leader>ss", ShowSpellSuggestions, { desc = "Show spell suggestions in float" })
-			vim.keymap.set("n", "<leader>vq", ToggleVimtexQuickfixMode, { desc = "Toggle vimtex_quickfix_mode" })
-
 			vim.api.nvim_create_autocmd("FileType", {
 				pattern = "tex",
 				callback = function()
+					vim.opt_local.spell = true
+					vim.opt_local.spelllang = "en_gb"
+
 					vim.keymap.set("x", "p", "p", { buffer = true, desc = "Paste without yanking (TeX)" })
+					vim.keymap.set(
+						"n",
+						"<leader>ss",
+						ShowSpellSuggestions,
+						{ buffer = true, desc = "Show spell suggestions in float" }
+					)
+					vim.keymap.set(
+						"n",
+						"<leader>vq",
+						ToggleVimtexQuickfixMode,
+						{ buffer = true, desc = "Toggle vimtex_quickfix_mode" }
+					)
+					vim.keymap.set("n", "<leader>m", function()
+						local current = vim.wo.conceallevel
+						vim.wo.conceallevel = current == 0 and 2 or 0
+					end, { buffer = true, desc = "Toggle conceallevel" })
 				end,
 			})
 
@@ -131,14 +210,6 @@ return {
 					if vim.fn.exists(":VimtexCompile") == 2 then
 						vim.cmd("silent VimtexCompile")
 					end
-				end,
-			})
-
-			vim.api.nvim_create_autocmd("FileType", {
-				pattern = "tex",
-				callback = function()
-					vim.opt_local.spell = true
-					vim.opt_local.spelllang = "en_gb"
 				end,
 			})
 
@@ -152,4 +223,44 @@ return {
 			})
 		end,
 	},
+	-- {
+	-- 	"OXY2DEV/markview.nvim",
+	-- 	lazy = false,
+	-- 	ft = { "tex", "latex" },
+	-- 	dependencies = {
+	-- 		"nvim-treesitter/nvim-treesitter",
+	-- 	},
+	-- 	config = function()
+	-- 		require("markview").setup({
+	-- 			preview = {
+	-- 				filetypes = { "markdown", "tex", "latex" },
+	-- 				ignore_buftypes = {},
+	-- 			},
+	-- 			latex = {
+	-- 				enable = true,
+	-- 				blocks = {
+	-- 					enable = true,
+	-- 					hl = "RenderMarkdownMath",
+	-- 					text = function(content)
+	-- 						local result = vim.fn.system("utftex " .. vim.fn.shellescape(content))
+	-- 						return vim.trim(result)
+	-- 					end,
+	-- 				},
+	-- 				inlines = {
+	-- 					enable = true,
+	-- 					hl = "RenderMarkdownMath",
+	-- 				},
+	-- 				subscripts = { enable = true },
+	-- 				superscripts = { enable = true },
+	-- 				symbols = { enable = true },
+	-- 				commands = { enable = true },
+	-- 			},
+	-- 			markdown = {
+	-- 				headings = { enable = false },
+	-- 			},
+	-- 			code_blocks = { enable = false },
+	-- 			checkboxes = { enable = false },
+	-- 		})
+	-- 	end,
+	-- },
 }
