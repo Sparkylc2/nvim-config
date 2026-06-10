@@ -37,7 +37,10 @@ vim.lsp.config("ltex", {
 vim.lsp.config("pyright", {
 	settings = {
 		python = {
-			-- pythonPath = vim.g.python3_host_prog,
+			pythonPath = "/opt/homebrew/bin/python3.11",
+		},
+		pyright = {
+			pythonVersion = "3.11",
 		},
 	},
 })
