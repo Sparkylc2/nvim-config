@@ -114,6 +114,12 @@ local function venv_python(root)
 	return vim.fn.exepath("python3")
 end
 
+-- basedpyright, not pyright: it is the fork that actually implements inlay
+-- hints. The config below used to be attached to "pyright", which is no longer
+-- in config/servers.lua -- so none of it was applying. That is the most likely
+-- source of the spurious inheritance errors: with no pythonPath, basedpyright
+-- was analysing against the system interpreter and its stdlib, not your venv.
+vim.lsp.config("basedpyright", {
 	root_markers = {
 		"pyproject.toml",
 		"setup.py",

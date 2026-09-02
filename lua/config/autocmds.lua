@@ -13,7 +13,11 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 	group = yank_grp,
 	callback = function()
 		-- YankFlash is a soft wash instead, and Snacks.animate fades it back to
+		-- the editor background over the life of the highlight -- the same
+		-- animation engine snacks.scroll and the cursor use, so it feels of a
+		-- piece with them rather than a hard on/off blink.
 		local p = require("config.palette")
+		local duration = 250
 
 		vim.api.nvim_set_hl(0, "YankFlash", { bg = p.yank_bg })
 		vim.hl.on_yank({ higroup = "YankFlash", timeout = duration })
