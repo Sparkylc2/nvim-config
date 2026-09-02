@@ -47,11 +47,13 @@ vim.lsp.config("texlab", {
 		},
 	},
 })
--- ltex is a Java LanguageTool server: a JVM per buffer, and it was attaching to
--- markdown, tex, latex AND plain text. It is no longer in config/servers.lua --
--- start it by hand with :LtexStart when you actually want prose checking.
+-- ltex is LanguageTool (grammar/style/spelling for prose) wrapped as an LSP.
+-- It is a JVM, so scope matters: "text" used to be in this list, which spawned
+-- one for every plain-text scratch buffer and is the likely source of the
+-- server-start timeouts. Restricted to the filetypes where prose checking is
+-- actually the point.
 vim.lsp.config("ltex", {
-	filetypes = { "markdown", "tex", "latex", "text" },
+	filetypes = { "markdown", "tex", "latex" },
 	settings = {
 		ltex = {
 			language = "en-GB",
@@ -59,6 +61,7 @@ vim.lsp.config("ltex", {
 	},
 })
 
+-- kept for buffers outside those filetypes, or to restart it by hand
 vim.api.nvim_create_user_command("LtexStart", function()
 	vim.lsp.enable("ltex")
 	local cfg = vim.lsp.config["ltex"]

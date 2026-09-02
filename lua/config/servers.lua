@@ -15,6 +15,7 @@ return {
 	"glsl_analyzer",
 	"html",
 	"lua_ls",
+	"ltex", -- prose grammar/style; markdown + tex only, see config/lsp.lua
 	"pyright", -- types only; ruff owns linting and formatting
 	"ruff",
 	"tailwindcss",

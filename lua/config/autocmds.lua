@@ -238,15 +238,10 @@ vim.api.nvim_create_autocmd("FileType", {
 -- 	end,
 -- })
 
--- toggle inlay hints (doesn't seem to work)
-vim.keymap.set("n", "<leader>ih", function()
-	local bufnr = vim.api.nvim_get_current_buf()
-	local ok_is_enabled, is_enabled = pcall(vim.lsp.inlay_hint.is_enabled, bufnr)
-	if not ok_is_enabled then
-		is_enabled = false
-	end
-	pcall(vim.lsp.inlay_hint.enable, bufnr, not is_enabled)
-end, { desc = "Toggle Inlay Hints" })
+-- inlay hints toggle is now Snacks.toggle.inlay_hints() on <leader>ih.
+-- The version that used to live here passed a bare bufnr to
+-- vim.lsp.inlay_hint.is_enabled/enable, which on 0.11 expect a filter table --
+-- which is why it "didn't seem to work".
 
 -- run the current python file
 vim.api.nvim_create_autocmd("FileType", {
