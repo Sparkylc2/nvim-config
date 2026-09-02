@@ -35,8 +35,7 @@ opt.swapfile = false
 opt.undofile = true
 opt.undodir = (os.getenv("HOME") or "") .. "/.vim/undodir"
 -- clangd's on_attach used to set this to 400 (800 for files over 1000 lines)
--- via vim.bo[bufnr].updatetime, which throws -- updatetime is global. If C++
--- CursorHold work feels too eager, raise it here; it applies everywhere.
+-- via vim.bo[bufnr].updatetime, which throws -- updatetime is global.
 opt.updatetime = 50
 opt.timeout = true
 opt.timeoutlen = 250
@@ -54,9 +53,6 @@ opt.synmaxcol = 200
 opt.winborder = "rounded"
 opt.clipboard = "unnamedplus"
 
--- Publish the current filename as the terminal title. tmux reads this as
--- #{pane_title} and uses it for the window name, so the tab bar shows the file
--- being edited rather than just "nvim".
 opt.title = true
 opt.titlestring = "%t"
 

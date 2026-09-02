@@ -1,16 +1,3 @@
--- Single source of truth for the Kanagawa Dragon colours.
---
--- These hexes were previously duplicated across at least four places with
--- values that had drifted: the ColorScheme autocmd in plugins/ui/colorscheme.lua
--- used #181616 as the background while the nvim-cmp highlight block used
--- #0d0c0c, and tmux/AeroSpace carry their own copies. Anything that needs a
--- colour should read it from here.
---
--- The tmux status bar (tmux/tmux.conf) and the AeroSpace border colours
--- (aerospace/aerospace.toml) still hold their own copies -- they are not Lua and
--- cannot require this. Keep them in step by hand; the values are listed in the
--- comment at the bottom.
-
 local M = {}
 
 M.bg = "#181616" -- dragonBlack3, the editor background

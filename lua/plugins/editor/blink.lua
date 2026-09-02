@@ -131,12 +131,15 @@ return {
 
 			-- Same palette as the old nvim-cmp block, via config.palette.
 			p.apply({
-				BlinkCmpMenu = { bg = p.bg_dark, fg = p.fg },
-				BlinkCmpMenuBorder = { bg = p.bg_dark, fg = p.orange },
+				-- Matching the old cmp exactly: the menu sat on bg_dim (#181616,
+				-- i.e. the editor background), NOT on bg (#0d0c0c). Only the
+				-- selected row's text used the darker one.
+				BlinkCmpMenu = { bg = p.bg, fg = p.fg },
+				BlinkCmpMenuBorder = { bg = p.bg, fg = p.orange },
 				BlinkCmpMenuSelection = { bg = p.blue, fg = p.bg_dark, bold = true },
-				BlinkCmpDoc = { bg = p.bg_dark, fg = p.fg },
-				BlinkCmpDocBorder = { bg = p.bg_dark, fg = p.orange },
-				BlinkCmpDocSeparator = { bg = p.bg_dark, fg = p.orange },
+				BlinkCmpDoc = { bg = p.bg, fg = p.fg },
+				BlinkCmpDocBorder = { bg = p.bg, fg = p.orange },
+				BlinkCmpDocSeparator = { bg = p.bg, fg = p.orange },
 
 				BlinkCmpLabel = { fg = p.fg },
 				BlinkCmpLabelDeprecated = { fg = p.fg_dim, strikethrough = true },

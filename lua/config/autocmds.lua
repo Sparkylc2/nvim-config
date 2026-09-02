@@ -97,22 +97,21 @@ vim.api.nvim_create_autocmd("TermOpen", {
 		-- ...which means the shell never sees <Esc>. <A-Esc> forwards a literal
 		-- one, for nushell's vi edit_mode and for TUIs (fzf, lazygit, REPLs).
 		vim.keymap.set("t", "<A-esc>", "<esc>", opts)
-		-- Window navigation straight out of terminal mode, on the same keys the
-		-- Claude window uses -- one scheme everywhere.
+		-- Cursor keys for the shell's own line editor. In nushell this is what
+		-- makes <A-o> accept the inline suggestion and <A-i>/<A-e> walk history.
 		--
-		-- These used to send <Left>/<Right>/<Up>/<Down> for shell line editing.
-		-- That is no longer needed: <Esc> now reaches the shell, so nushell's vi
-		-- edit_mode does cursor movement natively. To get the arrows back, swap
-		-- the four callbacks for "<Left>" / "<Right>" / "<Up>" / "<Down>".
-		local function nav(fn)
-			return function()
-				require("smart-splits")[fn]()
-			end
-		end
-		vim.keymap.set("t", "<A-n>", nav("move_cursor_left"), opts)
-		vim.keymap.set("t", "<A-e>", nav("move_cursor_down"), opts)
-		vim.keymap.set("t", "<A-i>", nav("move_cursor_up"), opts)
-		vim.keymap.set("t", "<A-o>", nav("move_cursor_right"), opts)
+		-- Not window navigation: <Esc> goes to nvim normal mode, so moving
+		-- between splits is done from there with the usual H/J/K/L.
+		--
+		-- Send real cursor keys rather than raw "\x1b[A" byte strings: nvim
+		-- encodes these in a single write and honours the app's cursor-key mode
+		-- (DECCKM). A raw sequence can be read one byte at a time, and a lone ESC
+		-- arriving first drops nushell's vi edit_mode into normal mode, which
+		-- then eats the rest as commands.
+		vim.keymap.set("t", "<A-n>", "<Left>", opts)
+		vim.keymap.set("t", "<A-o>", "<Right>", opts)
+		vim.keymap.set("t", "<A-i>", "<Up>", opts)
+		vim.keymap.set("t", "<A-e>", "<Down>", opts)
 	end,
 })
 

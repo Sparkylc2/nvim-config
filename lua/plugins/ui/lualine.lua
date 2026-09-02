@@ -29,10 +29,13 @@ return {
 				inactive = p.gray,
 			}) do
 				theme[mode] = {
+					-- c and x used p.gray (#625e5a), which was too dark to read.
+					-- The filename and the right-hand items now use the editor
+					-- foreground; b and y stay one step down for hierarchy.
 					a = outlined(accent),
-					b = outlined(p.fg_dim),
-					c = outlined(p.gray),
-					x = outlined(p.gray),
+					b = outlined(p.fg),
+					c = outlined(p.fg),
+					x = outlined(p.fg),
 					y = outlined(p.fg_dim),
 					z = outlined(accent),
 				}
