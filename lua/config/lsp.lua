@@ -91,7 +91,6 @@ vim.lsp.config("ts_ls", {
 	filetypes = tsserver_filetypes,
 })
 
-vim.lsp.config("volar", {})
 vim.lsp.config("eslint", { enable = false })
 
 vim.filetype.add({

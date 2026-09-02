@@ -1,18 +1,34 @@
 return {
-	-- "brenton-leighton/multiple-cursors.nvim",
-	-- version = "*",
-	--
-	-- opts = {},
-	-- keys = {
-	-- 	-- { "<C-u>", "<Cmd>MultipleCursorsAddDown<CR>", mode = { "n", "i" } },
-	-- 	-- { "<C-l>", "<Cmd>MultipleCursorsAddUp<CR>", mode = { "n", "i" } },
-	-- 	{ "<A-Up>", "<Cmd>MultipleCursorsAddUp<CR>", mode = { "n", "i" } },
-	-- 	{ "<A-Down>", "<Cmd>MultipleCursorsAddDown<CR>", mode = { "n", "i" } },
-	--
-	-- 	{ "<C-LeftMouse>", "<Cmd>MultipleCursorsMouseAddDelete<CR>", mode = { "n", "i" } },
-	-- 	{ "<Leader>a", "<Cmd>MultipleCursorsAddMatches<CR>", mode = { "n", "v" } },
-	-- 	{ "<Leader>A", "<Cmd>MultipleCursorsAddMatchesV<CR>", mode = { "n", "v" } },
-	-- 	{ "<Leader>d", "<Cmd>MultipleCursorsAddJumpNextMatch<CR>", mode = { "n", "v" } },
-	-- 	{ "<Leader>D", "<Cmd>MultipleCursorsJumpNextMatch<CR>" },
-	-- },
+	"brenton-leighton/multiple-cursors.nvim",
+	version = "*",
+	opts = {},
+	keys = {
+		{ "<C-l>", "<Cmd>MultipleCursorsAddUp<CR>", mode = { "n", "i" }, desc = "Add cursor up" },
+		{ "<C-u>", "<Cmd>MultipleCursorsAddDown<CR>", mode = { "n", "i" }, desc = "Add cursor down" },
+		{
+			"<Leader>ml",
+			"<Cmd>MultipleCursorsAddUp<CR>",
+			mode = { "n" },
+			desc = "Add cursor up (Ctrl-l normally)",
+		},
+		{
+			"<Leader>mu",
+			"<Cmd>MultipleCursorsAddDown<CR>",
+			mode = { "n" },
+			desc = "Add cursor down (-u normally)",
+		},
+
+		{
+			"<Leader>ma",
+			"<Cmd>MultipleCursorsAddMatches<CR>",
+			mode = { "n", "v" },
+			desc = "Add all matches under cursor",
+		},
+		{
+			"<Leader>md",
+			"<Cmd>MultipleCursorsAddJumpNextMatch<CR>",
+			mode = { "n", "v" },
+			desc = "Add match under cursor and jump to next",
+		},
+	},
 }

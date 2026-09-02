@@ -1,5 +1,6 @@
 return {
-	dir = "/Users/lukascampbell/Documents/GitHub/anchor.nvim", -- or push to GitHub and use the URL
+	-- dir = "/Users/lukascampbell/Documents/GitHub/anchor.nvim", -- or push to GitHub and use the URL
+	"sparkylc2/anchor.nvim",
 	dependencies = { "stevearc/oil.nvim" },
 	main = "anchor",
 	opts = {

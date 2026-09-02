@@ -2,7 +2,15 @@ return {
 	{
 		"gbprod/yanky.nvim",
 		dependencies = { "kkharji/sqlite.lua" },
+		keys = {
+			{
+				"<leader>y",
+				"<cmd>YankyRingHistory<cr>",
+				desc = "Yanky: Open ring history",
+			},
+		},
 		opts = {},
+
 		config = function()
 			require("yanky").setup({
 				ring = {

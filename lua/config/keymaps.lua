@@ -10,9 +10,6 @@ keymap("n", "<A-v>", "<C-v>", opts)
 -- redo with shift u
 keymap("n", "U", "<C-r>", opts)
 
--- join line below without moving cursor
-keymap({ "n", "x" }, "J", "mzJ`z", opts)
-
 -- copy until end of line
 keymap({ "n", "x" }, "Y", "y$", opts)
 
@@ -25,8 +22,8 @@ keymap({ "x", "n" }, "G", "G$", opts)
 keymap({ "x", "n" }, "gg", "gg^", opts)
 
 -- move half page up/down while keeping cursor centered
-keymap("n", "<D-d>", "<C-d>zz", opts)
-keymap("n", "<D-u>", "<C-u>zz", opts)
+keymap("n", "<M-U>", "<C-d>zz", opts) -- down
+keymap("n", "<M-L>", "<C-u>zz", opts) -- up
 
 -- search next/prev and center
 keymap("n", "n", "nzzzv", opts)
@@ -42,11 +39,6 @@ keymap("n", "Q", "<nop>")
 -- quick chmod +x
 keymap("n", "<leader>ch", "<cmd>!chmod +x %<CR>", { silent = true })
 
--- insert mode enhancements
--- keymap("i", "<C-n>", "<C-o>^", opts)
--- keymap("i", "<C-o>", "<C-o>$", opts)
-keymap("i", "<D-BS>", "<C-u>", opts)
-
 -- move cursor with alt + neio
 keymap("i", "<A-i>", "<Up>", opts)
 keymap("i", "<A-e>", "<Down>", opts)
@@ -54,10 +46,10 @@ keymap("i", "<A-n>", "<Left>", opts)
 keymap("i", "<A-o>", "<Right>", opts)
 
 -- win resize commands
-keymap("n", "<C-n>", ":vertical resize -2<CR>", { desc = "Resize split left" }) -- n
-keymap("n", "<C-e>", ":resize +2<CR>", { desc = "Resize split down" }) -- e
-keymap("n", "<C-i>", ":resize -2<CR>", { desc = "Resize split up" }) -- i
-keymap("n", "<C-o>", ":vertical resize +2<CR>", { desc = "Resize split right" }) -- o
+keymap("n", "<C-S-A>", ":vertical resize -2<CR>", { desc = "Resize split left" }) -- n
+keymap("n", "<C-S-R>", ":resize +2<CR>", { desc = "Resize split down" }) -- e
+keymap("n", "<C-S-S>", ":resize -2<CR>", { desc = "Resize split up" }) -- i
+keymap("n", "<C-S-T>", ":vertical resize +2<CR>", { desc = "Resize split right" }) -- o
 
 -- move splits (normal)
 keymap("n", "<A-N>", "<C-w>H", { desc = "Move window left" })
@@ -68,14 +60,11 @@ keymap("n", "<A-O>", "<C-w>L", { desc = "Move window right" })
 -- go to previous window (normal)
 keymap("n", "<C-\\>", "<C-w>p", { desc = "Go to previous window" })
 
--- split window (normal)
-keymap("n", "<leader>sv", "<C-w>v", { desc = "Vertical split" })
-keymap("n", "<leader>se", "<C-w>=", { desc = "Equalize" })
-keymap("n", "<leader>sh", "<C-w>s", { desc = "Horizontal split" })
-keymap("n", "<leader>sx", "<cmd>close<CR>", { desc = "Close window" })
-
--- tab management (normal)
-keymap("n", "<A-w>", "<Cmd>bdelete<CR>", { silent = true })
+-- tmux's pane mode (M-[) forwards lowercase a/s/r/t here as Alt+Shift, so the
+keymap("n", "<C-a>", "<cmd>leftabove vsplit<CR>", { desc = "Split nvim left" })
+keymap("n", "<C-s>", "<cmd>belowright split<CR>", { desc = "Split nvim down" })
+keymap("n", "<C-r>", "<cmd>aboveleft split<CR>", { desc = "Split nvim up" })
+keymap("n", "<C-t>", "<cmd>rightbelow vsplit<CR>", { desc = "Split nvim right" })
 
 -- move line (normal + visual)
 keymap("n", "<A-i>", ":m .-2<CR>==", { desc = "Move line up" })
@@ -96,16 +85,6 @@ keymap("x", "p", '"_dP', { desc = "Paste without yanking" })
 keymap("n", "<leader>q", ":q<CR>", { desc = "Quit" })
 keymap("n", "<leader>Q", ":qa<CR>", { desc = "Quit all" })
 
--- copilot stuff
-keymap("i", "<C-k>", 'copilot#Accept("")', { expr = true, silent = true, noremap = true, replace_keycodes = true })
-keymap("i", "<C-k>", function()
-	if vim.fn["copilot#GetDisplayedSuggestion"]().text ~= "" then
-		return vim.fn["copilot#Accept"]("")
-	else
-		return "<CR>"
-	end
-end, { expr = true, silent = true, noremap = true, replace_keycodes = false, desc = "Accept Copilot or newline" })
-
 keymap("n", "<leader>rr", function()
 	local t = require("toggleterm.terminal")
 	local term = t.get_last_focused() or t.get(1)
@@ -113,7 +92,6 @@ keymap("n", "<leader>rr", function()
 		vim.notify("no toggleterm to rerun in", vim.log.levels.WARN)
 		return
 	end
-	-- !! = shell's previous command; send() appends a newline so it executes
 	term:send("!!\n", false)
 end, { desc = "rerun previous terminal command" })
 

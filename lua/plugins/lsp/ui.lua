@@ -1,20 +1,3 @@
-vim.api.nvim_create_autocmd("LspAttach", {
-	callback = function(args)
-		pcall(function()
-			vim.lsp.inlay_hint.enable(args.buf, false)
-		end)
-	end,
-})
-
-vim.keymap.set("n", "<leader>ih", function()
-	local bufnr = vim.api.nvim_get_current_buf()
-	local ok_is_enabled, is_enabled = pcall(vim.lsp.inlay_hint.is_enabled, bufnr)
-	if not ok_is_enabled then
-		is_enabled = false
-	end
-	pcall(vim.lsp.inlay_hint.enable, bufnr, not is_enabled)
-end, { desc = "Toggle Inlay Hints" })
-
 return {
 	{
 		"ray-x/lsp_signature.nvim",

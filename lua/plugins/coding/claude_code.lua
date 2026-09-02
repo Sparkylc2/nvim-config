@@ -16,7 +16,6 @@ local function soft_reset()
 		vim.notify("Claude terminal is not running", vim.log.levels.WARN)
 		return
 	end
-
 	term.send_to_terminal("\12", { submit = false })
 
 	local win = vim.fn.win_findbuf(buf)[1]
@@ -67,6 +66,41 @@ return {
 						end,
 						mode = "t",
 						desc = "Hide Claude",
+					},
+					-- split navigation from inside the Claude terminal. capital
+					-- HJKL can't be used here: in terminal mode they're just typed
+					-- text, so they'd break typing capitals into the prompt.
+					nav_left = {
+						"<A-n>",
+						function()
+							require("smart-splits").move_cursor_left()
+						end,
+						mode = "t",
+						desc = "Split left",
+					},
+					nav_down = {
+						"<A-e>",
+						function()
+							require("smart-splits").move_cursor_down()
+						end,
+						mode = "t",
+						desc = "Split down",
+					},
+					nav_up = {
+						"<A-i>",
+						function()
+							require("smart-splits").move_cursor_up()
+						end,
+						mode = "t",
+						desc = "Split up",
+					},
+					nav_right = {
+						"<A-o>",
+						function()
+							require("smart-splits").move_cursor_right()
+						end,
+						mode = "t",
+						desc = "Split right",
 					},
 				},
 			},

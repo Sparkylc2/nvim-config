@@ -51,6 +51,12 @@ opt.synmaxcol = 200
 opt.winborder = "rounded"
 opt.clipboard = "unnamedplus"
 
+-- Publish the current filename as the terminal title. tmux reads this as
+-- #{pane_title} and uses it for the window name, so the tab bar shows the file
+-- being edited rather than just "nvim".
+opt.title = true
+opt.titlestring = "%t"
+
 -- Cursor
 opt.cursorline = true
 opt.cursorlineopt = "number"
@@ -80,5 +86,6 @@ for _, plugin in pairs({
 	vim.g["loaded_" .. plugin] = 1
 end
 
--- Python provider and environment
-vim.g.python3_host_prog = vim.fn.expand("~/.virtualenvs/neovim/bin/python")
+-- python host
+g.python3_host_prog = vim.fn.expand("~/.virtualenvs/neovim/bin/python")
+vim.b.slime_cell_delimiter = "# %%"

@@ -163,16 +163,6 @@ vim.api.nvim_create_autocmd("CmdlineLeave", {
 		end
 	end,
 })
-
--- fix for neovim bugging when resizing
--- vim.api.nvim_create_autocmd({ "VimResized", "FocusGained" }, {
--- 	callback = function()
--- 		vim.schedule(function()
--- 			vim.cmd("redraw!")
--- 			vim.cmd("mode")
--- 		end)
--- 	end,
--- })
 -- launches neovim cd'd into the working directory it was launched as an arg with
 vim.api.nvim_create_autocmd("VimEnter", {
 	desc = "cd to passed $PWD when vim starts.",
@@ -183,33 +173,6 @@ vim.api.nvim_create_autocmd("VimEnter", {
 	end,
 })
 
-vim.api.nvim_create_autocmd("WinResized", {
-	callback = function()
-		vim.cmd("redrawstatus")
-		vim.cmd("redrawtabline")
-		vim.cmd("redraw")
-	end,
-})
-
-vim.api.nvim_create_autocmd("VimEnter", {
-	callback = function()
-		local cols = tonumber(vim.env.COLUMNS)
-		local lines = tonumber(vim.env.LINES)
-		if cols and cols > 0 then
-			vim.o.columns = cols
-		end
-		if lines and lines > 0 then
-			vim.o.lines = lines
-		end
-		vim.cmd("doautocmd VimResized")
-		vim.schedule(function()
-			pcall(function()
-				require("lualine").refresh({ place = { "statusline" }, force = true })
-			end)
-			vim.cmd("redrawstatus!")
-		end)
-	end,
-})
 -- run npm tasks easily
 vim.api.nvim_create_autocmd("FileType", {
 	group = ft_group,
@@ -248,5 +211,40 @@ vim.api.nvim_create_autocmd("FileType", {
 	callback = function()
 		vim.keymap.set("n", "<leader>rm", ":!make<CR>", { buffer = true, desc = "Run make run" })
 		vim.keymap.set("n", "<leader>rf", ":!./a.out<CR>", { buffer = true, desc = "Run make output" })
+	end,
+})
+
+-- disable inline lsp hints
+-- vim.api.nvim_create_autocmd("LspAttach", {
+-- 	callback = function(args)
+-- 		pcall(function()
+-- 			vim.lsp.inlay_hint.enable(args.buf, false)
+-- 		end)
+-- 	end,
+-- })
+
+-- toggle inlay hints (doesn't seem to work)
+vim.keymap.set("n", "<leader>ih", function()
+	local bufnr = vim.api.nvim_get_current_buf()
+	local ok_is_enabled, is_enabled = pcall(vim.lsp.inlay_hint.is_enabled, bufnr)
+	if not ok_is_enabled then
+		is_enabled = false
+	end
+	pcall(vim.lsp.inlay_hint.enable, bufnr, not is_enabled)
+end, { desc = "Toggle Inlay Hints" })
+
+-- run the current python file
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = { "python" },
+	callback = function()
+		vim.keymap.set("n", "<leader>rp", function()
+			local file = vim.fn.expand("%:p")
+			if file == nil or file == "" then
+				vim.notify("No file to run", vim.log.levels.WARN)
+				return
+			end
+			local cmd = "python3 " .. vim.fn.shellescape(file)
+			require("toggleterm").exec(cmd, 1, 12, nil, "horizontal")
+		end, { buffer = true, desc = "Run python file in ToggleTerm" })
 	end,
 })
