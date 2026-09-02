@@ -11,12 +11,7 @@ return {
 			vim.api.nvim_create_autocmd("ColorScheme", {
 				pattern = "*",
 				callback = function()
-					local colors = {
-						bg = "#181616",
-						bg_light = "#282727",
-						fg = "#c5c9c5",
-						border = "#54546D",
-					}
+					local colors = require("config.palette")
 					vim.api.nvim_set_hl(0, "SignColumn", { bg = "#181616" })
 					vim.api.nvim_set_hl(0, "LineNr", { bg = "#181616", fg = "#625E5A" })
 					vim.api.nvim_set_hl(0, "DiagnosticSignError", { bg = "#181616", fg = "#FF5D62" })
@@ -70,14 +65,33 @@ return {
 					vim.api.nvim_set_hl(0, "FloatBorder", { bg = colors.bg, fg = colors.border })
 					vim.api.nvim_set_hl(0, "FloatTitle", { bg = colors.bg, fg = colors.border, bold = true })
 
-					vim.api.nvim_set_hl(0, "TelescopeNormal", { bg = colors.bg })
-					vim.api.nvim_set_hl(0, "TelescopeBorder", { bg = colors.bg, fg = colors.border })
-					vim.api.nvim_set_hl(0, "TelescopePromptNormal", { bg = colors.bg })
-					vim.api.nvim_set_hl(0, "TelescopePromptBorder", { bg = colors.bg, fg = colors.border })
-					vim.api.nvim_set_hl(0, "TelescopeResultsNormal", { bg = colors.bg })
-					vim.api.nvim_set_hl(0, "TelescopeResultsBorder", { bg = colors.bg, fg = colors.border })
-					vim.api.nvim_set_hl(0, "TelescopePreviewNormal", { bg = colors.bg })
-					vim.api.nvim_set_hl(0, "TelescopePreviewBorder", { bg = colors.bg, fg = colors.border })
+					-- snacks.picker replaced telescope; these are its groups
+					colors.apply({
+						SnacksPickerNormal = { bg = colors.bg, fg = colors.fg },
+						SnacksPickerBorder = { bg = colors.bg, fg = colors.border },
+						SnacksPickerTitle = { bg = colors.bg, fg = colors.border, bold = true },
+						SnacksPickerInput = { bg = colors.bg },
+						SnacksPickerInputBorder = { bg = colors.bg, fg = colors.border },
+						SnacksPickerList = { bg = colors.bg },
+						SnacksPickerListBorder = { bg = colors.bg, fg = colors.border },
+						SnacksPickerPreview = { bg = colors.bg },
+						SnacksPickerPreviewBorder = { bg = colors.bg, fg = colors.border },
+						SnacksPickerMatch = { fg = colors.blue, bold = true },
+						SnacksPickerCursorLine = { bg = colors.bg_light },
+
+						-- other snacks surfaces, same palette
+						SnacksNotifierBorderInfo = { bg = colors.bg, fg = colors.border },
+						SnacksNotifierBorderWarn = { bg = colors.bg, fg = colors.yellow },
+						SnacksNotifierBorderError = { bg = colors.bg, fg = colors.red },
+						SnacksInputBorder = { bg = colors.bg, fg = colors.border },
+						SnacksIndent = { fg = colors.bg_light },
+						SnacksIndentScope = { fg = colors.gray },
+						SnacksDashboardHeader = { fg = colors.blue },
+						SnacksDashboardIcon = { fg = colors.orange },
+						SnacksDashboardKey = { fg = colors.yellow },
+						SnacksDashboardDesc = { fg = colors.fg },
+						SnacksDashboardFooter = { fg = colors.gray, italic = true },
+					})
 
 					vim.api.nvim_set_hl(0, "LspInfoBorder", { bg = colors.bg, fg = colors.border })
 					vim.api.nvim_set_hl(0, "DiagnosticFloatingError", { bg = colors.bg })

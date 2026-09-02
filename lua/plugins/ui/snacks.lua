@@ -6,8 +6,7 @@
 -- which snacks.zen does not. See lua/plugins/editor/zen.lua.
 -- Adds: bigfile, scroll, input, notifier.
 --
--- The picker is deliberately NOT enabled yet -- telescope stays until that swap
--- gets its own branch, so the dashboard buttons below still call Telescope.
+-- The picker lives in lua/plugins/editor/picker.lua.
 
 local header = [[
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣰⡟⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -47,10 +46,10 @@ return {
 					header = header,
 					-- still Telescope: the picker swap is a later batch
 					keys = {
-						{ icon = " ", key = "f", desc = "Find file", action = ":Telescope find_files" },
+						{ icon = " ", key = "f", desc = "Find file", action = ":lua Snacks.picker.files()" },
 						{ icon = " ", key = "e", desc = "New file", action = ":ene | startinsert" },
-						{ icon = " ", key = "r", desc = "Recent files", action = ":Telescope oldfiles" },
-						{ icon = " ", key = "t", desc = "Find text", action = ":Telescope live_grep" },
+						{ icon = " ", key = "r", desc = "Recent files", action = ":lua Snacks.picker.recent()" },
+						{ icon = " ", key = "t", desc = "Find text", action = ":lua Snacks.picker.grep()" },
 						{ icon = " ", key = "s", desc = "Restore session", action = ":AutoSession restore" },
 						{
 							icon = " ",

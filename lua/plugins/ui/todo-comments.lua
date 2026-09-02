@@ -1,7 +1,7 @@
 return {
 	{
 		"folke/todo-comments.nvim",
-		cmd = { "TodoTrouble", "TodoTelescope" },
+		cmd = { "TodoTrouble" },
 		opts = {
 			keywords = {
 				TODO = {
@@ -33,7 +33,13 @@ return {
 				"<cmd>Trouble todo toggle filter = {tag = {TODO,FIX,FIXME}}<cr>",
 				desc = "Todo/Fix/Fixme (Trouble)",
 			},
-			{ "<leader>xT", "<cmd>TodoTelescope<cr>", desc = "Todo" },
+			{
+				"<leader>xT",
+				function()
+					Snacks.picker.todo_comments()
+				end,
+				desc = "Todo",
+			},
 		},
 	},
 }
