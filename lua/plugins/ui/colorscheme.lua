@@ -102,9 +102,14 @@ return {
 					vim.api.nvim_set_hl(0, "Pmenu", { bg = colors.bg_light, fg = colors.fg })
 					vim.api.nvim_set_hl(0, "PmenuSel", { bg = colors.border, fg = colors.bg, bold = true })
 					vim.api.nvim_set_hl(0, "PmenuBorder", { bg = colors.bg_light, fg = colors.border })
-					local c = require("kanagawa.colors").setup()
-					local sep = c.theme.ui.whitespace
-					vim.api.nvim_set_hl(0, "WinSeparator", { fg = sep, bg = "NONE" })
+					-- Splits should be invisible: the separator, the sign column and
+					-- the number column all sit on the same background, so a split
+					-- reads as one continuous surface rather than two panes with a
+					-- rule between them.
+					colors.apply({
+						WinSeparator = { fg = colors.bg, bg = colors.bg },
+						VertSplit = { fg = colors.bg, bg = colors.bg },
+					})
 				end,
 			})
 

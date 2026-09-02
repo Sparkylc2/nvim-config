@@ -44,7 +44,6 @@ return {
 				enabled = true,
 				preset = {
 					header = header,
-					-- still Telescope: the picker swap is a later batch
 					keys = {
 						{ icon = " ", key = "f", desc = "Find file", action = ":lua Snacks.picker.files()" },
 						{ icon = " ", key = "e", desc = "New file", action = ":ene | startinsert" },

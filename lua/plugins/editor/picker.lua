@@ -22,6 +22,10 @@ return {
 				-- search look consistent with everything else
 				ui_select = true,
 
+				-- no dimming behind the picker: the float should read as part of
+				-- the editor, not as an overlay on top of it
+				layout = { backdrop = false },
+
 				win = {
 					input = {
 						keys = {
