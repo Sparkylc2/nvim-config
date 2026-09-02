@@ -85,14 +85,21 @@ keymap("x", "p", '"_dP', { desc = "Paste without yanking" })
 keymap("n", "<leader>q", ":q<CR>", { desc = "Quit" })
 keymap("n", "<leader>Q", ":qa<CR>", { desc = "Quit all" })
 
+-- rerun the last shell command: "!!" expands to it, the newline runs it.
+-- snacks has no "last focused terminal", so take the most recent open one.
 keymap("n", "<leader>rr", function()
-	local t = require("toggleterm.terminal")
-	local term = t.get_last_focused() or t.get(1)
-	if not term then
-		vim.notify("no toggleterm to rerun in", vim.log.levels.WARN)
+	local terms = Snacks.terminal.list()
+	local target = terms[#terms]
+	if not target or not target:buf_valid() then
+		vim.notify("no terminal open to rerun in", vim.log.levels.WARN)
 		return
 	end
-	term:send("!!\n", false)
+	local chan = vim.bo[target.buf].channel
+	if not chan or chan <= 0 then
+		vim.notify("terminal has no job channel", vim.log.levels.WARN)
+		return
+	end
+	vim.api.nvim_chan_send(chan, "!!\n")
 end, { desc = "rerun previous terminal command" })
 
 keymap("n", "<M-l>", "<C-o>", { desc = "jumplist back" })

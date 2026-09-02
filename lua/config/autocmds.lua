@@ -99,25 +99,22 @@ vim.api.nvim_create_autocmd("TermOpen", {
 		-- <C-\><C-n> is nvim's built-in and always works as a fallback.
 		vim.keymap.set("t", "<C-e>", [[<C-\><C-n>]], opts)
 		vim.keymap.set("t", "<A-esc>", [[<C-\><C-n>]], opts)
-		-- Send real cursor keys, not raw "\x1b[A" byte strings: nvim encodes these
-		-- in one write and respects the app's cursor-key mode.
-		vim.keymap.set("t", "<A-n>", "<Left>", opts) -- left
-		vim.keymap.set("t", "<A-o>", "<Right>", opts) -- right
-		vim.keymap.set("t", "<A-i>", "<Up>", opts) -- up
-		vim.keymap.set("t", "<A-e>", "<Down>", opts) -- down
-
-		-- Window navigation without leaving terminal mode. Alt+Shift, because
-		-- plain A-neio are the cursor keys above and capital NEIO in terminal
-		-- mode are just typed text.
+		-- Window navigation straight out of terminal mode, on the same keys the
+		-- Claude window uses -- one scheme everywhere.
+		--
+		-- These used to send <Left>/<Right>/<Up>/<Down> for shell line editing.
+		-- That is no longer needed: <Esc> now reaches the shell, so nushell's vi
+		-- edit_mode does cursor movement natively. To get the arrows back, swap
+		-- the four callbacks for "<Left>" / "<Right>" / "<Up>" / "<Down>".
 		local function nav(fn)
 			return function()
 				require("smart-splits")[fn]()
 			end
 		end
-		vim.keymap.set("t", "<A-N>", nav("move_cursor_left"), opts)
-		vim.keymap.set("t", "<A-E>", nav("move_cursor_down"), opts)
-		vim.keymap.set("t", "<A-I>", nav("move_cursor_up"), opts)
-		vim.keymap.set("t", "<A-O>", nav("move_cursor_right"), opts)
+		vim.keymap.set("t", "<A-n>", nav("move_cursor_left"), opts)
+		vim.keymap.set("t", "<A-e>", nav("move_cursor_down"), opts)
+		vim.keymap.set("t", "<A-i>", nav("move_cursor_up"), opts)
+		vim.keymap.set("t", "<A-o>", nav("move_cursor_right"), opts)
 	end,
 })
 
@@ -254,7 +251,10 @@ vim.api.nvim_create_autocmd("FileType", {
 				return
 			end
 			local cmd = "python3 " .. vim.fn.shellescape(file)
-			require("toggleterm").exec(cmd, 1, 12, nil, "horizontal")
-		end, { buffer = true, desc = "Run python file in ToggleTerm" })
+			Snacks.terminal.open(cmd, {
+				win = { position = "bottom", height = 0.3 },
+				interactive = false,
+			})
+		end, { buffer = true, desc = "Run python file in a terminal" })
 	end,
 })

@@ -20,6 +20,6 @@ return {
 	"ruff",
 	"tailwindcss",
 	"texlab",
-	"ts_ls",
+	"vtsls", -- one TS server; ts_ls dropped, see config/lsp.lua
 	"vue_ls",
 }

@@ -1,7 +1,9 @@
 -- snacks.nvim, batch 1.
 --
--- Replaces: alpha-nvim (dashboard), indent-blankline (indent), zen-mode (zen),
+-- Replaces: alpha-nvim (dashboard), indent-blankline (indent),
 -- peepsight (dim), kdheepak/lazygit.nvim (lazygit).
+-- zen-mode.nvim is deliberately KEPT: it drives kitty font + tmux status,
+-- which snacks.zen does not. See lua/plugins/editor/zen.lua.
 -- Adds: bigfile, scroll, input, notifier.
 --
 -- The picker is deliberately NOT enabled yet -- telescope stays until that swap
@@ -86,35 +88,38 @@ return {
 
 			notifier = { enabled = true, timeout = 3000 },
 
+			-- inline images in the buffer, and rendered LaTeX math. Needs a
+			-- graphics-capable terminal -- kitty qualifies.
+			image = { enabled = true },
+
+			-- LSP-aware file rename: renaming a file tells the language servers so
+			-- imports/includes follow. Wired to oil below.
+			rename = { enabled = true },
+
 			scratch = { enabled = true },
 
-			scroll = { enabled = true },
+			-- defaults are step=10/total=200 (and 5/50 when repeating), which
+			-- reads as lag. Roughly halved, with a snappier repeat so held
+			-- <C-d>/<C-u> keeps up instead of queueing behind the animation.
+			scroll = {
+				enabled = true,
+				animate = {
+					duration = { step = 5, total = 30 },
+					-- easing = "inOutSine",
+					easing = "linear",
+				},
+				animate_repeat = {
+					delay = 20,
+					duration = { step = 3, total = 25 },
+					easing = "linear",
+				},
+			},
 
 			-- ]] / [[ jump between LSP references of the symbol under the cursor
 			words = { enabled = true },
-
-			-- replaces zen-mode.nvim
-			zen = {
-				enabled = true,
-				toggles = { dim = true, git_signs = false },
-				win = { width = 120 },
-			},
-
-			styles = {
-				zen = {
-					backdrop = { transparent = false },
-				},
-			},
 		},
 
 		keys = {
-			{
-				"<leader>z",
-				function()
-					Snacks.zen()
-				end,
-				desc = "Zen mode",
-			},
 			{
 				"<leader>gg",
 				function()
@@ -161,6 +166,22 @@ return {
 		},
 
 		init = function()
+			-- tell the LSPs about oil renames so imports/includes follow.
+			-- This is the general version of what lua/tools/cpp/include_rename.lua
+			-- does by hand for C/C++ headers.
+			vim.api.nvim_create_autocmd("User", {
+				pattern = "OilActionsPost",
+				callback = function(event)
+					if event.data and event.data.actions then
+						for _, a in ipairs(event.data.actions) do
+							if a.type == "move" then
+								Snacks.rename.on_rename_file(a.src_url, a.dest_url)
+							end
+						end
+					end
+				end,
+			})
+
 			vim.api.nvim_create_autocmd("User", {
 				pattern = "VeryLazy",
 				callback = function()

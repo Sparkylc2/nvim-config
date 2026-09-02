@@ -70,17 +70,62 @@ vim.api.nvim_create_user_command("LtexStart", function()
 	end
 end, { desc = "Start ltex grammar checking for this buffer" })
 
+-- Find the interpreter pyright should use. The old version only checked
+-- .venv/venv/.env directly under the root, so uv, poetry and any activated
+-- env silently fell back to the system python -- which is exactly when pyright
+-- starts reporting imports it cannot resolve.
 local function venv_python(root)
+	-- 1. an activated environment always wins
+	if vim.env.VIRTUAL_ENV and vim.env.VIRTUAL_ENV ~= "" then
+		local exe = vim.env.VIRTUAL_ENV .. "/bin/python"
+		if vim.uv.fs_stat(exe) then
+			return exe
+		end
+	end
+
+	-- 2. conda
+	if vim.env.CONDA_PREFIX and vim.env.CONDA_PREFIX ~= "" then
+		local exe = vim.env.CONDA_PREFIX .. "/bin/python"
+		if vim.uv.fs_stat(exe) then
+			return exe
+		end
+	end
+
+	-- 3. in-tree virtualenvs (uv and plain venv both put one here)
 	for _, name in ipairs({ ".venv", "venv", ".env" }) do
 		local exe = root .. "/" .. name .. "/bin/python"
 		if vim.uv.fs_stat(exe) then
 			return exe
 		end
 	end
+
+	-- 4. poetry keeps its venvs out of tree; ask it. Only when this actually
+	-- looks like a poetry project, since `poetry env info` is a slow subprocess.
+	if vim.uv.fs_stat(root .. "/poetry.lock") and vim.fn.executable("poetry") == 1 then
+		local out = vim.fn.system({ "poetry", "env", "info", "-e" })
+		if vim.v.shell_error == 0 then
+			local exe = vim.trim(out)
+			if exe ~= "" and vim.uv.fs_stat(exe) then
+				return exe
+			end
+		end
+	end
+
 	return vim.fn.exepath("python3")
 end
 
 vim.lsp.config("pyright", {
+	-- pyright's own defaults do not include these, so a project with only a
+	-- pyproject.toml used to root at the cwd
+	root_markers = {
+		"pyproject.toml",
+		"setup.py",
+		"setup.cfg",
+		"requirements.txt",
+		"Pipfile",
+		"pyrightconfig.json",
+		".git",
+	},
 	before_init = function(params, config)
 		local root = config.root_dir or params.rootPath or vim.fn.getcwd()
 		config.settings.python.pythonPath = venv_python(root)
@@ -90,6 +135,10 @@ vim.lsp.config("pyright", {
 			analysis = {
 				autoSearchPaths = true,
 				useLibraryCodeForTypes = true,
+				-- "workspace" would surface errors in files you have not opened,
+				-- but re-analyses the whole tree on every change. ruff already
+				-- lints the whole project cheaply, so pyright stays on open files
+				-- and keeps type-checking responsive on big repos.
 				diagnosticMode = "openFilesOnly",
 			},
 		},
@@ -183,13 +232,17 @@ local vue_plugin = {
 	configNamespace = "typescript",
 }
 
-vim.lsp.config("ts_ls", {
-	init_options = {
-		plugins = {
-			vue_plugin,
+-- One TypeScript server, not two. vtsls is the better-maintained wrapper and
+-- was already installed via mason while ts_ls was the one actually wired up.
+vim.lsp.config("vtsls", {
+	filetypes = tsserver_filetypes,
+	settings = {
+		vtsls = {
+			tsserver = {
+				globalPlugins = { vue_plugin },
+			},
 		},
 	},
-	filetypes = tsserver_filetypes,
 })
 
 -- eslint is simply absent from config/servers.lua; there is no "enable" field

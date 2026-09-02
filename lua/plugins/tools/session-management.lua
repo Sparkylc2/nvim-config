@@ -22,10 +22,14 @@ return {
 			vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,localoptions"
 
 			require("auto-session").setup({
-				-- explicit save, automatic restore: <leader>Ss writes a session,
-				-- entering a directory that already has one restores it. This is
-				-- what stops every directory you ever opened accumulating a file.
-				auto_save = false,
+				-- Save on exit, restore on entry -- but only for directories that
+				-- already HAVE a session. auto_create = false gates saving too,
+				-- not just creating: with no existing session file, auto_save is
+				-- a no-op ("Create not enabled and no existing session"). So a
+				-- session exists only because you made one with <leader>Ss, and
+				-- from then on it keeps itself up to date. That is what stops
+				-- every directory you ever opened accumulating a file.
+				auto_save = true,
 				auto_restore = true,
 				auto_create = false,
 
