@@ -1,3 +1,23 @@
+-- nvim 0.11 LSP wiring.
+--
+-- Servers are described with vim.lsp.config() and turned on with
+-- vim.lsp.enable(). nvim-lspconfig is present only as a *data provider* -- it
+-- ships lsp/<server>.lua files that supply cmd/filetypes/root_markers -- and is
+-- never require()d. That framework is deprecated on 0.11.
+
+-- Defaults merged into every server. Nothing was advertising cmp's completion
+-- capabilities before this, so servers saw only nvim's built-in set and LSP
+-- snippet expansion never worked properly.
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+local ok_cmp, cmp_lsp = pcall(require, "cmp_nvim_lsp")
+if ok_cmp then
+	capabilities = vim.tbl_deep_extend("force", capabilities, cmp_lsp.default_capabilities())
+end
+
+vim.lsp.config("*", {
+	capabilities = capabilities,
+})
+
 vim.lsp.config("texlab", {
 	settings = {
 		texlab = {
@@ -12,8 +32,10 @@ vim.lsp.config("texlab", {
 				executable = nil,
 				args = {},
 			},
+			-- chktex IS the LaTeX linter. Both were false, so tex had no
+			-- linting at all. onEdit stays off: it relints on every keystroke.
 			chktex = {
-				onOpenAndSave = false,
+				onOpenAndSave = true,
 				onEdit = false,
 			},
 			diagnosticsDelay = 300,
@@ -25,6 +47,9 @@ vim.lsp.config("texlab", {
 		},
 	},
 })
+-- ltex is a Java LanguageTool server: a JVM per buffer, and it was attaching to
+-- markdown, tex, latex AND plain text. It is no longer in config/servers.lua --
+-- start it by hand with :LtexStart when you actually want prose checking.
 vim.lsp.config("ltex", {
 	filetypes = { "markdown", "tex", "latex", "text" },
 	settings = {
@@ -33,6 +58,14 @@ vim.lsp.config("ltex", {
 		},
 	},
 })
+
+vim.api.nvim_create_user_command("LtexStart", function()
+	vim.lsp.enable("ltex")
+	local cfg = vim.lsp.config["ltex"]
+	if cfg then
+		vim.lsp.start(cfg, { bufnr = 0 })
+	end
+end, { desc = "Start ltex grammar checking for this buffer" })
 
 local function venv_python(root)
 	for _, name in ipairs({ ".venv", "venv", ".env" }) do
@@ -60,13 +93,78 @@ vim.lsp.config("pyright", {
 	},
 })
 
-vim.lsp.config("matlab_ls", {
+vim.lsp.config("clangd", {
+	cmd = {
+		"clangd",
+		"--background-index",
+		"--clang-tidy",
+		"--header-insertion=iwyu",
+		"--completion-style=detailed",
+		"--function-arg-placeholders",
+		"--fallback-style=llvm",
+		-- NOTE: "--std=c++20" used to be here. It is a *compiler* flag, not a
+		-- clangd one -- clangd rejected it and exited 1 on every C/C++ file, so
+		-- the server has never actually run. Set the standard in
+		-- compile_commands.json, compile_flags.txt or a .clangd file instead.
+		"--limit-results=50",
+		"--compile-commands-dir=.",
+		"--pch-storage=memory",
+	},
+	-- replaces lspconfig.util.root_pattern(), which is deprecated
+	root_markers = {
+		"compile_commands.json",
+		"compile_flags.txt",
+		"Makefile",
+		"configure.ac",
+		"configure.in",
+		"config.h.in",
+		"meson.build",
+		"meson_options.txt",
+		"build.ninja",
+		".git",
+	},
+	init_options = {
+		usePlaceholders = true,
+		completeUnimported = false,
+		clangdFileStatus = true,
+	},
 	settings = {
-		MATLAB = {
-			installPath = "/Applications/MATLAB_R2024b.app",
-			matlabConnectionTiming = "onStart",
-			telemetry = true,
+		clangd = {
+			InlayHints = {
+				Designators = false,
+				Enabled = false,
+				ParameterNames = false,
+				DeducedTypes = false,
+			},
+			SemanticHighlighting = false,
 		},
+	},
+	on_attach = function(client, bufnr)
+		client.server_capabilities.semanticTokensProvider = nil
+		if client.server_capabilities.signatureHelpProvider then
+			client.server_capabilities.signatureHelpProvider.triggerCharacters = { "(", "," }
+		end
+		-- updatetime is global and now lives in config/options.lua
+		if vim.api.nvim_buf_line_count(bufnr) > 1000 then
+			client.server_capabilities.documentHighlightProvider = nil
+		end
+	end,
+})
+
+-- ruff does linting + import sorting + formatting. pyright keeps types and
+-- hover; disabling ruff's hover stops the two duplicating every docstring.
+vim.lsp.config("ruff", {
+	on_attach = function(client, _)
+		client.server_capabilities.hoverProvider = false
+	end,
+})
+
+-- eslint reads the project's own .eslintrc/flat config, which is the whole
+-- point: prettier alone cannot know your project's rules. Previously eslint was
+-- installed via mason and then never enabled.
+vim.lsp.config("eslint", {
+	settings = {
+		workingDirectories = { mode = "auto" },
 	},
 })
 
@@ -91,7 +189,8 @@ vim.lsp.config("ts_ls", {
 	filetypes = tsserver_filetypes,
 })
 
-vim.lsp.config("eslint", { enable = false })
+-- eslint is simply absent from config/servers.lua; there is no "enable" field
+-- on vim.lsp.config, so the old `{ enable = false }` here did nothing.
 
 vim.filetype.add({
 	extension = {
@@ -100,23 +199,42 @@ vim.filetype.add({
 	},
 })
 
-vim.lsp.enable({
-	"vue_ls",
-	"ts_ls",
-	"lua_ls",
-	"ltex",
-	"cssls",
-	"tailwindcss",
-	"html",
-	"matlab_ls",
-	"clangd",
-	"pyright",
-	"texlab",
-	"glsl_analyzer",
-})
+-- one list, shared with mason's ensure_installed -- see lua/config/servers.lua
+vim.lsp.enable(require("config.servers"))
 
--- Signature help
+-- Signature help. The second vim.lsp.with() call that used to be here threw its
+-- result away and did nothing.
 vim.lsp.handlers["textDocument/signatureHelp"] =
 	vim.lsp.with(vim.lsp.handlers.signature_help, { update_in_insert = false })
-vim.lsp.with(vim.lsp.handlers.signature_help, { update_in_insert = false })
+
+-- Registered here rather than in the nvim-lspconfig spec: vim.lsp.enable() can
+-- attach a client before that plugin's config function has run.
+vim.api.nvim_create_autocmd("LspAttach", {
+	group = vim.api.nvim_create_augroup("LspKeymaps", { clear = true }),
+	desc = "LSP actions",
+	callback = function(event)
+		local function map(mode, lhs, rhs, desc)
+			vim.keymap.set(mode, lhs, rhs, { buffer = event.buf, desc = desc })
+		end
+
+		map("n", "gd", vim.lsp.buf.definition, "Go to Definition")
+		map("n", "gr", vim.lsp.buf.references, "Find References")
+		map("n", "gi", vim.lsp.buf.implementation, "Go to Implementation")
+		map("n", "gD", vim.lsp.buf.declaration, "Go to Declaration")
+		map("n", "go", vim.lsp.buf.type_definition, "Go to Type Definition")
+		map("n", "gs", vim.lsp.buf.signature_help, "Signature Help")
+		map("n", "K", vim.lsp.buf.hover, "Hover Documentation")
+		map("n", "<leader>rn", vim.lsp.buf.rename, "Rename Symbol")
+		map({ "n", "x" }, "<leader>la", vim.lsp.buf.code_action, "Code Action")
+		map("n", "<leader>ld", vim.diagnostic.open_float, "Show Diagnostic")
+		-- vim.diagnostic.goto_prev/next are deprecated on 0.11
+		map("n", "[d", function()
+			vim.diagnostic.jump({ count = -1, float = true })
+		end, "Previous Diagnostic")
+		map("n", "]d", function()
+			vim.diagnostic.jump({ count = 1, float = true })
+		end, "Next Diagnostic")
+	end,
+})
+
 vim.lsp.set_log_level("WARN")

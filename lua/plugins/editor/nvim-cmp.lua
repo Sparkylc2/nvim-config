@@ -249,14 +249,50 @@ return {
 			-- `enabled` above returns false in cmdline mode ("c"), and cmdline
 			-- setups inherit the global config -- so these need it forced back on
 			-- or cmp-cmdline never fires.
+			-- A-u / A-l scroll the menu, matching the insert-mode bindings above.
+			-- <CR> accepts the highlighted item when the menu is open; press it
+			-- again to run the command. With the menu closed it just runs.
+			local cmdline_mapping = {
+				["<A-u>"] = { c = cmp.mapping.select_next_item() },
+				["<A-l>"] = { c = cmp.mapping.select_prev_item() },
+				["<C-h>"] = { c = cmp.mapping.close() },
+				["<Tab>"] = {
+					c = function()
+						if cmp.visible() then
+							cmp.select_next_item()
+						else
+							cmp.complete()
+						end
+					end,
+				},
+				["<S-Tab>"] = {
+					c = function()
+						if cmp.visible() then
+							cmp.select_prev_item()
+						else
+							cmp.complete()
+						end
+					end,
+				},
+				["<CR>"] = {
+					c = function(fallback)
+						if cmp.visible() and cmp.get_selected_entry() then
+							cmp.confirm({ select = false })
+						else
+							fallback()
+						end
+					end,
+				},
+			}
+
 			cmp.setup.cmdline("/", {
 				enabled = true,
-				mapping = cmp.mapping.preset.cmdline(),
+				mapping = cmdline_mapping,
 				sources = { { name = "buffer" } },
 			})
 			cmp.setup.cmdline(":", {
 				enabled = true,
-				mapping = cmp.mapping.preset.cmdline(),
+				mapping = cmdline_mapping,
 				sources = cmp.config.sources({ { name = "path" } }, { { name = "cmdline" } }),
 			})
 		end,

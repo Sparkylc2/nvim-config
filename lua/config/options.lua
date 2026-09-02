@@ -34,6 +34,9 @@ opt.backup = false
 opt.swapfile = false
 opt.undofile = true
 opt.undodir = (os.getenv("HOME") or "") .. "/.vim/undodir"
+-- clangd's on_attach used to set this to 400 (800 for files over 1000 lines)
+-- via vim.bo[bufnr].updatetime, which throws -- updatetime is global. If C++
+-- CursorHold work feels too eager, raise it here; it applies everywhere.
 opt.updatetime = 50
 opt.timeout = true
 opt.timeoutlen = 250
@@ -60,11 +63,6 @@ opt.titlestring = "%t"
 -- Cursor
 opt.cursorline = true
 opt.cursorlineopt = "number"
-
--- Copilot configuration
-g.copilot_no_tab_map = true
-g.copilot_assume_mapped = true
-g.copilot_idle_delay = 250
 
 -- Disable built-in plugins
 for _, plugin in pairs({

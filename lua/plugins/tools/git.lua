@@ -4,11 +4,11 @@ return {
 
 		cmd = { "G", "Git", "Gvdiffsplit", "Gread", "Gwrite", "Ggrep", "GMove", "GDelete", "GBrowse" },
 		keys = {
-			{ "<leader>gs", "<cmd>Git<cr>", desc = "Git status" },
-			{ "<leader>gc", "<cmd>Git commit<cr>", desc = "Git commit" },
-			{ "<leader>gp", "<cmd>Git push<cr>", desc = "Git push" },
-			{ "<leader>gl", "<cmd>Git log --oneline<cr>", desc = "Git log" },
-			{ "<leader>gb", "<cmd>Git blame<cr>", desc = "Git blame" },
+			{ "<leader>Gs", "<cmd>Git<cr>", desc = "Git status" },
+			{ "<leader>Gc", "<cmd>Git commit<cr>", desc = "Git commit" },
+			{ "<leader>Gp", "<cmd>Git push<cr>", desc = "Git push" },
+			{ "<leader>Gl", "<cmd>Git log --oneline<cr>", desc = "Git log" },
+			{ "<leader>Gb", "<cmd>Git blame<cr>", desc = "Git blame" },
 		},
 	},
 	{
@@ -61,20 +61,20 @@ return {
 				end, "First Hunk")
 
 				-- Actions
-				map({ "n", "v" }, "<leader>ghs", ":Gitsigns stage_hunk<CR>", "Stage Hunk")
-				map({ "n", "v" }, "<leader>ghr", ":Gitsigns reset_hunk<CR>", "Reset Hunk")
-				map("n", "<leader>ghS", gs.stage_buffer, "Stage Buffer")
-				map("n", "<leader>ghu", gs.undo_stage_hunk, "Undo Stage Hunk")
-				map("n", "<leader>ghR", gs.reset_buffer, "Reset Buffer")
-				map("n", "<leader>ghp", gs.preview_hunk_inline, "Preview Hunk Inline")
-				map("n", "<leader>ghb", function()
+				map({ "n", "v" }, "<leader>Ghs", ":Gitsigns stage_hunk<CR>", "Stage Hunk")
+				map({ "n", "v" }, "<leader>Ghr", ":Gitsigns reset_hunk<CR>", "Reset Hunk")
+				map("n", "<leader>GhS", gs.stage_buffer, "Stage Buffer")
+				map("n", "<leader>Ghu", gs.undo_stage_hunk, "Undo Stage Hunk")
+				map("n", "<leader>GhR", gs.reset_buffer, "Reset Buffer")
+				map("n", "<leader>Ghp", gs.preview_hunk_inline, "Preview Hunk Inline")
+				map("n", "<leader>Ghb", function()
 					gs.blame_line({ full = true })
 				end, "Blame Line")
-				map("n", "<leader>ghB", function()
+				map("n", "<leader>GhB", function()
 					gs.blame()
 				end, "Blame Buffer")
-				map("n", "<leader>ghd", gs.diffthis, "Diff This")
-				map("n", "<leader>ghD", function()
+				map("n", "<leader>Ghd", gs.diffthis, "Diff This")
+				map("n", "<leader>GhD", function()
 					gs.diffthis("~")
 				end, "Diff This ~")
 

@@ -35,14 +35,6 @@ return {
 					},
 				},
 			})
-
-			vim.api.nvim_create_autocmd("WinResized", {
-				callback = function()
-					vim.defer_fn(function()
-						require("lualine").refresh({ place = { "statusline" }, force = true })
-					end, 50)
-				end,
-			})
 		end,
 	},
 }

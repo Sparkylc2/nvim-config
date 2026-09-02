@@ -108,7 +108,6 @@ return {
 				else
 					vim.cmd("SessionRestore")
 				end
-				-- vim.cmd("lcd " .. vim.fn.fnameescape(old))
 				vim.notify("Session loaded for " .. dir)
 			end
 

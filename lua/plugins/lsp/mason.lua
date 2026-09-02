@@ -1,31 +1,27 @@
+-- mason v2. The williamboman/* repos were renamed to mason-org/*; GitHub
+-- redirects, so lazy has been pulling v2 code under the old name -- which works
+-- but hides which version you are actually on.
+--
+-- NOTE: neither spec is lazy-triggered on purpose. mason.setup() is what
+-- prepends ~/.local/share/nvim/mason/bin to PATH, and without it nvim cannot
+-- find clangd, pyright and friends. Deferring these breaks LSP for any file
+-- opened before the trigger fires.
+
 return {
 	{
-		"williamboman/mason.nvim",
-		cmd = "Mason",
+		"mason-org/mason.nvim",
 		build = ":MasonUpdate",
-		config = function()
-			require("mason").setup()
-		end,
+		opts = {},
 	},
 
 	{
-		"williamboman/mason-lspconfig.nvim",
-		dependencies = { "williamboman/mason.nvim", "neovim/nvim-lspconfig" },
-		config = function()
-			require("mason-lspconfig").setup({
-				ensure_installed = {
-					"pyright",
-					"lua_ls",
-					"clangd",
-					"texlab",
-					"ts_ls",
-					"vue_ls",
-					"cssls",
-					"tailwindcss",
-					"html",
-				},
-				automatic_enable = false,
-			})
-		end,
+		"mason-org/mason-lspconfig.nvim",
+		dependencies = { "mason-org/mason.nvim", "neovim/nvim-lspconfig" },
+		opts = {
+			ensure_installed = require("config.servers"),
+			-- servers are enabled explicitly in config/lsp.lua, next to their
+			-- settings; letting mason enable them too would configure them twice
+			automatic_enable = false,
+		},
 	},
 }

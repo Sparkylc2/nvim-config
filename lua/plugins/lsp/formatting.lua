@@ -17,7 +17,9 @@ return {
 		opts = {
 			formatters_by_ft = {
 				lua = { "stylua" },
-				python = { "black", "isort" },
+				-- ruff replaces black + isort: one tool, and "isort" was listed
+				-- here but never installed, so import sorting never ran
+				python = { "ruff_organize_imports", "ruff_format" },
 				javascript = { "prettier" },
 				typescript = { "prettier" },
 				javascriptreact = { "prettier" },

@@ -1,71 +1,60 @@
 return {
 	{
 		"rmagatti/auto-session",
+		-- must load at startup to restore the session for the cwd
 		lazy = false,
-		dependencies = {
-			"nvim-telescope/telescope.nvim",
-		},
+		-- no telescope dependency: :SessionSearch has its own picker and falls
+		-- back to vim.ui.select. The old `dependencies = telescope` was pulling
+		-- the whole picker in at startup (~16ms) purely for session-lens.
 		keys = {
-			{ "<leader>sr", "<cmd>SessionSave<cr>", desc = "Save session" },
-			{ "<leader>sl", "<cmd>SessionRestore<cr>", desc = "Restore session" },
-			{ "<leader>sd", "<cmd>SessionDelete<cr>", desc = "Delete session" },
-			{ "<leader>sf", "<cmd>Telescope session-lens search_session<cr>", desc = "Find sessions" },
+			-- the Session* commands are deprecated in favour of :AutoSession <sub>
+			{ "<leader>Ss", "<cmd>AutoSession save<cr>", desc = "Session: save" },
+			{ "<leader>Sr", "<cmd>AutoSession restore<cr>", desc = "Session: restore" },
+			{ "<leader>Sd", "<cmd>AutoSession deletePicker<cr>", desc = "Session: delete (pick)" },
+			{ "<leader>Sf", "<cmd>AutoSession search<cr>", desc = "Session: find" },
+			{ "<leader>Sp", "<cmd>AutoSession purgeOrphaned<cr>", desc = "Session: purge orphaned" },
+			{ "<leader>St", "<cmd>AutoSession toggle<cr>", desc = "Session: toggle autosave" },
 		},
 		config = function()
-			vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions"
+			-- "terminal" is deliberately absent: restoring terminal buffers
+			-- re-spawns jobs (toggleterm, claude) and is the slow, flaky part of
+			-- a restore. Everything else here is cheap.
+			vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,localoptions"
 
 			require("auto-session").setup({
-				auto_session_suppress_dirs = {
+				-- explicit save, automatic restore: <leader>Ss writes a session,
+				-- entering a directory that already has one restores it. This is
+				-- what stops every directory you ever opened accumulating a file.
+				auto_save = false,
+				auto_restore = true,
+				auto_create = false,
+
+				suppressed_dirs = {
 					vim.fn.expand("~"),
 					vim.fn.expand("~/Downloads"),
+					vim.fn.expand("~/.Trash"),
 					"/",
 					"/tmp",
 				},
-				args_allow_files_auto_save = function()
-					local supported = 0
 
-					local buffers = vim.api.nvim_list_bufs()
-					for _, buf in ipairs(buffers) do
-						if vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_buf_is_loaded(buf) then
-							local path = vim.api.nvim_buf_get_name(buf)
-							if vim.fn.filereadable(path) ~= 0 then
-								supported = supported + 1
-							end
-						end
-					end
-
-					return supported >= 2
-				end,
+				-- a restored session with nothing in it lands you on a blank
+				-- buffer; open oil at the cwd instead
 				post_restore_cmds = {
 					function()
 						vim.defer_fn(function()
-							local function has_real_buffers()
-								for _, b in ipairs(vim.api.nvim_list_bufs()) do
-									if vim.bo[b].buflisted and vim.api.nvim_buf_get_name(b) ~= "" then
-										return true
-									end
+							for _, b in ipairs(vim.api.nvim_list_bufs()) do
+								if vim.bo[b].buflisted and vim.api.nvim_buf_get_name(b) ~= "" then
+									return
 								end
-								return false
 							end
-
-							if not has_real_buffers() then
-								local cwd = vim.fn.getcwd()
-								local ok, oil = pcall(require, "oil")
-								if ok then
-									oil.open(cwd)
-								else
-									vim.notify("Oil not available to open fallback view", vim.log.levels.ERROR)
-								end
+							local ok, oil = pcall(require, "oil")
+							if ok then
+								oil.open(vim.fn.getcwd())
 							end
 						end, 50)
 					end,
 				},
 			})
-
-			local ok, telescope = pcall(require, "telescope")
-			if ok then
-				pcall(telescope.load_extension, "session-lens")
-			end
 		end,
 	},
 }
