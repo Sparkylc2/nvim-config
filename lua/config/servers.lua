@@ -1,11 +1,4 @@
--- Single source of truth for LSP servers.
---
--- config/lsp.lua passes this to vim.lsp.enable(); plugins/lsp/mason.lua passes
--- the same list to mason-lspconfig's ensure_installed. Previously those were two
--- hand-maintained lists that disagreed: ltex, matlab_ls and glsl_analyzer were
--- enabled but never ensured, and two markdown servers were installed but unused.
---
--- Names are lspconfig server names. mason-lspconfig maps them to package names
+-- names are lspconfig server names. mason-lspconfig maps them to package names
 -- (lua_ls -> lua-language-server, cssls -> css-lsp, and so on).
 
 return {
@@ -16,10 +9,10 @@ return {
 	"html",
 	"lua_ls",
 	"ltex", -- prose grammar/style; markdown + tex only, see config/lsp.lua
-	"pyright", -- types only; ruff owns linting and formatting
+	"basedpyright",
 	"ruff",
 	"tailwindcss",
 	"texlab",
-	"vtsls", -- one TS server; ts_ls dropped, see config/lsp.lua
+	"vtsls", -- one TS server; ts_ls dropped
 	"vue_ls",
 }

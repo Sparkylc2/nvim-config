@@ -60,6 +60,15 @@ keymap("n", "<A-O>", "<C-w>L", { desc = "Move window right" })
 -- go to previous window (normal)
 keymap("n", "<C-\\>", "<C-w>p", { desc = "Go to previous window" })
 
+-- Close the current nvim split. :q works too, but quits nvim entirely when it
+-- is the last window -- this only ever closes a split.
+-- <M-Q> mirrors the split scheme: tmux pane mode sends <M-A/S/R/T> to split
+-- nvim, and now <M-Q> to close. See tmux.conf pane_mode.
+keymap("n", "<M-Q>", "<C-w>c", { desc = "Close split" })
+keymap("n", "<leader>sx", "<C-w>c", { desc = "Close split" })
+keymap("n", "<leader>so", "<C-w>o", { desc = "Close all other splits" })
+keymap("n", "<leader>se", "<C-w>=", { desc = "Equalize splits" })
+
 -- tmux's pane mode (M-[) forwards lowercase a/s/r/t here as Alt+Shift, so the
 keymap("n", "<C-a>", "<cmd>leftabove vsplit<CR>", { desc = "Split nvim left" })
 keymap("n", "<C-s>", "<cmd>belowright split<CR>", { desc = "Split nvim down" })

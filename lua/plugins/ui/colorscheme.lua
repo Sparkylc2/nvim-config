@@ -14,10 +14,36 @@ return {
 					local colors = require("config.palette")
 					vim.api.nvim_set_hl(0, "SignColumn", { bg = "#181616" })
 					vim.api.nvim_set_hl(0, "LineNr", { bg = "#181616", fg = "#625E5A" })
-					vim.api.nvim_set_hl(0, "DiagnosticSignError", { bg = "#181616", fg = "#FF5D62" })
-					vim.api.nvim_set_hl(0, "DiagnosticSignWarn", { bg = "#181616", fg = "#E6C384" })
-					vim.api.nvim_set_hl(0, "DiagnosticSignInfo", { bg = "#181616", fg = "#7FB4CA" })
-					vim.api.nvim_set_hl(0, "DiagnosticSignHint", { bg = "#181616", fg = "#98BB6C" })
+					colors.apply({
+						-- signs
+						DiagnosticSignError = { bg = colors.bg, fg = colors.error },
+						DiagnosticSignWarn = { bg = colors.bg, fg = colors.warn },
+						DiagnosticSignInfo = { bg = colors.bg, fg = colors.info },
+						DiagnosticSignHint = { bg = colors.bg, fg = colors.hint },
+						DiagnosticSignOk = { bg = colors.bg, fg = colors.ok },
+
+						-- virtual text and floats, so the whole diagnostic
+						-- surface uses one set of hues
+						DiagnosticError = { fg = colors.error },
+						DiagnosticWarn = { fg = colors.warn },
+						DiagnosticInfo = { fg = colors.info },
+						DiagnosticHint = { fg = colors.hint },
+						DiagnosticOk = { fg = colors.ok },
+
+						DiagnosticVirtualTextError = { fg = colors.error, bg = "NONE" },
+						DiagnosticVirtualTextWarn = { fg = colors.warn, bg = "NONE" },
+						DiagnosticVirtualTextInfo = { fg = colors.info, bg = "NONE" },
+						DiagnosticVirtualTextHint = { fg = colors.hint, bg = "NONE" },
+
+						-- undercurls pick up the same hues
+						DiagnosticUnderlineError = { undercurl = true, sp = colors.error },
+						DiagnosticUnderlineWarn = { undercurl = true, sp = colors.warn },
+						DiagnosticUnderlineInfo = { undercurl = true, sp = colors.info },
+						DiagnosticUnderlineHint = { undercurl = true, sp = colors.hint },
+
+						-- soft yank flash, see config/autocmds.lua
+						YankFlash = { bg = colors.yank_bg },
+					})
 
 					local function set_git_sign_bgs()
 						local bg = "#181616"

@@ -1,16 +1,6 @@
--- blink.cmp, replacing nvim-cmp + cmp-nvim-lsp + cmp-buffer + cmp-path +
--- cmp-cmdline + cmp_luasnip + cmp-omni + lspkind (8 plugins -> 2).
---
--- blink.compat is required for exactly one thing: vimtex's completion is a
--- vimscript omnifunc with no lua source, so cmp-omni has to be run inside blink.
--- Everything else uses blink's native sources.
-
 local p = require("config.palette")
 
 return {
-	-- LuaSnip keeps its own spec: the loaders below are what pull in
-	-- lua/snippets (488 lines of LaTeX maths among them), and they used to live
-	-- in the nvim-cmp file. Losing them would silently lose every snippet.
 	{
 		"L3MON4D3/LuaSnip",
 		lazy = true,
@@ -31,22 +21,23 @@ return {
 		dependencies = {
 			"L3MON4D3/LuaSnip",
 			"rafamadriz/friendly-snippets",
-			-- shim so blink can run nvim-cmp sources; only cmp-omni needs it
 			{ "saghen/blink.compat", version = "2.*", opts = {} },
 			"hrsh7th/cmp-omni",
 		},
 
 		opts = {
 			snippets = { preset = "luasnip" },
-
 			keymap = {
 				preset = "none",
+				-- kitty maps cmd+enter -> ctrl+j, so this IS cmd+enter.
+				-- <CR> is deliberately left unbound: Enter should insert a
+				-- newline, never accept a completion.
 				["<C-j>"] = { "accept", "fallback" },
 				["<C-h>"] = { "hide", "fallback" },
 				["<A-u>"] = { "select_next", "fallback" },
 				["<A-l>"] = { "select_prev", "fallback" },
-				["<C-b>"] = { "scroll_documentation_up", "fallback" },
-				["<C-f>"] = { "scroll_documentation_down", "fallback" },
+				["<A-U>"] = { "scroll_documentation_up", "fallback" },
+				["<A-L>"] = { "scroll_documentation_down", "fallback" },
 				["<Tab>"] = { "snippet_forward", "accept", "fallback" },
 				["<S-Tab>"] = { "snippet_backward", "fallback" },
 			},
@@ -58,7 +49,9 @@ return {
 					["<A-l>"] = { "select_prev", "fallback" },
 					["<Tab>"] = { "show", "select_next", "fallback" },
 					["<S-Tab>"] = { "select_prev", "fallback" },
-					["<CR>"] = { "accept_and_enter", "fallback" },
+					-- cmd+enter accepts the highlighted item without running it;
+					-- plain Enter is left alone so it executes the command line
+					["<C-j>"] = { "accept", "fallback" },
 					["<C-h>"] = { "hide", "fallback" },
 				},
 				completion = { menu = { auto_show = true } },
@@ -71,7 +64,10 @@ return {
 				menu = {
 					border = "rounded",
 					winhighlight = "Normal:BlinkCmpMenu,FloatBorder:BlinkCmpMenuBorder,CursorLine:BlinkCmpMenuSelection,Search:None",
-					scrollbar = false,
+					-- note: blink disables the scrollbar *gutter* when a border is
+					-- set, so only the thumb draws -- it rides the rounded border
+					-- itself, which is the rounded look you wanted
+					scrollbar = true,
 					draw = {
 						-- kind icon, label, then source -- the lspkind layout
 						columns = {
@@ -98,10 +94,6 @@ return {
 			sources = {
 				default = { "lsp", "path", "snippets", "buffer" },
 
-				-- The per-filetype answer to "snippets first in LaTeX, real
-				-- symbols first in C++". score_offset biases the fuzzy score
-				-- rather than hard-ordering, so a strong LSP match can still beat
-				-- a weak snippet.
 				per_filetype = {
 					tex = { "snippets", "omni", "lsp", "path" },
 					plaintex = { "snippets", "omni", "lsp", "path" },
@@ -113,7 +105,8 @@ return {
 					path = { score_offset = -3 },
 					buffer = { score_offset = -5 },
 					snippets = {
-						score_offset = -1, -- default: below LSP, as in C/C++
+						score_offset = -1,
+						min_keyword_length = 2,
 					},
 					omni = {
 						name = "omni",
@@ -141,11 +134,22 @@ return {
 				BlinkCmpDocBorder = { bg = p.bg, fg = p.orange },
 				BlinkCmpDocSeparator = { bg = p.bg, fg = p.orange },
 
-				BlinkCmpLabel = { fg = p.fg },
-				BlinkCmpLabelDeprecated = { fg = p.fg_dim, strikethrough = true },
-				BlinkCmpLabelMatch = { fg = p.blue, bold = true },
-				BlinkCmpLabelDescription = { fg = p.fg_dim, italic = true },
-				BlinkCmpSource = { fg = p.fg_dim, italic = true },
+				BlinkCmpLabel = { bg = p.bg, fg = p.fg },
+				BlinkCmpLabelDeprecated = { bg = p.bg, fg = p.fg_dim, strikethrough = true },
+				BlinkCmpLabelMatch = { bg = p.bg, fg = p.blue, bold = true },
+
+				-- LabelDetail is the "() const" / signature half of each entry.
+				-- Left undefined it links to PmenuExtra, which in this theme has
+				-- a blue background -- that is where the blue second half came
+				-- from. bg is set explicitly on all of these so none of them can
+				-- fall back to a group with its own background.
+				BlinkCmpLabelDetail = { bg = p.bg, fg = p.fg_dim },
+				BlinkCmpLabelDescription = { bg = p.bg, fg = p.fg_dim, italic = true },
+				BlinkCmpSource = { bg = p.bg, fg = p.fg_dim, italic = true },
+				BlinkCmpKind = { bg = p.bg, fg = p.fg_dim },
+				BlinkCmpGhostText = { bg = p.bg, fg = p.gray, italic = true },
+				BlinkCmpScrollBarThumb = { bg = p.blue, fg = p.blue },
+				BlinkCmpScrollBarGutter = { bg = p.bg, fg = p.bg },
 
 				BlinkCmpKindText = { fg = p.fg },
 				BlinkCmpKindMethod = { fg = p.blue },

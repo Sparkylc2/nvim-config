@@ -114,9 +114,6 @@ local function venv_python(root)
 	return vim.fn.exepath("python3")
 end
 
-vim.lsp.config("pyright", {
-	-- pyright's own defaults do not include these, so a project with only a
-	-- pyproject.toml used to root at the cwd
 	root_markers = {
 		"pyproject.toml",
 		"setup.py",
@@ -128,18 +125,54 @@ vim.lsp.config("pyright", {
 	},
 	before_init = function(params, config)
 		local root = config.root_dir or params.rootPath or vim.fn.getcwd()
-		config.settings.python.pythonPath = venv_python(root)
+		local exe = venv_python(root)
+		config.settings.basedpyright.pythonPath = exe
+
+		-- Pin the language version to the interpreter's own, so basedpyright
+		-- cannot analyse 3.12 code against a 3.9 stdlib (or vice versa).
+		local out =
+			vim.fn.system({ exe, "-c", "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')" })
+		if vim.v.shell_error == 0 then
+			local ver = vim.trim(out)
+			if ver:match("^%d+%.%d+$") then
+				config.settings.basedpyright.analysis.pythonVersion = ver
+			end
+		end
 	end,
 	settings = {
-		python = {
+		basedpyright = {
 			analysis = {
 				autoSearchPaths = true,
 				useLibraryCodeForTypes = true,
-				-- "workspace" would surface errors in files you have not opened,
-				-- but re-analyses the whole tree on every change. ruff already
-				-- lints the whole project cheaply, so pyright stays on open files
-				-- and keeps type-checking responsive on big repos.
 				diagnosticMode = "openFilesOnly",
+
+				-- basedpyright defaults to "recommended", which turns on the
+				-- whole reportUnknown* family and reportMissingParameterType.
+				-- On untyped code that is thousands of warnings saying "this is
+				-- not annotated", which is noise rather than signal.
+				-- "standard" matches what pyright gave you before.
+				typeCheckingMode = "standard",
+
+				inlayHints = {
+					variableTypes = true,
+					functionReturnTypes = true,
+					callArgumentNames = true,
+				},
+
+				-- the few "recommended" rules worth keeping off explicitly, in
+				-- case a project's own pyrightconfig turns the mode back up
+				diagnosticSeverityOverrides = {
+					reportUnknownMemberType = "none",
+					reportUnknownVariableType = "none",
+					reportUnknownArgumentType = "none",
+					reportUnknownParameterType = "none",
+					reportMissingParameterType = "none",
+					reportUnknownLambdaType = "none",
+					reportImplicitStringConcatenation = "none",
+					reportAny = "none",
+					reportExplicitAny = "none",
+					reportIgnoreCommentWithoutRule = "none",
+				},
 			},
 		},
 	},
@@ -182,11 +215,13 @@ vim.lsp.config("clangd", {
 	},
 	settings = {
 		clangd = {
+			-- these were all false, so clangd sent no hints regardless of what
+			-- nvim asked for. Turn them on now that hints are enabled on attach.
 			InlayHints = {
-				Designators = false,
-				Enabled = false,
-				ParameterNames = false,
-				DeducedTypes = false,
+				Designators = true,
+				Enabled = true,
+				ParameterNames = true,
+				DeducedTypes = true,
 			},
 			SemanticHighlighting = false,
 		},
@@ -271,6 +306,12 @@ vim.api.nvim_create_autocmd("LspAttach", {
 	callback = function(event)
 		local function map(mode, lhs, rhs, desc)
 			vim.keymap.set(mode, lhs, rhs, { buffer = event.buf, desc = desc })
+		end
+
+		-- inlay hints on by default; <leader>ih (Snacks.toggle) turns them off
+		local client = vim.lsp.get_client_by_id(event.data.client_id)
+		if client and client:supports_method("textDocument/inlayHint") then
+			vim.lsp.inlay_hint.enable(true, { bufnr = event.buf })
 		end
 
 		map("n", "gd", vim.lsp.buf.definition, "Go to Definition")

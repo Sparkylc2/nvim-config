@@ -12,7 +12,24 @@ local perf_guard = aug("PerfGuard", { clear = true })
 vim.api.nvim_create_autocmd("TextYankPost", {
 	group = yank_grp,
 	callback = function()
-		vim.highlight.on_yank({ higroup = "IncSearch", timeout = 150 })
+		-- YankFlash is a soft wash instead, and Snacks.animate fades it back to
+		local p = require("config.palette")
+
+		vim.api.nvim_set_hl(0, "YankFlash", { bg = p.yank_bg })
+		vim.hl.on_yank({ higroup = "YankFlash", timeout = duration })
+
+		if Snacks and Snacks.animate then
+			Snacks.animate(0, 100, function(value)
+				vim.api.nvim_set_hl(0, "YankFlash", { bg = p.blend(p.yank_bg, p.bg, value / 100) })
+			end, {
+				-- a bare number here is ms PER STEP, not total -- 250 would mean
+				-- 250ms x 100 steps, i.e. barely moving. Pass the table form.
+				duration = { step = 8, total = duration },
+				easing = "outQuad",
+				int = true,
+				id = "yank_flash",
+			})
+		end
 	end,
 })
 

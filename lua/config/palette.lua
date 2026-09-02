@@ -18,11 +18,32 @@ M.orange = "#b6927b" -- dragonOrange
 M.teal = "#8ea4a2" -- alias of cyan; kept because the cmp block used both names
 M.white = "#C8C093" -- oldWhite
 
--- Diagnostic accents, as used by the sign column
-M.error = "#FF5D62"
-M.warn = M.yellow
-M.info = "#7FB4CA"
-M.hint = M.green
+M.error = "#e46876" -- dragonRed, brightened
+M.warn = "#dca561" -- dragonOrange/yellow, brightened
+M.info = "#7fb4ca" -- dragonBlue, brightened
+M.hint = "#9fc6a0" -- dragonGreen, brightened
+M.ok = M.hint
+
+M.yank_bg = "#2d4f67"
+
+---Mix two "#rrggbb" strings. t=0 returns a, t=1 returns b.
+---@param a string
+---@param b string
+---@param t number
+---@return string
+function M.blend(a, b, t)
+	local function rgb(hex)
+		return tonumber(hex:sub(2, 3), 16), tonumber(hex:sub(4, 5), 16), tonumber(hex:sub(6, 7), 16)
+	end
+	local ar, ag, ab = rgb(a)
+	local br, bg, bb = rgb(b)
+	return string.format(
+		"#%02x%02x%02x",
+		math.floor(ar + (br - ar) * t + 0.5),
+		math.floor(ag + (bg - ag) * t + 0.5),
+		math.floor(ab + (bb - ab) * t + 0.5)
+	)
+end
 
 ---Apply a table of { GroupName = { ... } } highlight definitions.
 ---@param groups table<string, table>
@@ -31,9 +52,5 @@ function M.apply(groups)
 		vim.api.nvim_set_hl(0, name, spec)
 	end
 end
-
--- Mirrored by hand elsewhere:
---   tmux/tmux.conf      bg fg black red green yellow blue magenta cyan white gray
---   aerospace.toml      borders active/inactive/background = 0xff181616
 
 return M
