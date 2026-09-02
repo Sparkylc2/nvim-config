@@ -2,6 +2,10 @@ return {
 	{
 		"ThePrimeagen/harpoon",
 		branch = "harpoon2",
+		-- harpoon require()s plenary at runtime but does not declare it. It only
+		-- worked before because telescope pulled plenary in; removing telescope
+		-- took plenary with it and harpoon started failing to load.
+		dependencies = { "nvim-lua/plenary.nvim" },
 		lazy = false,
 		config = function()
 			local harpoon = require("harpoon")

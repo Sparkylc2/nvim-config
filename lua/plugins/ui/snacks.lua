@@ -84,6 +84,15 @@ return {
 			-- replaces kdheepak/lazygit.nvim
 			lazygit = { enabled = true },
 
+			-- no dimming behind any snacks float -- lazygit, terminal, zen and
+			-- the picker should all read as part of the editor, not as overlays
+			styles = {
+				lazygit = { backdrop = false },
+				terminal = { backdrop = false },
+				float = { backdrop = false },
+				notification = { backdrop = false },
+			},
+
 			notifier = { enabled = true, timeout = 3000 },
 
 			-- inline images in the buffer, and rendered LaTeX math. Needs a

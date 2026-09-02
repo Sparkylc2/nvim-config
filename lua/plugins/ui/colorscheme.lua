@@ -109,6 +109,19 @@ return {
 					colors.apply({
 						WinSeparator = { fg = colors.bg, bg = colors.bg },
 						VertSplit = { fg = colors.bg, bg = colors.bg },
+
+						-- snacks.words calls vim.lsp.buf.document_highlight(),
+						-- which highlights every reference of the symbol under the
+						-- cursor. Blanking these groups removes the highlight but
+						-- keeps the extmarks, so ]] / [[ still jump between them.
+						-- To drop the feature entirely instead, set
+						-- words = { enabled = false } in plugins/ui/snacks.lua.
+						LspReferenceText = {},
+						LspReferenceRead = {},
+						LspReferenceWrite = {},
+						SnacksWordsText = {},
+						SnacksWordsRead = {},
+						SnacksWordsWrite = {},
 					})
 				end,
 			})

@@ -90,15 +90,13 @@ vim.api.nvim_create_autocmd("TermOpen", {
 
 		local opts = { buffer = event.buf }
 
-		-- <Esc> goes to the SHELL, not to nvim: nushell's vi edit_mode, fzf,
-		-- lazygit and REPLs all need it, and losing it makes editing a command
-		-- line painful. Swapped from the other way round.
-		vim.keymap.set("t", "<esc>", "<esc>", opts)
-		-- ...so leaving terminal mode needs its own keys. <C-e> and <A-Esc> both
-		-- drop to nvim normal mode for scrollback, search and yank; i/a/A returns.
-		-- <C-\><C-n> is nvim's built-in and always works as a fallback.
+		-- <Esc> leaves terminal mode -> nvim normal mode, for scrollback, search
+		-- and yank over the terminal buffer. i/a/A returns to the shell.
+		vim.keymap.set("t", "<esc>", [[<C-\><C-n>]], opts)
 		vim.keymap.set("t", "<C-e>", [[<C-\><C-n>]], opts)
-		vim.keymap.set("t", "<A-esc>", [[<C-\><C-n>]], opts)
+		-- ...which means the shell never sees <Esc>. <A-Esc> forwards a literal
+		-- one, for nushell's vi edit_mode and for TUIs (fzf, lazygit, REPLs).
+		vim.keymap.set("t", "<A-esc>", "<esc>", opts)
 		-- Window navigation straight out of terminal mode, on the same keys the
 		-- Claude window uses -- one scheme everywhere.
 		--
