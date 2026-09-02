@@ -134,7 +134,11 @@ return {
 					use_autosession = true,
 				},
 				Personal = {
-					path = "~/Library/CloudStorage/OneDrive2-ImperialCollegeLondon/Personal/",
+					path = "~/Library/CloudStorage/OneDrive-ImperialCollegeLondon/Personal/",
+					use_autosession = true,
+				},
+				UROP = {
+					path = "~/Library/CloudStorage/OneDrive-ImperialCollegeLondon/UROP/",
 					use_autosession = true,
 				},
 			},

@@ -38,4 +38,4 @@ require("lazy").setup("plugins", {
 	},
 })
 
-require("user")
+require("tools").setup()

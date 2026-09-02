@@ -25,20 +25,22 @@ return {
 			vim.api.nvim_create_autocmd("LspAttach", {
 				desc = "LSP actions",
 				callback = function(event)
-					vim.keymap.set("n", "gd", vim.lsp.buf.definition, { desc = "Go to Definition" })
-					vim.keymap.set("n", "gr", vim.lsp.buf.references, { desc = "Find References" })
-					vim.keymap.set("n", "gi", vim.lsp.buf.implementation, { desc = "Go to Implementation" })
-					vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, { desc = "Rename Symbol" })
-					vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code Action" })
-					vim.keymap.set("n", "gD", vim.lsp.buf.declaration, { desc = "Go to Declaration" })
-					vim.keymap.set("n", "go", vim.lsp.buf.type_definition, { desc = "Go to Type Definition" })
-					vim.keymap.set("n", "gs", vim.lsp.buf.signature_help, { desc = "Signature Help" })
-					vim.keymap.set("n", "K", vim.lsp.buf.hover, { desc = "Hover Documentation" })
-					vim.keymap.set("n", "<leader>cr", vim.lsp.buf.rename, { desc = "Rename Symbol" })
-					vim.keymap.set({ "n", "x" }, "<leader>ca", vim.lsp.buf.code_action, { desc = "Code Action" })
-					vim.keymap.set("n", "<leader>cd", vim.diagnostic.open_float, { desc = "Show Diagnostic" })
-					vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Go to Previous Diagnostic" })
-					vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Go to Next Diagnostic" })
+					local function map(mode, lhs, rhs, desc)
+						vim.keymap.set(mode, lhs, rhs, { buffer = event.buf, desc = desc })
+					end
+
+					map("n", "gd", vim.lsp.buf.definition, "Go to Definition")
+					map("n", "gr", vim.lsp.buf.references, "Find References")
+					map("n", "gi", vim.lsp.buf.implementation, "Go to Implementation")
+					map("n", "gD", vim.lsp.buf.declaration, "Go to Declaration")
+					map("n", "go", vim.lsp.buf.type_definition, "Go to Type Definition")
+					map("n", "gs", vim.lsp.buf.signature_help, "Signature Help")
+					map("n", "K", vim.lsp.buf.hover, "Hover Documentation")
+					map("n", "<leader>rn", vim.lsp.buf.rename, "Rename Symbol")
+					map({ "n", "x" }, "<leader>la", vim.lsp.buf.code_action, "Code Action")
+					map("n", "<leader>ld", vim.diagnostic.open_float, "Show Diagnostic")
+					map("n", "[d", vim.diagnostic.goto_prev, "Go to Previous Diagnostic")
+					map("n", "]d", vim.diagnostic.goto_next, "Go to Next Diagnostic")
 				end,
 			})
 		end,

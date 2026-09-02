@@ -246,11 +246,16 @@ return {
 				}),
 			})
 
+			-- `enabled` above returns false in cmdline mode ("c"), and cmdline
+			-- setups inherit the global config -- so these need it forced back on
+			-- or cmp-cmdline never fires.
 			cmp.setup.cmdline("/", {
+				enabled = true,
 				mapping = cmp.mapping.preset.cmdline(),
 				sources = { { name = "buffer" } },
 			})
 			cmp.setup.cmdline(":", {
+				enabled = true,
 				mapping = cmp.mapping.preset.cmdline(),
 				sources = cmp.config.sources({ { name = "path" } }, { { name = "cmdline" } }),
 			})

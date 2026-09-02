@@ -105,3 +105,20 @@ keymap("i", "<C-k>", function()
 		return "<CR>"
 	end
 end, { expr = true, silent = true, noremap = true, replace_keycodes = false, desc = "Accept Copilot or newline" })
+
+keymap("n", "<leader>rr", function()
+	local t = require("toggleterm.terminal")
+	local term = t.get_last_focused() or t.get(1)
+	if not term then
+		vim.notify("no toggleterm to rerun in", vim.log.levels.WARN)
+		return
+	end
+	-- !! = shell's previous command; send() appends a newline so it executes
+	term:send("!!\n", false)
+end, { desc = "rerun previous terminal command" })
+
+keymap("n", "<M-l>", "<C-o>", { desc = "jumplist back" })
+keymap("n", "<M-u>", "<C-i>", { desc = "jumplist forward" })
+
+-- keymap("n", "<C-[>", "<M-[>")
+-- keymap("n", "<C-]>", "<M-]>")

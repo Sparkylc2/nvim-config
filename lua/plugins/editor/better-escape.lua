@@ -23,12 +23,16 @@ return {
 						},
 					},
 
+					-- In terminal mode <Esc> is just a byte handed to the shell; it does
+					-- NOT leave terminal mode (better-escape feeds keys with "n", so
+					-- the buffer-local <esc> map never applies). <C-\><C-n> is the
+					-- only thing that actually gets you to normal mode.
 					t = {
 						e = {
-							i = "<Esc>",
+							i = [[<C-\><C-n>]],
 						},
 						i = {
-							e = "<Esc>",
+							e = [[<C-\><C-n>]],
 						},
 					},
 				},

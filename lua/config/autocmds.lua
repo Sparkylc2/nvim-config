@@ -79,14 +79,26 @@ vim.api.nvim_create_autocmd("FileType", {
 -- terminal buffers
 vim.api.nvim_create_autocmd("TermOpen", {
 	group = term_group,
-	callback = function()
+	callback = function(event)
 		vim.opt_local.buflisted = false
 		vim.opt_local.modifiable = false
 
-		local opts = { buffer = 0 }
+		-- claude code binds esc, alt+o etc itself; shadowing them breaks its TUI
+		if vim.api.nvim_buf_get_name(event.buf):lower():find("claude", 1, true) then
+			return
+		end
 
+		local opts = { buffer = event.buf }
+
+		-- <Esc> leaves terminal mode -> nvim normal mode, vim motions over the
+		-- terminal buffer (scrollback, search, yank). i/a/A returns to the shell.
 		vim.keymap.set("t", "<esc>", [[<C-\><C-n>]], opts)
 		vim.keymap.set("t", "<C-e>", [[<C-\><C-n>]], opts)
+		-- ...which means the shell never sees <Esc>. <A-Esc> forwards a literal
+		-- one, for nushell's vi edit_mode and for TUIs (fzf, lazygit, REPLs).
+		vim.keymap.set("t", "<A-esc>", "<esc>", opts)
+		-- Send real cursor keys, not raw "\x1b[A" byte strings: nvim encodes these
+		-- in one write and respects the app's cursor-key mode.
 		vim.keymap.set("t", "<A-n>", "<Left>", opts) -- left
 		vim.keymap.set("t", "<A-o>", "<Right>", opts) -- right
 		vim.keymap.set("t", "<A-i>", "<Up>", opts) -- up

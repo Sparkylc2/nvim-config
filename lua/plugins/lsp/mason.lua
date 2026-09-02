@@ -12,8 +12,20 @@ return {
 		"williamboman/mason-lspconfig.nvim",
 		dependencies = { "williamboman/mason.nvim", "neovim/nvim-lspconfig" },
 		config = function()
-			local mlsp = require("mason-lspconfig")
-			mlsp.setup({ automatic_installation = true })
+			require("mason-lspconfig").setup({
+				ensure_installed = {
+					"pyright",
+					"lua_ls",
+					"clangd",
+					"texlab",
+					"ts_ls",
+					"vue_ls",
+					"cssls",
+					"tailwindcss",
+					"html",
+				},
+				automatic_enable = false,
+			})
 		end,
 	},
 }

@@ -16,51 +16,57 @@ vim.api.nvim_create_autocmd("FileType", {
 	end,
 })
 
-vim.api.nvim_create_user_command("JupytextConvert", function()
-	local jupytext = vim.fn.expand("~/.virtualenvs/neovim/bin/jupytext")
-	local ipynb = vim.fn.expand("%:p")
-	local py = vim.fn.expand("%:p:r") .. ".py"
-	vim.fn.system({ jupytext, "--to", "py:percent", ipynb })
-	vim.cmd.edit(py)
-end, {})
+vim.b.slime_cell_delimiter = "# %%"
+
+local map = function(mode, lhs, rhs, desc)
+	vim.keymap.set(mode, lhs, rhs, { buffer = true, desc = desc, silent = true })
+end
+
+map("n", "<leader>jo", function()
+	vim.cmd("botright vsplit")
+	vim.cmd("terminal uv run --with ipython ipython")
+	vim.cmd("startinsert")
+end, "Jupyter: open ipython REPL")
+
+map("n", "<leader>js", "<Plug>SlimeConfig", "Jupyter: configure slime target")
+
+-- Core cell workflow.
+map("n", "<leader>jc", "<Plug>SlimeCellsSendAndGoToNext", "Jupyter: send cell + advance")
+map("n", "<leader>je", "<Plug>SlimeCellsSend", "Jupyter: send cell (stay)")
+map("n", "]c", "<Plug>SlimeCellsNext", "Next cell")
+map("n", "[c", "<Plug>SlimeCellsPrev", "Prev cell")
+
+-- Send granular pieces.
+map("n", "<leader>jl", "<Plug>SlimeLineSend", "Jupyter: send line")
+map("x", "<leader>j", "<Plug>SlimeRegionSend", "Jupyter: send selection")
 
 return {
 	{
-		"benlubas/molten-nvim",
-		build = ":UpdateRemotePlugins",
-		dependencies = { "3rd/image.nvim" },
+		"GCBallesteros/jupytext.nvim",
+		lazy = false,
+		opts = {
+			style = "percent",
+			output_extension = "auto",
+			force_ft = nil,
+		},
+	},
+
+	{
+		"jpalardy/vim-slime",
 		init = function()
-			vim.g.molten_image_provider = "image.nvim"
-			vim.g.molten_output_win_max_height = 20
-			vim.g.molten_auto_open_output = false
-			vim.keymap.set("n", "<leader>mi", ":MoltenInit python3<CR>", { desc = "molten init" })
-			vim.keymap.set("v", "<leader>mr", ":<C-u>MoltenEvaluateVisual<CR>", { desc = "molten run selection" })
-			vim.keymap.set("n", "<leader>ml", ":MoltenEvaluateLine<CR>", { desc = "molten run line" })
-			vim.keymap.set("n", "<leader>mo", ":MoltenShowOutput<CR>", { desc = "molten show output" })
-			vim.keymap.set("n", "<leader>mc", function()
-				local start = vim.fn.search("^# %%", "bnW")
-				local end_ = vim.fn.search("^# %%", "nW")
-				if start == 0 then
-					start = 1
-				end
-				if end_ == 0 then
-					end_ = vim.fn.line("$")
-				else
-					end_ = end_ - 1
-				end
-				vim.fn.MoltenEvaluateRange(start, end_)
-			end, { desc = "molten run cell" })
+			vim.g.slime_target = "neovim"
+			vim.g.slime_no_mappings = 1
+			vim.g.slime_cell_delimiter = "# %%"
+			vim.g.slime_suggest_default = 1
+			vim.g.slime_bracketed_paste = 1
 		end,
 	},
+
 	{
-		"3rd/image.nvim",
-		opts = {
-			backend = "kitty",
-			max_width = 100,
-			max_height = 12,
-			integrations = {
-				markdown = { enabled = true },
-			},
-		},
+		"Klafyvel/vim-slime-cells",
+		dependencies = { "jpalardy/vim-slime" },
+		init = function()
+			vim.g.slime_cells_no_highlight = 0
+		end,
 	},
 }

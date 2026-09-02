@@ -71,15 +71,12 @@ return {
 				},
 			})
 
-			function _G.set_terminal_keymaps()
-				local opts = { buffer = 0 }
-				vim.keymap.set("t", "<A-n>", "\x1b[D", opts) -- left
-				vim.keymap.set("t", "<A-o>", "\x1b[C", opts) -- right
-				vim.keymap.set("t", "<A-i>", "\x1b[A", opts) -- up
-				vim.keymap.set("t", "<A-e>", "\x1b[B", opts) -- down
-			end
-
-			vim.cmd("autocmd! TermOpen term://* lua _G.set_terminal_keymaps()")
+			-- NOTE: terminal-mode keymaps live in lua/config/autocmds.lua (TermTweaks).
+			-- Do not re-map <A-n/e/i/o> here: raw escape sequences like "\x1b[A" are
+			-- fed one keystroke at a time, so the shell can receive a lone ESC before
+			-- the "[A" lands. In nushell's vi edit_mode that drops you into vi-normal
+			-- and eats the rest as commands. <Up>/<Down>/... are encoded by nvim's own
+			-- terminal in a single write, and honour DECCKM.
 
 			vim.api.nvim_create_autocmd("VimLeavePre", {
 				callback = function()

@@ -37,8 +37,11 @@ opt.undodir = (os.getenv("HOME") or "") .. "/.vim/undodir"
 opt.updatetime = 50
 opt.timeout = true
 opt.timeoutlen = 250
-opt.ttimeout = false
-opt.ttimeoutlen = 0
+-- ttimeoutlen is the grace period for a *terminal key code* to arrive in full.
+-- At 0, a split read of Alt+<key> (ESC then the char) is decoded as a bare <Esc>
+-- followed by the char, which wrecks Alt mappings in terminal mode.
+opt.ttimeout = true
+opt.ttimeoutlen = 25
 opt.completeopt = "menu,menuone,noselect"
 opt.splitbelow = true
 opt.splitright = true
