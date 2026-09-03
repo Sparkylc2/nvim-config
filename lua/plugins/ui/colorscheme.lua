@@ -133,8 +133,13 @@ return {
 					-- reads as one continuous surface rather than two panes with a
 					-- rule between them.
 					colors.apply({
-						WinSeparator = { fg = colors.bg, bg = colors.bg },
-						VertSplit = { fg = colors.bg, bg = colors.bg },
+						-- Visible again, but subtle: the same family as the indent
+						-- guides (SnacksIndent, bg_light) nudged brighter so a
+						-- split boundary reads without becoming a hard rule.
+						-- With the outlined lualine there is no filled bar to
+						-- mark where one pane ends, so this is the only cue.
+						WinSeparator = { fg = colors.blend(colors.bg_light, colors.gray, 0.9), bg = colors.bg },
+						VertSplit = { fg = colors.blend(colors.bg_light, colors.gray, 0.9), bg = colors.bg },
 
 						-- snacks.words calls vim.lsp.buf.document_highlight(),
 						-- which highlights every reference of the symbol under the

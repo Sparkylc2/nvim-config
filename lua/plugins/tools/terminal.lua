@@ -28,9 +28,15 @@ local function term(win_opts, opts)
 	end
 end
 
+-- Split terminals get a rule along the edge they meet the buffer on, and no
+-- title -- the title was just the cwd, which the shell prompt already shows.
+-- border here is the 8-element form: {top, top-right, right, bottom-right,
+-- bottom, bottom-left, left, top-left} with "" meaning "draw nothing".
+local top_only = { "─", "", "", "", "", "", "", "" }
+
 local float = { position = "float", border = "rounded" }
-local horiz = { position = "bottom", height = 0.3 }
-local vert = { position = "right", width = 0.4 }
+local horiz = { position = "bottom", height = 0.3, border = top_only, title = "" }
+local vert = { position = "right", width = 0.4, border = top_only, title = "" }
 
 return {
 	{
@@ -40,6 +46,9 @@ return {
 				win = {
 					position = "float",
 					border = "rounded",
+					-- no cwd title: the shell prompt already shows it
+					title = "",
+					title_pos = "center",
 					-- Float-only keys. The shared terminal scheme (<Esc> to the
 					-- shell, <C-e>/<A-Esc> to nvim normal mode, <A-neio> window
 					-- navigation) lives in the TermOpen autocmd in

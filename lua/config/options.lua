@@ -25,7 +25,10 @@ opt.wrap = false
 opt.scrolloff = 8
 opt.sidescrolloff = 8
 vim.wo.cursorline = true
-opt.laststatus = 2
+-- 3 = one global statusline, so horizontal splits are separated by
+-- WinSeparator rather than by a per-window statusline bar. lualine sets this
+-- too when globalstatus = true; pinned here so the two cannot disagree.
+opt.laststatus = 3
 opt.cmdheight = 1
 
 -- Behavior
@@ -51,6 +54,20 @@ opt.maxmempattern = 200000
 opt.lazyredraw = false
 opt.synmaxcol = 200
 opt.winborder = "rounded"
+
+-- Box-drawing glyphs, not the one-eighth block "▏" that was here before: that
+-- block is missing from many monospace fonts, and a missing glyph renders as
+-- nothing -- which is why the separator appeared to be absent entirely.
+-- Subtlety comes from the WinSeparator colour, not from the glyph.
+opt.fillchars:append({
+	vert = "│",
+	horiz = "─",
+	horizup = "┴",
+	horizdown = "┬",
+	vertleft = "┤",
+	vertright = "├",
+	verthoriz = "┼",
+})
 opt.clipboard = "unnamedplus"
 
 opt.title = true

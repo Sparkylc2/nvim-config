@@ -4,17 +4,6 @@ return {
 		dependencies = { "nvim-tree/nvim-web-devicons" },
 		config = function()
 			local p = require("config.palette")
-
-			-- Outlined rather than filled: every section sits on the editor
-			-- background and is capped with rounded glyphs in the section's accent
-			-- colour, so the statusline reads as part of the buffer.
-			--
-			-- The caps are baked into the component text with `fmt` rather than
-			-- set via `section_separators`. That is deliberate: lualine draws a
-			-- separator as (fg = this section's bg, bg = next section's bg), and
-			-- since every section here shares the editor background the glyphs
-			-- came out background-on-background, i.e. invisible. Inside the
-			-- component they inherit the component's fg, which is the accent.
 			local function outlined(fg)
 				return { fg = fg, bg = p.bg }
 			end
@@ -29,9 +18,6 @@ return {
 				inactive = p.gray,
 			}) do
 				theme[mode] = {
-					-- c and x used p.gray (#625e5a), which was too dark to read.
-					-- The filename and the right-hand items now use the editor
-					-- foreground; b and y stay one step down for hierarchy.
 					a = outlined(accent),
 					b = outlined(p.fg),
 					c = outlined(p.fg),

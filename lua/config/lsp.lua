@@ -49,6 +49,7 @@ vim.lsp.config("texlab", {
 })
 -- ltex is LanguageTool (grammar/style/spelling for prose) wrapped as an LSP.
 -- It is a JVM, so scope matters: "text" used to be in this list, which spawned
+--
 -- one for every plain-text scratch buffer and is the likely source of the
 -- server-start timeouts. Restricted to the filetypes where prose checking is
 -- actually the point.
@@ -326,7 +327,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		map("n", "gD", vim.lsp.buf.declaration, "Go to Declaration")
 		map("n", "go", vim.lsp.buf.type_definition, "Go to Type Definition")
 		map("n", "gs", vim.lsp.buf.signature_help, "Signature Help")
-		map("n", "K", vim.lsp.buf.hover, "Hover Documentation")
+		map("n", "gK", vim.lsp.buf.hover, "Hover Documentation")
 		map("n", "<leader>rn", vim.lsp.buf.rename, "Rename Symbol")
 		map({ "n", "x" }, "<leader>la", vim.lsp.buf.code_action, "Code Action")
 		map("n", "<leader>ld", vim.diagnostic.open_float, "Show Diagnostic")

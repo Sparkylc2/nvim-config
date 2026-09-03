@@ -7,7 +7,6 @@ M.fg = "#c5c9c5" -- dragonWhite
 M.fg_dim = "#a6a69c" -- dragonGray
 M.gray = "#625e5a" -- line numbers, inactive text
 M.border = "#54546D" -- float borders
-
 M.red = "#c4746e" -- dragonRed
 M.green = "#8a9a7b" -- dragonGreen
 M.yellow = "#c4b28a" -- dragonYellow

@@ -2,36 +2,6 @@ return {
 	{
 		"mrjones2014/smart-splits.nvim",
 		lazy = false,
-		keys = {
-			{
-				"<S-h>",
-				function()
-					require("smart-splits").move_cursor_left()
-				end,
-				desc = "Move to left split",
-			},
-			{
-				"<S-j>",
-				function()
-					require("smart-splits").move_cursor_down()
-				end,
-				desc = "Move to split below",
-			},
-			{
-				"<S-k>",
-				function()
-					require("smart-splits").move_cursor_up()
-				end,
-				desc = "Move to split above",
-			},
-			{
-				"<S-l>",
-				function()
-					require("smart-splits").move_cursor_right()
-				end,
-				desc = "Move to right split",
-			},
-		},
 		opts = {
 			ignored_filetypes = { "nofile", "quickfix", "prompt" },
 			ignored_buftypes = { "NvimTree", "neo-tree" },
