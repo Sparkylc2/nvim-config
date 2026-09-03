@@ -4,7 +4,7 @@ return {
 		cmd = "Atone",
 		opts = {},
 		keys = {
-			{ "<leader>u", "<cmd>Atone toggle<cr>" },
+			{ "<leader>U", "<cmd>Atone toggle<cr>", desc = "Atone Toggle" },
 		},
 	},
 }

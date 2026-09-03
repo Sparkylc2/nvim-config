@@ -8,7 +8,7 @@ return {
 			anti_conceal = {
 				enabled = true,
 				ignore = {
-					latex = true, -- don't reveal latex source on cursor
+					latex = true,
 				},
 			},
 			checkbox = {
@@ -33,7 +33,6 @@ return {
 					vim.api.nvim_set_hl(0, "RenderMarkdownChecked", { fg = "#25b2bc" }),
 				},
 				custom = {
-					-- custom checkboxes
 					todo = { raw = "[-]", rendered = "󰥔 ", highlight = "RenderMarkdownTodo", scope_highlight = nil },
 					star = { raw = "[~]", rendered = "󰓎 ", highlight = "RenderMarkdownStar", scope_highlight = nil },
 					warn = {
@@ -43,7 +42,6 @@ return {
 						scope_highlight = nil,
 					},
 
-					-- custom checkboxes' colours
 					vim.api.nvim_set_hl(0, "RenderMarkdownTodo", { fg = "#97bc71" }),
 					vim.api.nvim_set_hl(0, "RenderMarkdownStar", { fg = "#ffc24b" }),
 					vim.api.nvim_set_hl(0, "RenderMarkdownWarning", { fg = "#f43753" }),
@@ -52,13 +50,7 @@ return {
 			},
 
 			latex = {
-				enabled = true,
-				render_modes = false,
-				converter = { "utftex", "latex2text" },
-				highlight = "RenderMarkdownMath",
-				position = "center",
-				top_pad = 0,
-				bottom_pad = 0,
+				enabled = false,
 			},
 
 			heading = {

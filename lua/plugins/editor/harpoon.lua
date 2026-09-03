@@ -2,9 +2,6 @@ return {
 	{
 		"ThePrimeagen/harpoon",
 		branch = "harpoon2",
-		-- harpoon require()s plenary at runtime but does not declare it. It only
-		-- worked before because telescope pulled plenary in; removing telescope
-		-- took plenary with it and harpoon started failing to load.
 		dependencies = { "nvim-lua/plenary.nvim" },
 		lazy = false,
 		config = function()
@@ -29,7 +26,7 @@ return {
 			vim.keymap.set("n", "<leader>a", function()
 				list():add()
 			end, { desc = "Harpoon: add file" })
-			vim.keymap.set("n", "<leader>h", function()
+			vim.keymap.set("n", "<leader>hh", function()
 				ui:toggle_quick_menu(list())
 			end, { desc = "Harpoon: menu" })
 

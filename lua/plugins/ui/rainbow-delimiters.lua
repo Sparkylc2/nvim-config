@@ -1,8 +1,9 @@
 return {
 	{
 		"HiPhish/rainbow-delimiters.nvim",
+		submodules = false,
+		dependencies = { "nvim-treesitter/nvim-treesitter" },
 		event = "BufReadPost",
-
 		config = function()
 			local rainbow_delimiters = require("rainbow-delimiters")
 			vim.g.rainbow_delimiters = {

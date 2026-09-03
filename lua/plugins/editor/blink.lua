@@ -29,9 +29,6 @@ return {
 			snippets = { preset = "luasnip" },
 			keymap = {
 				preset = "none",
-				-- kitty maps cmd+enter -> ctrl+j, so this IS cmd+enter.
-				-- <CR> is deliberately left unbound: Enter should insert a
-				-- newline, never accept a completion.
 				["<C-j>"] = { "accept", "fallback" },
 				["<C-h>"] = { "hide", "fallback" },
 				["<A-u>"] = { "select_next", "fallback" },
@@ -49,8 +46,6 @@ return {
 					["<A-l>"] = { "select_prev", "fallback" },
 					["<Tab>"] = { "show", "select_next", "fallback" },
 					["<S-Tab>"] = { "select_prev", "fallback" },
-					-- cmd+enter accepts the highlighted item without running it;
-					-- plain Enter is left alone so it executes the command line
 					["<C-j>"] = { "accept", "fallback" },
 					["<C-h>"] = { "hide", "fallback" },
 				},
@@ -64,12 +59,8 @@ return {
 				menu = {
 					border = "rounded",
 					winhighlight = "Normal:BlinkCmpMenu,FloatBorder:BlinkCmpMenuBorder,CursorLine:BlinkCmpMenuSelection,Search:None",
-					-- note: blink disables the scrollbar *gutter* when a border is
-					-- set, so only the thumb draws -- it rides the rounded border
-					-- itself, which is the rounded look you wanted
 					scrollbar = true,
 					draw = {
-						-- kind icon, label, then source -- the lspkind layout
 						columns = {
 							{ "kind_icon" },
 							{ "label", "label_description", gap = 1 },
@@ -88,7 +79,7 @@ return {
 			},
 
 			signature = {
-				enabled = false, -- lsp_signature.nvim still owns this
+				enabled = false,
 			},
 
 			sources = {
@@ -122,11 +113,7 @@ return {
 		config = function(_, opts)
 			require("blink.cmp").setup(opts)
 
-			-- Same palette as the old nvim-cmp block, via config.palette.
 			p.apply({
-				-- Matching the old cmp exactly: the menu sat on bg_dim (#181616,
-				-- i.e. the editor background), NOT on bg (#0d0c0c). Only the
-				-- selected row's text used the darker one.
 				BlinkCmpMenu = { bg = p.bg, fg = p.fg },
 				BlinkCmpMenuBorder = { bg = p.bg, fg = p.orange },
 				BlinkCmpMenuSelection = { bg = p.blue, fg = p.bg_dark, bold = true },
@@ -138,11 +125,6 @@ return {
 				BlinkCmpLabelDeprecated = { bg = p.bg, fg = p.fg_dim, strikethrough = true },
 				BlinkCmpLabelMatch = { bg = p.bg, fg = p.blue, bold = true },
 
-				-- LabelDetail is the "() const" / signature half of each entry.
-				-- Left undefined it links to PmenuExtra, which in this theme has
-				-- a blue background -- that is where the blue second half came
-				-- from. bg is set explicitly on all of these so none of them can
-				-- fall back to a group with its own background.
 				BlinkCmpLabelDetail = { bg = p.bg, fg = p.fg_dim },
 				BlinkCmpLabelDescription = { bg = p.bg, fg = p.fg_dim, italic = true },
 				BlinkCmpSource = { bg = p.bg, fg = p.fg_dim, italic = true },

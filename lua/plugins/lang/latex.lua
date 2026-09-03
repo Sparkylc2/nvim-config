@@ -1,72 +1,11 @@
-local function start_neovim_server()
-	local socket = "/tmp/nvim-arview.sock"
-
-	if vim.fn.filereadable(socket) == 1 then
-		vim.fn.delete(socket)
-	end
-
-	vim.fn.serverstart(socket)
-end
-
-vim.api.nvim_create_autocmd("VimEnter", {
-	callback = start_neovim_server,
-	once = true,
-})
-
-if vim.v.vim_did_enter == 1 then
-	start_neovim_server()
-end
-
-local function sync_to_pdf()
-	local line = vim.fn.line(".")
-	local file = vim.fn.expand("%:p")
-
-	if not file:match("%.tex$") then
-		vim.notify("Not a TeX file", vim.log.levels.WARN)
-		return
-	end
-
-	local socket_path = "/tmp/nvim-arview-forward.sock"
-
-	if vim.fn.filereadable(socket_path) == 0 then
-		vim.notify("arview forward search server not running", vim.log.levels.ERROR)
-		return
-	end
-
-	local message = vim.fn.json_encode({
-		type = "forward-search",
-		sourcePath = file,
-		line = line,
-	})
-
-	local cmd = string.format("echo %s | nc -U %s", vim.fn.shellescape(message), vim.fn.shellescape(socket_path))
-
-	vim.fn.system(cmd)
-
-	vim.notify(string.format("Synced line %d to PDF", line), vim.log.levels.INFO)
-end
-
-vim.api.nvim_create_user_command("SyncPDF", sync_to_pdf, {
-	desc = "Sync current line to PDF (forward search)",
-})
-
-vim.keymap.set("n", "<leader>sp", sync_to_pdf, {
-	desc = "Sync to PDF",
-	silent = true,
-})
-
-vim.api.nvim_create_autocmd("BufWritePost", {
-	pattern = "*.tex",
-	callback = function()
-		-- sync_to_pdf()
-	end,
-})
 return {
 	{
 		"lervag/vimtex",
 		ft = "tex",
 		event = "VeryLazy",
 		init = function()
+			vim.g.vimtex_syntax_conceal_disable = 1
+
 			vim.g.vimtex_view_method = "general"
 			vim.g.vimtex_view_general_viewer = "arview"
 			vim.g.vimtex_view_general_options = ("--ppid %d @pdf"):format(vim.fn.getpid())
@@ -134,21 +73,6 @@ return {
 			})
 		end,
 		config = function()
-			vim.api.nvim_create_autocmd("BufWritePost", {
-				pattern = "*.tex",
-				callback = function() end,
-			})
-
-			function ToggleVimtexQuickfixMode()
-				if vim.g.vimtex_quickfix_mode == 1 then
-					vim.g.vimtex_quickfix_mode = 0
-					print("vimtex_quickfix_mode: 0 (default menu shown)")
-				else
-					vim.g.vimtex_quickfix_mode = 1
-					print("vimtex_quickfix_mode: 1 (default menu hidden)")
-				end
-			end
-
 			function ShowSpellSuggestions()
 				local word = vim.fn.expand("<cword>")
 				local suggestions = vim.fn.spellsuggest(word, 10)
@@ -183,6 +107,8 @@ return {
 				callback = function()
 					vim.opt_local.spell = true
 					vim.opt_local.spelllang = "en_gb"
+					vim.opt_local.conceallevel = 2
+					vim.opt_local.concealcursor = ""
 
 					vim.keymap.set("x", "p", "p", { buffer = true, desc = "Paste without yanking (TeX)" })
 					vim.keymap.set(
@@ -191,13 +117,7 @@ return {
 						ShowSpellSuggestions,
 						{ buffer = true, desc = "Show spell suggestions in float" }
 					)
-					vim.keymap.set(
-						"n",
-						"<leader>vq",
-						ToggleVimtexQuickfixMode,
-						{ buffer = true, desc = "Toggle vimtex_quickfix_mode" }
-					)
-					vim.keymap.set("n", "<leader>m", function()
+					vim.keymap.set("n", "<leader>mm", function()
 						local current = vim.wo.conceallevel
 						vim.wo.conceallevel = current == 0 and 2 or 0
 					end, { buffer = true, desc = "Toggle conceallevel" })

@@ -1,12 +1,3 @@
--- zen-mode.nvim, kept rather than snacks.zen: this one drives kitty's font size
--- and tmux's status bar, which snacks.zen does not.
---
--- That external state is exactly why the guard below exists. zen-mode restores
--- the kitty font and tmux status on close -- but only if close actually runs. If
--- nvim exits while zen is active (:qa, closing the last buffer, quitting kitty
--- with the window still open) the restore never fires and kitty is left at
--- font +4 for every future session.
-
 return {
 	{
 		"folke/zen-mode.nvim",
@@ -54,14 +45,10 @@ return {
 
 			local group = vim.api.nvim_create_augroup("ZenModeGuard", { clear = true })
 
-			-- every path out of nvim, so the kitty font and tmux status are
-			-- always restored
 			vim.api.nvim_create_autocmd({ "VimLeavePre", "VimSuspend" }, {
 				group = group,
 				callback = close_zen,
 			})
-
-			-- and if the last real buffer goes away underneath it
 			vim.api.nvim_create_autocmd({ "BufDelete", "BufWipeout" }, {
 				group = group,
 				callback = function()

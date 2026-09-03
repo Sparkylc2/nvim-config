@@ -34,10 +34,16 @@ return {
 				tex = { "latexindent" },
 				plaintex = { "latexindent" },
 				bib = { "bibtex-tidy" },
+				markdown = { "injected" },
+				quarto = { "injected" },
 			},
-			format_on_save = {
-				lsp_fallback = true,
-			},
+			format_on_save = function(bufnr)
+				local ft = vim.bo[bufnr].filetype
+				if ft == "markdown" or ft == "quarto" then
+					return nil
+				end
+				return { lsp_fallback = true }
+			end,
 		},
 	},
 }

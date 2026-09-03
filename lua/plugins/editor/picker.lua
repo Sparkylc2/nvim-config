@@ -1,15 +1,3 @@
--- snacks.picker, replacing telescope + telescope-fzf-native + telescope-ui-select
--- + telescope-symbols (4 plugins).
---
--- Removing telescope also removes one of the two things blocking the
--- nvim-treesitter main-branch migration: telescope's __files.lua requires
--- nvim-treesitter.locals, which does not exist on main.
---
--- GAP: <leader>fm was telescope-symbols' LaTeX symbol browser. snacks has no
--- equivalent (its `icons` source is nerd-font/emoji only). cmp-omni is already
--- wired for tex, so symbol *insertion* still works via completion -- but the
--- browse-and-pick UI is gone. Left unmapped rather than silently rebound.
-
 return {
 	{
 		"folke/snacks.nvim",
@@ -17,20 +5,14 @@ return {
 			picker = {
 				enabled = true,
 
-				-- replaces telescope-ui-select: vim.ui.select now renders here,
-				-- which is also what makes YankyRingHistory and :AutoSession
-				-- search look consistent with everything else
+				-- replaces telescope-ui-select
 				ui_select = true,
 
-				-- no dimming behind the picker: the float should read as part of
-				-- the editor, not as an overlay on top of it
 				layout = { backdrop = false },
 
 				win = {
 					input = {
 						keys = {
-							-- match the fzf popups in tmux and the cmp menu:
-							-- Colemak home row, plus the telescope-era C-j/C-k
 							["<A-e>"] = { "list_down", mode = { "i", "n" } },
 							["<A-i>"] = { "list_up", mode = { "i", "n" } },
 							["<C-j>"] = { "list_down", mode = { "i", "n" } },
@@ -43,7 +25,6 @@ return {
 		},
 
 		keys = {
-			-- same <leader>f* namespace the telescope bindings used
 			{
 				"<leader>ff",
 				function()

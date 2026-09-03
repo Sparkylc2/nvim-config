@@ -13,44 +13,41 @@ return {
 			},
 			primary_dirs = {
 				Uni = {
-					base_dir = "~/Users/lukascampbell/Library/CloudStorage/OneDrive-ImperialCollegeLondon/Year\\/",
+					base_dir = "~/Users/lukascampbell/OneDrive\\ -\\ Imperial\\ College\\ London/Year\\ 2",
 					use_autosession = true,
 					subdirs = {
-						ae = {
-							path = "Aerodynamics\\ 2",
+						writing = {
+							path = "Advanced\\ Creative\\ Writing",
 						},
-						fd = {
-							path = "Flight\\ Dynamics\\ and\\ Control",
+						ae = {
+							path = "Aerodynamics\\ 3",
+						},
+						vdes = {
+							path = "Aerospace\\ Vehicle\\ Design",
+						},
+						cs = {
+							path = "High\\ Performance\\ Computing",
+						},
+						ctrl = {
+							path = "Control\\ Systems",
+						},
+						desproj = {
+							path = "Group\\ Design\\ Project",
 						},
 						math = {
-							path = "Mathematics\\ 2",
+							path = "Mathematics\\ 3",
 						},
 						exams = {
 							path = "Past\\ Exams",
 						},
-						cs = {
-							path = "Computing\\ and\\ Numerical\\ Methods\\ 2",
-						},
 						labs = {
 							path = "Lab\\ Reports",
-						},
-						mech = {
-							path = "Mechatronics",
-						},
-						pt = {
-							path = "Propulsion\\ and\\ Turbomachinery",
-						},
-						ep = {
-							path = "Engineering\\ Practice\\ 2",
-						},
-						mat = {
-							path = "Materials\\ 2",
 						},
 						misc = {
 							path = "Misc",
 						},
 						struct = {
-							path = "Structures\\ 2",
+							path = "Structures\\ 3",
 						},
 						h = {
 							path = "",

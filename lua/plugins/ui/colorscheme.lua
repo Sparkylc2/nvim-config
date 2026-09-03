@@ -22,8 +22,7 @@ return {
 						DiagnosticSignHint = { bg = colors.bg, fg = colors.hint },
 						DiagnosticSignOk = { bg = colors.bg, fg = colors.ok },
 
-						-- virtual text and floats, so the whole diagnostic
-						-- surface uses one set of hues
+						-- virtual text and floats
 						DiagnosticError = { fg = colors.error },
 						DiagnosticWarn = { fg = colors.warn },
 						DiagnosticInfo = { fg = colors.info },
@@ -35,13 +34,13 @@ return {
 						DiagnosticVirtualTextInfo = { fg = colors.info, bg = "NONE" },
 						DiagnosticVirtualTextHint = { fg = colors.hint, bg = "NONE" },
 
-						-- undercurls pick up the same hues
+						-- undercurls
 						DiagnosticUnderlineError = { undercurl = true, sp = colors.error },
 						DiagnosticUnderlineWarn = { undercurl = true, sp = colors.warn },
 						DiagnosticUnderlineInfo = { undercurl = true, sp = colors.info },
 						DiagnosticUnderlineHint = { undercurl = true, sp = colors.hint },
 
-						-- soft yank flash, see config/autocmds.lua
+						-- soft yank flash
 						YankFlash = { bg = colors.yank_bg },
 					})
 
@@ -91,7 +90,7 @@ return {
 					vim.api.nvim_set_hl(0, "FloatBorder", { bg = colors.bg, fg = colors.border })
 					vim.api.nvim_set_hl(0, "FloatTitle", { bg = colors.bg, fg = colors.border, bold = true })
 
-					-- snacks.picker replaced telescope; these are its groups
+					-- snacks.picker
 					colors.apply({
 						SnacksPickerNormal = { bg = colors.bg, fg = colors.fg },
 						SnacksPickerBorder = { bg = colors.bg, fg = colors.border },
@@ -105,7 +104,7 @@ return {
 						SnacksPickerMatch = { fg = colors.blue, bold = true },
 						SnacksPickerCursorLine = { bg = colors.bg_light },
 
-						-- other snacks surfaces, same palette
+						-- other snacks surfaces
 						SnacksNotifierBorderInfo = { bg = colors.bg, fg = colors.border },
 						SnacksNotifierBorderWarn = { bg = colors.bg, fg = colors.yellow },
 						SnacksNotifierBorderError = { bg = colors.bg, fg = colors.red },
@@ -128,25 +127,10 @@ return {
 					vim.api.nvim_set_hl(0, "Pmenu", { bg = colors.bg_light, fg = colors.fg })
 					vim.api.nvim_set_hl(0, "PmenuSel", { bg = colors.border, fg = colors.bg, bold = true })
 					vim.api.nvim_set_hl(0, "PmenuBorder", { bg = colors.bg_light, fg = colors.border })
-					-- Splits should be invisible: the separator, the sign column and
-					-- the number column all sit on the same background, so a split
-					-- reads as one continuous surface rather than two panes with a
-					-- rule between them.
 					colors.apply({
-						-- Visible again, but subtle: the same family as the indent
-						-- guides (SnacksIndent, bg_light) nudged brighter so a
-						-- split boundary reads without becoming a hard rule.
-						-- With the outlined lualine there is no filled bar to
-						-- mark where one pane ends, so this is the only cue.
 						WinSeparator = { fg = colors.blend(colors.bg_light, colors.gray, 0.9), bg = colors.bg },
 						VertSplit = { fg = colors.blend(colors.bg_light, colors.gray, 0.9), bg = colors.bg },
 
-						-- snacks.words calls vim.lsp.buf.document_highlight(),
-						-- which highlights every reference of the symbol under the
-						-- cursor. Blanking these groups removes the highlight but
-						-- keeps the extmarks, so ]] / [[ still jump between them.
-						-- To drop the feature entirely instead, set
-						-- words = { enabled = false } in plugins/ui/snacks.lua.
 						LspReferenceText = {},
 						LspReferenceRead = {},
 						LspReferenceWrite = {},

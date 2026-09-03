@@ -12,10 +12,6 @@ local perf_guard = aug("PerfGuard", { clear = true })
 vim.api.nvim_create_autocmd("TextYankPost", {
 	group = yank_grp,
 	callback = function()
-		-- YankFlash is a soft wash instead, and Snacks.animate fades it back to
-		-- the editor background over the life of the highlight -- the same
-		-- animation engine snacks.scroll and the cursor use, so it feels of a
-		-- piece with them rather than a hard on/off blink.
 		local p = require("config.palette")
 		local duration = 250
 
@@ -26,8 +22,6 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 			Snacks.animate(0, 100, function(value)
 				vim.api.nvim_set_hl(0, "YankFlash", { bg = p.blend(p.yank_bg, p.bg, value / 100) })
 			end, {
-				-- a bare number here is ms PER STEP, not total -- 250 would mean
-				-- 250ms x 100 steps, i.e. barely moving. Pass the table form.
 				duration = { step = 8, total = duration },
 				easing = "outQuad",
 				int = true,
@@ -81,6 +75,28 @@ local ft_handlers = {
 	markdown = function()
 		vim.opt_local.wrap = true
 		vim.opt_local.spell = true
+
+		vim.keymap.set("n", "<leader>o", function()
+			local file = vim.api.nvim_buf_get_name(0)
+			if file == "" then
+				vim.notify("buffer has no file on disk", vim.log.levels.WARN)
+				return
+			end
+			if file:match("%.ipynb$") then
+				vim.notify("that's a notebook -- Typora can't open .ipynb", vim.log.levels.WARN)
+				return
+			end
+			if vim.bo.modified then
+				vim.cmd.write()
+			end
+			vim.system({ "open", "-a", "Typora", file }, { text = true }, function(res)
+				if res.code ~= 0 then
+					vim.schedule(function()
+						vim.notify("Typora: " .. (res.stderr or "failed"), vim.log.levels.ERROR)
+					end)
+				end
+			end)
+		end, { buffer = true, desc = "Open in Typora" })
 	end,
 }
 
@@ -111,24 +127,9 @@ vim.api.nvim_create_autocmd("TermOpen", {
 
 		local opts = { buffer = event.buf }
 
-		-- <Esc> leaves terminal mode -> nvim normal mode, for scrollback, search
-		-- and yank over the terminal buffer. i/a/A returns to the shell.
 		vim.keymap.set("t", "<esc>", [[<C-\><C-n>]], opts)
 		vim.keymap.set("t", "<C-e>", [[<C-\><C-n>]], opts)
-		-- ...which means the shell never sees <Esc>. <A-Esc> forwards a literal
-		-- one, for nushell's vi edit_mode and for TUIs (fzf, lazygit, REPLs).
 		vim.keymap.set("t", "<A-esc>", "<esc>", opts)
-		-- Cursor keys for the shell's own line editor. In nushell this is what
-		-- makes <A-o> accept the inline suggestion and <A-i>/<A-e> walk history.
-		--
-		-- Not window navigation: <Esc> goes to nvim normal mode, so moving
-		-- between splits is done from there with the usual H/J/K/L.
-		--
-		-- Send real cursor keys rather than raw "\x1b[A" byte strings: nvim
-		-- encodes these in a single write and honours the app's cursor-key mode
-		-- (DECCKM). A raw sequence can be read one byte at a time, and a lone ESC
-		-- arriving first drops nushell's vi edit_mode into normal mode, which
-		-- then eats the rest as commands.
 		vim.keymap.set("t", "<A-n>", "<Left>", opts)
 		vim.keymap.set("t", "<A-o>", "<Right>", opts)
 		vim.keymap.set("t", "<A-i>", "<Up>", opts)
@@ -136,7 +137,7 @@ vim.api.nvim_create_autocmd("TermOpen", {
 	end,
 })
 
--- open pdfs in skim
+-- open pdfs in my pdf viewer
 vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
 	group = open_ext,
 	pattern = "*.pdf",
@@ -243,21 +244,6 @@ vim.api.nvim_create_autocmd("FileType", {
 		vim.keymap.set("n", "<leader>rf", ":!./a.out<CR>", { buffer = true, desc = "Run make output" })
 	end,
 })
-
--- disable inline lsp hints
--- vim.api.nvim_create_autocmd("LspAttach", {
--- 	callback = function(args)
--- 		pcall(function()
--- 			vim.lsp.inlay_hint.enable(args.buf, false)
--- 		end)
--- 	end,
--- })
-
--- inlay hints toggle is now Snacks.toggle.inlay_hints() on <leader>ih.
--- The version that used to live here passed a bare bufnr to
--- vim.lsp.inlay_hint.is_enabled/enable, which on 0.11 expect a filter table --
--- which is why it "didn't seem to work".
-
 -- run the current python file
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = { "python" },

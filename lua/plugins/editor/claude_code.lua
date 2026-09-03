@@ -67,9 +67,6 @@ return {
 						mode = "t",
 						desc = "Hide Claude",
 					},
-					-- split navigation from inside the Claude terminal. capital
-					-- HJKL can't be used here: in terminal mode they're just typed
-					-- text, so they'd break typing capitals into the prompt.
 					nav_left = {
 						"<A-n>",
 						function()

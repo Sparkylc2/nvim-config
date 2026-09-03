@@ -1,13 +1,3 @@
--- snacks.nvim, batch 1.
---
--- Replaces: alpha-nvim (dashboard), indent-blankline (indent),
--- peepsight (dim), kdheepak/lazygit.nvim (lazygit).
--- zen-mode.nvim is deliberately KEPT: it drives kitty font + tmux status,
--- which snacks.zen does not. See lua/plugins/editor/zen.lua.
--- Adds: bigfile, scroll, input, notifier.
---
--- The picker lives in lua/plugins/editor/picker.lua.
-
 local header = [[
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣰⡟⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢻⣆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣰⡿⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -35,10 +25,10 @@ return {
 		priority = 1000,
 		lazy = false,
 		opts = {
-			-- turns off treesitter/LSP/syntax on huge files, which is what
-			-- synmaxcol and the 1000-line branch in clangd's on_attach were
-			-- crudely approximating
-			bigfile = { enabled = true },
+			-- turns off treesitter/LSP/syntax on huge files
+			bigfile = {
+				enabled = true,
+			},
 
 			-- replaces alpha-nvim
 			dashboard = {
@@ -67,10 +57,7 @@ return {
 				},
 			},
 
-			-- replaces peepsight. Scope-based rather than peepsight's explicit
-			-- treesitter node list, so it needs no per-language configuration --
-			-- and, unlike peepsight, no nvim-treesitter.ts_utils, which is one of
-			-- the two things blocking the treesitter main-branch migration.
+			-- replaces peepsight
 			dim = { enabled = true },
 
 			-- replaces indent-blankline
@@ -85,8 +72,7 @@ return {
 			-- replaces kdheepak/lazygit.nvim
 			lazygit = { enabled = true },
 
-			-- no dimming behind any snacks float -- lazygit, terminal, zen and
-			-- the picker should all read as part of the editor, not as overlays
+			-- no dimming behind any snacks float
 			styles = {
 				lazygit = { backdrop = false },
 				terminal = { backdrop = false },
@@ -96,19 +82,29 @@ return {
 
 			notifier = { enabled = true, timeout = 3000 },
 
-			-- inline images in the buffer, and rendered LaTeX math. Needs a
-			-- graphics-capable terminal -- kitty qualifies.
-			image = { enabled = true },
+			image = {
+				enabled = true,
+				doc = {
+					enabled = true,
+					inline = true,
+					float = true,
+					-- max_width = 100,
+					-- max_height = 30,
+				},
+				math = {
+					enabled = true,
+					latex = {
+						font_size = "large",
+						packages = { "amsmath", "amssymb", "amsfonts", "amscd", "mathtools" },
+					},
+				},
+			},
 
-			-- LSP-aware file rename: renaming a file tells the language servers so
-			-- imports/includes follow. Wired to oil below.
+			-- LSP-aware file rename
 			rename = { enabled = true },
 
 			scratch = { enabled = true },
 
-			-- defaults are step=10/total=200 (and 5/50 when repeating), which
-			-- reads as lag. Roughly halved, with a snappier repeat so held
-			-- <C-d>/<C-u> keeps up instead of queueing behind the animation.
 			scroll = {
 				enabled = true,
 				animate = {
@@ -149,7 +145,6 @@ return {
 				end,
 				desc = "Scratch buffer",
 			},
-			-- NOT <leader>S: that is the session-management prefix
 			{
 				"<leader>,",
 				function()
@@ -174,9 +169,42 @@ return {
 		},
 
 		init = function()
-			-- tell the LSPs about oil renames so imports/includes follow.
-			-- This is the general version of what lua/tools/cpp/include_rename.lua
-			-- does by hand for C/C++ headers.
+			local INLINE_FONT_SIZE = "Large"
+
+			local function patch_inline_math_size()
+				local ok, doc = pcall(require, "snacks.image.doc")
+				if not ok or type(doc) ~= "table" or type(doc.transforms) ~= "table" then
+					return
+				end
+				local orig = doc.transforms.latex
+				if type(orig) ~= "function" then
+					return
+				end
+				doc.transforms.latex = function(img, ctx)
+					local raw = vim.trim(img.content or "")
+					orig(img, ctx)
+					local inline = raw:match("^%$[^$]") or raw:match("^\\%(")
+					if not inline or not img.content then
+						return
+					end
+					local size = (Snacks.image.config.math.latex or {}).font_size or "large"
+					local from = "\\" .. size .. " \\selectfont"
+					img.content = img.content:gsub(vim.pesc(from), "\\" .. INLINE_FONT_SIZE .. " \\selectfont", 1)
+				end
+			end
+
+			vim.api.nvim_create_autocmd("FileType", {
+				pattern = { "markdown", "quarto", "tex", "latex" },
+				once = true,
+				callback = patch_inline_math_size,
+			})
+
+			local function math_hl()
+				vim.api.nvim_set_hl(0, "SnacksImageMath", { fg = "#FFFFFF" })
+			end
+			math_hl()
+			vim.api.nvim_create_autocmd("ColorScheme", { callback = math_hl })
+
 			vim.api.nvim_create_autocmd("User", {
 				pattern = "OilActionsPost",
 				callback = function(event)
@@ -198,7 +226,19 @@ return {
 					Snacks.toggle.inlay_hints():map("<leader>ih")
 					Snacks.toggle.diagnostics():map("<leader>ud")
 					Snacks.toggle.option("wrap", { name = "Wrap" }):map("<leader>uw")
-					Snacks.toggle.option("spell", { name = "Spelling" }):map("<leader>us")
+					Snacks.toggle({
+						name = "Spelling & grammar",
+						get = function()
+							return vim.wo.spell
+						end,
+						set = function(state)
+							vim.wo.spell = state
+							for _, client in ipairs(vim.lsp.get_clients({ name = "ltex" })) do
+								local ns = vim.lsp.diagnostic.get_namespace(client.id, false)
+								vim.diagnostic.enable(state, { ns_id = ns, bufnr = 0 })
+							end
+						end,
+					}):map("<leader>us")
 					Snacks.toggle.line_number():map("<leader>ul")
 					Snacks.toggle.treesitter():map("<leader>uT")
 				end,

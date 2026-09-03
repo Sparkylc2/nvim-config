@@ -25,9 +25,6 @@ opt.wrap = false
 opt.scrolloff = 8
 opt.sidescrolloff = 8
 vim.wo.cursorline = true
--- 3 = one global statusline, so horizontal splits are separated by
--- WinSeparator rather than by a per-window statusline bar. lualine sets this
--- too when globalstatus = true; pinned here so the two cannot disagree.
 opt.laststatus = 3
 opt.cmdheight = 1
 
@@ -37,14 +34,9 @@ opt.backup = false
 opt.swapfile = false
 opt.undofile = true
 opt.undodir = (os.getenv("HOME") or "") .. "/.vim/undodir"
--- clangd's on_attach used to set this to 400 (800 for files over 1000 lines)
--- via vim.bo[bufnr].updatetime, which throws -- updatetime is global.
 opt.updatetime = 50
 opt.timeout = true
 opt.timeoutlen = 250
--- ttimeoutlen is the grace period for a *terminal key code* to arrive in full.
--- At 0, a split read of Alt+<key> (ESC then the char) is decoded as a bare <Esc>
--- followed by the char, which wrecks Alt mappings in terminal mode.
 opt.ttimeout = true
 opt.ttimeoutlen = 25
 opt.completeopt = "menu,menuone,noselect"
@@ -55,10 +47,6 @@ opt.lazyredraw = false
 opt.synmaxcol = 200
 opt.winborder = "rounded"
 
--- Box-drawing glyphs, not the one-eighth block "▏" that was here before: that
--- block is missing from many monospace fonts, and a missing glyph renders as
--- nothing -- which is why the separator appeared to be absent entirely.
--- Subtlety comes from the WinSeparator colour, not from the glyph.
 opt.fillchars:append({
 	vert = "│",
 	horiz = "─",
@@ -77,7 +65,6 @@ opt.titlestring = "%t"
 opt.cursorline = true
 opt.cursorlineopt = "number"
 
--- Disable built-in plugins
 for _, plugin in pairs({
 	"gzip",
 	"zip",
