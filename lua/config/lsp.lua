@@ -131,7 +131,13 @@ vim.lsp.config("basedpyright", {
 		".git",
 	},
 	before_init = function(params, config)
-		local root = config.root_dir or params.rootPath or vim.fn.getcwd()
+		-- params.rootPath is vim.NIL (userdata, and truthy!) rather than nil when
+		-- the client sends no root, so `a or b or c` happily picks it and every
+		-- later concat blows up with "attempt to concatenate a userdata value".
+		local function str(v)
+			return (type(v) == "string" and v ~= "") and v or nil
+		end
+		local root = str(config.root_dir) or str(params.rootPath) or vim.fn.getcwd()
 		local exe = venv_python(root)
 		config.settings.basedpyright.pythonPath = exe
 
