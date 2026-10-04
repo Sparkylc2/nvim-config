@@ -88,7 +88,7 @@ return {
 				per_filetype = {
 					tex = { "snippets", "omni", "lsp", "path" },
 					plaintex = { "snippets", "omni", "lsp", "path" },
-					markdown = { "snippets", "lsp", "path", "buffer" },
+					markdown = { "lsp", "snippets", "path", "buffer" },
 				},
 
 				providers = {

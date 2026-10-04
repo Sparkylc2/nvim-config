@@ -27,6 +27,15 @@ return {
 				}
 			end
 
+			-- word count of the visual selection, prose filetypes only
+			local prose = { text = true, markdown = true, tex = true, plaintex = true }
+			local function selection_words()
+				return vim.fn.wordcount().visual_words .. "w"
+			end
+			local function in_prose_selection()
+				return prose[vim.bo.filetype] and vim.fn.mode():find("^[vV\22]") ~= nil
+			end
+
 			require("lualine").setup({
 				options = {
 					theme = theme,
@@ -56,6 +65,7 @@ return {
 					lualine_x = { "diagnostics", "encoding", "filetype" },
 					lualine_y = { "progress" },
 					lualine_z = {
+						{ selection_words, cond = in_prose_selection },
 						{
 							"location",
 							fmt = function(s)

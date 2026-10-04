@@ -58,6 +58,28 @@ opt.fillchars:append({
 })
 opt.clipboard = "unnamedplus"
 
+-- clean text pasted from word/outlook/the web: windows line endings show as ^M,
+-- zero-width chars as <200b>, and non-breaking spaces look like spaces but aren't
+vim.paste = (function(paste)
+	local strip = { "\u{200b}", "\u{200c}", "\u{200d}", "\u{feff}", "\u{ad}" }
+	return function(lines, phase)
+		local out = {}
+		for _, l in ipairs(lines) do
+			l = l:gsub("\u{a0}", " "):gsub("\u{202f}", " ")
+			for _, c in ipairs(strip) do
+				l = l:gsub(c, "")
+			end
+			-- a lone \r (old mac line endings) splits lines too; \r\n leaves an empty tail
+			local parts = vim.split(l, "\r", { plain = true })
+			if #parts > 1 and parts[#parts] == "" then
+				table.remove(parts)
+			end
+			vim.list_extend(out, parts)
+		end
+		return paste(out, phase)
+	end
+end)(vim.paste)
+
 opt.title = true
 opt.titlestring = "%t"
 

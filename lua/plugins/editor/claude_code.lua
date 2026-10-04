@@ -59,6 +59,7 @@ return {
 			split_width_percentage = 0.4,
 			snacks_win_opts = {
 				keys = {
+					term_hide = false,
 					claude_hide = {
 						toggle_key,
 						function(self)

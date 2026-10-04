@@ -13,7 +13,7 @@ return {
 			},
 			primary_dirs = {
 				Uni = {
-					base_dir = "~/Users/lukascampbell/OneDrive\\ -\\ Imperial\\ College\\ London/Year\\ 2",
+					base_dir = "~/Users/lukascampbell/OneDrive\\ -\\ Imperial\\ College\\ London/Year\\ 3",
 					use_autosession = true,
 					subdirs = {
 						writing = {

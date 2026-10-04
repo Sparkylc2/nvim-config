@@ -201,6 +201,42 @@ vim.api.nvim_create_user_command("JupyterToPy", function(a)
 	end
 end, { nargs = "?", complete = "file", desc = "Convert an .ipynb to percent-format .py" })
 
+local MOLTEN_SHOW_OLD = [[        if (
+            self.selected_cell is not None
+            # Prevent from rendering when it's done
+            and self.output_statuses.get(self.selected_cell, None) != OutputStatus.DONE
+        ):]]
+
+local MOLTEN_SHOW_NEW = [[        if self.selected_cell is not None and (
+            self.output_statuses.get(self.selected_cell, None) != OutputStatus.DONE
+            or (
+                self.should_show_floating_win
+                and self.selected_cell in self.outputs
+                and self.outputs[self.selected_cell].display_win is None
+            )
+        ):]]
+
+local function patch_reshow()
+	local file = vim.fn.stdpath("data") .. "/lazy/molten-nvim/rplugin/python3/molten/moltenbuffer.py"
+	local fd = io.open(file, "r")
+	if not fd then
+		return
+	end
+	local src = fd:read("*a")
+	fd:close()
+	if not src:find(MOLTEN_SHOW_OLD, 1, true) then
+		return
+	end
+	local out = src:gsub(vim.pesc(MOLTEN_SHOW_OLD), (MOLTEN_SHOW_NEW:gsub("%%", "%%%%")), 1)
+	local w = io.open(file, "w")
+	if not w then
+		return
+	end
+	w:write(out)
+	w:close()
+	vim.notify("molten: patched output re-show; restart nvim", vim.log.levels.WARN)
+end
+
 local function molten_highlights()
 	local hl = vim.api.nvim_set_hl
 	local red, orange, yellow = "#FF5D62", "#FFA066", "#FF9E3B"
@@ -224,125 +260,6 @@ local function molten_highlights()
 	hl(0, "MoltenOutStr", { fg = green })
 end
 
--- Molten's setup guide is explicit that the image provider's size caps must be
--- set (an uncapped plot can crash the terminal) and recommends 100x12: wide
--- enough for a matplotlib figure, short enough that a cell's output does not
--- shove the rest of the buffer off screen. It also insists the provider apply
--- no window-relative cap on top -- Molten opens an output window exactly as
--- tall as it needs, so a percentage cap makes the window and the image
--- disagree. snacks has no window-percentage option, and with a cap of 12 the
--- clamp to window height in snacks' placement never binds, so the guide's
--- advice carries over directly.
---
--- These are deliberately Molten's own, NOT Snacks.config.image.doc: those
--- govern figures in prose, which should be free to be taller than a cell
--- output.
-local MAX_WIDTH = 100
-local MAX_HEIGHT = 12
-
-local MOLTEN_GUARD_OLD = [[        if (
-            self.selected_cell is not None
-            # Prevent from rendering when it's done
-            and self.output_statuses.get(self.selected_cell, None) != OutputStatus.DONE
-        ):]]
-
-local MOLTEN_GUARD_NEW = [[        if self.selected_cell is not None:]]
-
-local function patch_output_regression()
-	local file = vim.fn.stdpath("data") .. "/lazy/molten-nvim/rplugin/python3/molten/moltenbuffer.py"
-	local fd = io.open(file, "r")
-	if not fd then
-		return
-	end
-	local src = fd:read("*a")
-	fd:close()
-	if not src:find(MOLTEN_GUARD_OLD, 1, true) then
-		return
-	end
-	local out = src:gsub(vim.pesc(MOLTEN_GUARD_OLD), (MOLTEN_GUARD_NEW:gsub("%%", "%%%%")), 1)
-	local w = io.open(file, "w")
-	if not w then
-		return
-	end
-	w:write(out)
-	w:close()
-	vim.notify("molten: patched output-window regression; restart nvim", vim.log.levels.WARN)
-end
---
-local function patch_snacks_bridge()
-	local ok, mod = pcall(require, "load_snacks_nvim")
-	if not ok or type(mod) ~= "table" or type(mod.snacks_api) ~= "table" then
-		return
-	end
-	local api = mod.snacks_api
-	local store = {}
-
-	api.from_file = function(path, opts)
-		local id = opts.id or path
-		local row, col = opts.y, opts.x
-		local prev = store[id]
-		if
-			prev
-			and prev.src == path
-			and prev.buffer == opts.buffer
-			and prev.opts.pos[1] == row
-			and prev.opts.pos[2] == col
-		then
-			return id
-		end
-		if prev and prev.placement then
-			pcall(function()
-				prev.placement:close()
-			end)
-		end
-		store[id] = {
-			src = path,
-			buffer = opts.buffer,
-			opts = {
-				inline = true,
-				pos = { row, col },
-				max_width = MAX_WIDTH,
-				max_height = MAX_HEIGHT,
-			},
-		}
-		return id
-	end
-
-	api.render = function(id)
-		local e = store[id]
-		if e and not e.placement then
-			e.placement = Snacks.image.placement.new(e.buffer, e.src, e.opts)
-		end
-	end
-
-	api.clear = function(id)
-		local e = store[id]
-		if e and e.placement then
-			pcall(function()
-				e.placement:close()
-			end)
-			e.placement = nil
-		end
-	end
-
-	api.clear_all = function()
-		for id in pairs(store) do
-			api.clear(id)
-		end
-	end
-
-	-- Molten sizes the output float from this estimate before the placement
-	-- exists, so it has to use the exact caps the placement will use --
-	-- otherwise the float and the image disagree.
-	api.image_size = function(id)
-		local e = store[id]
-		if not e then
-			return { width = 0, height = 0 }
-		end
-		return Snacks.image.util.fit(e.src, { width = e.opts.max_width, height = e.opts.max_height })
-	end
-end
-
 return {
 	{
 		"benlubas/molten-nvim",
@@ -358,12 +275,17 @@ return {
 			vim.g.molten_image_location = "float"
 
 			vim.g.molten_auto_open_output = true
-			vim.g.molten_virt_text_output = false
+			vim.g.molten_virt_text_output = true
+			vim.g.molten_virt_lines_off_by_1 = true
 			vim.g.molten_output_virt_lines = true
 			vim.g.molten_wrap_output = true
+			vim.g.molten_virt_text_max_lines = 20
+			vim.g.molten_virt_text_truncate = "top"
+
+			vim.g.molten_output_show_exec_time = false
 
 			vim.g.molten_enter_output_behavior = "open_and_enter"
-			vim.g.molten_output_win_max_height = 24
+			vim.g.molten_output_win_max_height = 40
 			vim.g.molten_output_win_hide_on_leave = false
 			vim.g.molten_output_show_more = true
 			vim.g.molten_floating_window_focus = "bottom"
@@ -375,9 +297,8 @@ return {
 		end,
 		config = function()
 			molten_highlights()
+			patch_reshow()
 			vim.api.nvim_create_autocmd("ColorScheme", { callback = molten_highlights })
-			-- patch_output_regression()
-			patch_snacks_bridge()
 
 			vim.api.nvim_create_autocmd("FileType", {
 				pattern = "molten_output",
@@ -413,7 +334,16 @@ return {
 				end,
 				desc = "Jupyter: init kernel (auto-picks project venv)",
 			},
-			{ "<leader>jc", eval_cell, desc = "Jupyter: run cell" },
+			{
+				"<leader>jc",
+				function()
+					eval_cell()
+					vim.defer_fn(function()
+						pcall(vim.cmd, "MoltenShowOutput")
+					end, 200)
+				end,
+				desc = "Jupyter: run cell",
+			},
 			{
 				"<leader>jC",
 				function()

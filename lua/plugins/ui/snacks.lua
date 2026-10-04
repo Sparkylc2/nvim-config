@@ -18,6 +18,41 @@ local header = [[
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⠷⣾⠟⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ]]
 
+-- obsidian-style image lookup for ![[name.png]]: the vault's attachment folder,
+-- then the vault root, then anywhere in the vault by filename. nil falls back to
+-- snacks' own relative-to-file resolution.
+local found = {}
+local function resolve_vault_image(file, src)
+	if src:find("^%w%w+://") or vim.uv.fs_stat(vim.fs.joinpath(vim.fs.dirname(file), src)) then
+		return nil
+	end
+	local root = vim.fs.root(file, ".obsidian")
+	if not root then
+		return nil
+	end
+	-- only hits are cached, so an image added later still gets picked up
+	local key = root .. "\0" .. src
+	if found[key] and vim.uv.fs_stat(found[key]) then
+		return found[key]
+	end
+	local ok, app = pcall(function()
+		return vim.json.decode(table.concat(vim.fn.readfile(root .. "/.obsidian/app.json"), "\n"))
+	end)
+	local dirs = { root }
+	if ok and app.attachmentFolderPath then
+		table.insert(dirs, 1, vim.fs.joinpath(root, app.attachmentFolderPath))
+	end
+	for _, dir in ipairs(dirs) do
+		local path = vim.fs.joinpath(dir, src)
+		if vim.uv.fs_stat(path) then
+			found[key] = path
+			return path
+		end
+	end
+	found[key] = vim.fs.find(vim.fs.basename(src), { path = root, type = "file", limit = 1 })[1]
+	return found[key]
+end
+
 return {
 	{
 
@@ -84,6 +119,7 @@ return {
 
 			image = {
 				enabled = true,
+				resolve = resolve_vault_image,
 				doc = {
 					enabled = true,
 					inline = true,

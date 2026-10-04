@@ -76,27 +76,54 @@ local ft_handlers = {
 		vim.opt_local.wrap = true
 		vim.opt_local.spell = true
 
-		vim.keymap.set("n", "<leader>o", function()
-			local file = vim.api.nvim_buf_get_name(0)
-			if file == "" then
-				vim.notify("buffer has no file on disk", vim.log.levels.WARN)
-				return
-			end
-			if file:match("%.ipynb$") then
-				vim.notify("that's a notebook -- Typora can't open .ipynb", vim.log.levels.WARN)
-				return
-			end
-			if vim.bo.modified then
-				vim.cmd.write()
-			end
-			vim.system({ "open", "-a", "Typora", file }, { text = true }, function(res)
-				if res.code ~= 0 then
-					vim.schedule(function()
-						vim.notify("Typora: " .. (res.stderr or "failed"), vim.log.levels.ERROR)
-					end)
+		-- open the file in an app next to nvim, with aerospace in accordion mode
+		local function open_beside(name, bundle, open_args)
+			return function()
+				local file = vim.api.nvim_buf_get_name(0)
+				if file == "" then
+					vim.notify("buffer has no file on disk", vim.log.levels.WARN)
+					return
 				end
-			end)
-		end, { buffer = true, desc = "Open in Typora" })
+				if file:match("%.ipynb$") then
+					vim.notify("that's a notebook -- " .. name .. " can't open .ipynb", vim.log.levels.WARN)
+					return
+				end
+				local args, delay = open_args(vim.fn.resolve(file))
+				if not args then
+					return
+				end
+				if vim.bo.modified then
+					vim.cmd.write()
+				end
+				local script = vim.fn.expand("~/.config/aerospace/scripts/open-beside.sh")
+				vim.defer_fn(function()
+					vim.system({ script, bundle, unpack(args) }, { text = true }, function(res)
+						if res.code ~= 0 then
+							vim.schedule(function()
+								vim.notify(name .. ": " .. (res.stderr or "failed"), vim.log.levels.ERROR)
+							end)
+						end
+					end)
+				end, delay or 0)
+			end
+		end
+
+		vim.keymap.set("n", "<leader>o", open_beside("Typora", "abnerworks.Typora", function(file)
+			return { "-a", "Typora", file }
+		end), { buffer = true, desc = "Open in Typora" })
+
+		vim.keymap.set("n", "<leader>O", open_beside("Obsidian", "md.obsidian", function(file)
+			local uri, err = require("tools.obsidian_hub").uri(file)
+			if not uri then
+				vim.notify("Obsidian: " .. err, vim.log.levels.WARN)
+				return
+			end
+			-- a folder just linked into the hub needs a moment before obsidian sees it
+			return { uri }, err == true and 1000 or 0
+		end), { buffer = true, desc = "Open in Obsidian" })
+
+		-- Year 3 notes: pasting a copied image file puts it in the attachment folder
+		require("tools.paste_image").attach(0)
 	end,
 }
 

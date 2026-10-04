@@ -7,10 +7,10 @@ return {
 				use_snippet_tabstops = true,
 			})
 			-- actually cmd+semicolon
-			vim.keymap.set({ "n", "i" }, "<C-x>", require("smart-nav").next)
+			vim.keymap.set({ "n", "i", "s" }, "<C-x>", require("smart-nav").next)
 
 			-- actually cmd+shift+semicolon
-			vim.keymap.set({ "n", "i" }, "<C-b>", require("smart-nav").prev)
+			vim.keymap.set({ "n", "i", "s" }, "<C-b>", require("smart-nav").prev)
 		end,
 	},
 }
