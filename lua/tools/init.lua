@@ -4,6 +4,7 @@ local M = {}
 
 local languages = {
 	"cpp",
+	"julia",
 }
 
 function M.setup()

@@ -239,6 +239,29 @@ vim.lsp.config("vtsls", {
 	},
 })
 
+-- LanguageServer.jl lives in ~/.julia/environments/nvim-lspconfig, outside mason
+-- (mason's julia-lsp is a separate install the lspconfig cmd never uses), so it
+-- is enabled here rather than listed in config/servers.lua. Pinned to the 1.12
+-- juliaup channel: SymbolServer 8.0.1 fails to precompile on 1.13. Drop the
+-- "+1.12" once a SymbolServer release supports the default channel.
+-- Install/update: julia +1.12 --project=~/.julia/environments/nvim-lspconfig -e 'using Pkg; Pkg.update()'
+vim.lsp.config("julials", {
+	cmd = {
+		"julia",
+		"+1.12",
+		"--startup-file=no",
+		"--history-file=no",
+		"-e",
+		[[
+			pushfirst!(LOAD_PATH, joinpath(get(DEPOT_PATH, 1, joinpath(homedir(), ".julia")), "environments", "nvim-lspconfig"))
+			using LanguageServer
+			popfirst!(LOAD_PATH)
+			LanguageServer.runserver()
+		]],
+	},
+})
+vim.lsp.enable("julials")
+
 vim.filetype.add({
 	extension = {
 		fs = "glsl",
