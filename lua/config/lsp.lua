@@ -256,9 +256,35 @@ vim.lsp.config("julials", {
 			pushfirst!(LOAD_PATH, joinpath(get(DEPOT_PATH, 1, joinpath(homedir(), ".julia")), "environments", "nvim-lspconfig"))
 			using LanguageServer
 			popfirst!(LOAD_PATH)
-			LanguageServer.runserver()
+			# packages for scripts outside a project resolve against the newest
+			# default env (v1.13), not this 1.12 process's own, which is empty
+			envs = joinpath(get(DEPOT_PATH, 1, joinpath(homedir(), ".julia")), "environments")
+			defaults = filter(d -> occursin(r"^v\d+\.\d+$", d) && isfile(joinpath(envs, d, "Project.toml")), readdir(envs))
+			proj = Base.current_project(pwd())
+			env = proj !== nothing ? dirname(proj) :
+				isempty(defaults) ? LanguageServer.choose_env() :
+				joinpath(envs, last(sort(defaults; by = d -> VersionNumber(d[2:end]))))
+			LanguageServer.runserver(stdin, stdout, env)
 		]],
 	},
+	-- the server lints only files inside a workspace folder, so a loose script
+	-- (no Project.toml or .git) got no diagnostics at all; use its directory.
+	-- Never ~ or /, which the server would walk for every .jl file.
+	root_dir = function(bufnr, on_dir)
+		local root = vim.fs.root(bufnr, { "Project.toml", "JuliaProject.toml", ".git" })
+		if not root then
+			local dir = vim.fs.dirname(vim.api.nvim_buf_get_name(bufnr))
+			if dir ~= vim.env.HOME and dir ~= "/" then
+				root = dir
+			end
+		end
+		if root then
+			on_dir(root)
+		end
+	end,
+	-- with incremental sync the server's copy drifted from the buffer (an extra
+	-- trailing newline), and its didSave check then threw and killed the server
+	flags = { allow_incremental_sync = false },
 })
 vim.lsp.enable("julials")
 
