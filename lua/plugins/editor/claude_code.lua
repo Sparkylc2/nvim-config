@@ -53,6 +53,11 @@ return {
 	"coder/claudecode.nvim",
 	dependencies = { "folke/snacks.nvim" },
 	opts = {
+		-- claude inherits $TMUX from the nvim that tmux started, so on copy it wraps
+		-- its OSC 52 in tmux's DCS passthrough. nvim's terminal is what actually
+		-- parses that, can't read the wrapper, and prints "52;c;<base64>" over the
+		-- prompt. Empty (falsy) hides tmux; copying still goes through pbcopy.
+		env = { TMUX = "", TMUX_PANE = "" },
 		focus_after_send = true,
 		terminal = {
 			split_side = "right",
