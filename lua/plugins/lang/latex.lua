@@ -31,46 +31,7 @@ return {
 			vim.g.vimtex_compiler_method = "latexmk"
 			vim.g.vimtex_compiler_latexmk_engines = { _ = "-xelatex" }
 			vim.g.vimtex_bibliography_autoload = { filenames = { "**/bibliography/*.bib" } }
-			local function has_tex_root_directive(buf)
-				local line_count = vim.api.nvim_buf_line_count(buf)
-				local last = math.min(5, line_count)
-				local lines = vim.api.nvim_buf_get_lines(buf, 0, last, false)
-				for _, l in ipairs(lines) do
-					if l:match("%%%s*!%s*[Tt][Ee][Xx].-[Rr][Oo][Oo][Tt]") then
-						return true
-					end
-				end
-				return false
-			end
-			local function find_closest_main_tex(start_path)
-				local dir = vim.fs.dirname(start_path)
-				local found = vim.fs.find({ "main.tex", "Main.tex" }, { upward = true, path = dir })
-				if found and #found > 0 then
-					return found[1]
-				end
-				local here = vim.fs.find({ "main.tex", "Main.tex" }, { upward = false, path = dir })
-				if here and #here > 0 then
-					return here[1]
-				end
-				return nil
-			end
-			vim.api.nvim_create_autocmd({ "BufReadPre", "BufNewFile" }, {
-				pattern = "*.tex",
-				callback = function(args)
-					local buf = args.buf
-					local name = vim.api.nvim_buf_get_name(buf)
-					if name == "" then
-						return
-					end
-					if has_tex_root_directive(buf) then
-						return
-					end
-					local main = find_closest_main_tex(name)
-					if main then
-						vim.b[buf].vimtex_main = main
-					end
-				end,
-			})
+			require("tools.texmain").setup()
 		end,
 		config = function()
 			function ShowSpellSuggestions()
@@ -127,7 +88,11 @@ return {
 			vim.api.nvim_create_autocmd("BufWritePost", {
 				pattern = "*.tex",
 				callback = function()
-					if vim.fn.exists(":VimtexCompile") == 2 then
+					-- skip files VimTeX could not place in a project instead of erroring on every save
+					if
+						vim.fn.exists(":VimtexCompile") == 2
+						and vim.fn.eval("exists('b:vimtex') && b:vimtex.is_compileable()") == 1
+					then
 						vim.cmd("silent VimtexCompile")
 					end
 				end,

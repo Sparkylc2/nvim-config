@@ -127,11 +127,37 @@ return {
 					-- max_width = 100,
 					-- max_height = 30,
 				},
+				-- on-screen size is pixels / dpi, so density only buys sharpness (default 192)
+				convert = {
+					magick = {
+						math = { "-density", 384, "{src}[{page}]", "-trim" },
+					},
+				},
 				math = {
 					enabled = true,
 					latex = {
-						font_size = "large",
+						font_size = "normalsize",
 						packages = { "amsmath", "amssymb", "amsfonts", "amscd", "mathtools" },
+						-- math fonts from ICL-Advanced-Latex-Template/config/icl_report.cls.
+						-- fontspec needs xelatex, swapped in by use_xelatex() below
+						tpl = [=[
+        \documentclass[preview,border=0pt,varwidth,12pt]{standalone}
+        \PassOptionsToPackage{math-style=TeX}{unicode-math}
+        \usepackage{${packages}}
+        \usepackage{fontspec}
+        \usepackage{unicode-math}
+        \setmainfont{SF Pro Text}[UprightFont = *-Light, BoldFont = *-Semibold]
+        \setmathfont{Lete Sans Math}
+        \setmathfont{SF Pro Text Light}[range={up/{num,Latin,latin,Greek,greek}}, script-features={}, sscript-features={}]
+        \setmathfont{SF Pro Text Light Italic}[range={it/{Latin,latin,Greek,greek}}, script-features={}, sscript-features={}]
+        \newfontface{\letefont}{Lete Sans Math}
+        \providecommand{\fsym}[1]{\text{\letefont#1}}
+        \begin{document}
+        ${header}
+        { \${font_size} \selectfont
+          \color[HTML]{${color}}
+        ${content}}
+        \end{document}]=],
 					},
 				},
 			},
@@ -205,7 +231,7 @@ return {
 		},
 
 		init = function()
-			local INLINE_FONT_SIZE = "Large"
+			local INLINE_FONT_SIZE = "normalsize"
 
 			local function patch_inline_math_size()
 				local ok, doc = pcall(require, "snacks.image.doc")
@@ -229,10 +255,44 @@ return {
 				end
 			end
 
+			-- snacks only knows tectonic/pdflatex, which can't load fontspec. its command
+			-- table is file-local, so reach it via upvalues: convert.convert -> Convert -> commands
+			local function use_xelatex()
+				local ok, convert = pcall(require, "snacks.image.convert")
+				if not ok or vim.fn.executable("xelatex") == 0 then
+					return
+				end
+				local function upvalue(fn, name)
+					for i = 1, math.huge do
+						local n, v = debug.getupvalue(fn, i)
+						if n == nil then
+							return
+						elseif n == name then
+							return v
+						end
+					end
+				end
+				local Convert = upvalue(convert.convert, "Convert")
+				local commands = Convert and upvalue(Convert._resolve, "commands")
+				if not (commands and commands.tex) then
+					return
+				end
+				commands.tex.cmd = {
+					{
+						cmd = "xelatex",
+						cwd = "{dirname}",
+						args = { "-output-directory={cache}", "-interaction=nonstopmode", "{src}" },
+					},
+				}
+			end
+
 			vim.api.nvim_create_autocmd("FileType", {
 				pattern = { "markdown", "quarto", "tex", "latex" },
 				once = true,
-				callback = patch_inline_math_size,
+				callback = function()
+					patch_inline_math_size()
+					use_xelatex()
+				end,
 			})
 
 			local function math_hl()
